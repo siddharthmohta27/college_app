@@ -14,10 +14,13 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppStudyRouteImport } from './routes/app/study'
+import { Route as AppResourcesRouteImport } from './routes/app/resources'
 import { Route as AppMarketplaceRouteImport } from './routes/app/marketplace'
+import { Route as AppDatingRouteImport } from './routes/app/dating'
 import { Route as AppClubsRouteImport } from './routes/app/clubs'
 import { Route as AppChatRouteImport } from './routes/app/chat'
 import { Route as AppCanteenRouteImport } from './routes/app/canteen'
+import { Route as AppAttendanceRouteImport } from './routes/app/attendance'
 
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
@@ -44,9 +47,19 @@ const AppStudyRoute = AppStudyRouteImport.update({
   path: '/study',
   getParentRoute: () => AppRoute,
 } as any)
+const AppResourcesRoute = AppResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMarketplaceRoute = AppMarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDatingRoute = AppDatingRouteImport.update({
+  id: '/dating',
+  path: '/dating',
   getParentRoute: () => AppRoute,
 } as any)
 const AppClubsRoute = AppClubsRouteImport.update({
@@ -64,25 +77,36 @@ const AppCanteenRoute = AppCanteenRouteImport.update({
   path: '/canteen',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAttendanceRoute = AppAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/chat': typeof ChatRoute
+  '/app/attendance': typeof AppAttendanceRoute
   '/app/canteen': typeof AppCanteenRoute
   '/app/chat': typeof AppChatRoute
   '/app/clubs': typeof AppClubsRoute
+  '/app/dating': typeof AppDatingRoute
   '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/chat': typeof ChatRoute
+  '/app/attendance': typeof AppAttendanceRoute
   '/app/canteen': typeof AppCanteenRoute
   '/app/chat': typeof AppChatRoute
   '/app/clubs': typeof AppClubsRoute
+  '/app/dating': typeof AppDatingRoute
   '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
   '/app': typeof AppIndexRoute
 }
@@ -91,10 +115,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/chat': typeof ChatRoute
+  '/app/attendance': typeof AppAttendanceRoute
   '/app/canteen': typeof AppCanteenRoute
   '/app/chat': typeof AppChatRoute
   '/app/clubs': typeof AppClubsRoute
+  '/app/dating': typeof AppDatingRoute
   '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
   '/app/': typeof AppIndexRoute
 }
@@ -104,20 +131,26 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/chat'
+    | '/app/attendance'
     | '/app/canteen'
     | '/app/chat'
     | '/app/clubs'
+    | '/app/dating'
     | '/app/marketplace'
+    | '/app/resources'
     | '/app/study'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/chat'
+    | '/app/attendance'
     | '/app/canteen'
     | '/app/chat'
     | '/app/clubs'
+    | '/app/dating'
     | '/app/marketplace'
+    | '/app/resources'
     | '/app/study'
     | '/app'
   id:
@@ -125,10 +158,13 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/chat'
+    | '/app/attendance'
     | '/app/canteen'
     | '/app/chat'
     | '/app/clubs'
+    | '/app/dating'
     | '/app/marketplace'
+    | '/app/resources'
     | '/app/study'
     | '/app/'
   fileRoutesById: FileRoutesById
@@ -176,11 +212,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStudyRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/resources': {
+      id: '/app/resources'
+      path: '/resources'
+      fullPath: '/app/resources'
+      preLoaderRoute: typeof AppResourcesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/marketplace': {
       id: '/app/marketplace'
       path: '/marketplace'
       fullPath: '/app/marketplace'
       preLoaderRoute: typeof AppMarketplaceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/dating': {
+      id: '/app/dating'
+      path: '/dating'
+      fullPath: '/app/dating'
+      preLoaderRoute: typeof AppDatingRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/clubs': {
@@ -204,23 +254,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCanteenRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/attendance': {
+      id: '/app/attendance'
+      path: '/attendance'
+      fullPath: '/app/attendance'
+      preLoaderRoute: typeof AppAttendanceRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAttendanceRoute: typeof AppAttendanceRoute
   AppCanteenRoute: typeof AppCanteenRoute
   AppChatRoute: typeof AppChatRoute
   AppClubsRoute: typeof AppClubsRoute
+  AppDatingRoute: typeof AppDatingRoute
   AppMarketplaceRoute: typeof AppMarketplaceRoute
+  AppResourcesRoute: typeof AppResourcesRoute
   AppStudyRoute: typeof AppStudyRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAttendanceRoute: AppAttendanceRoute,
   AppCanteenRoute: AppCanteenRoute,
   AppChatRoute: AppChatRoute,
   AppClubsRoute: AppClubsRoute,
+  AppDatingRoute: AppDatingRoute,
   AppMarketplaceRoute: AppMarketplaceRoute,
+  AppResourcesRoute: AppResourcesRoute,
   AppStudyRoute: AppStudyRoute,
   AppIndexRoute: AppIndexRoute,
 }

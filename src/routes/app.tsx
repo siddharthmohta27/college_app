@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-rout
 import {
   LayoutDashboard, ShoppingBag, UtensilsCrossed, MessageSquare,
   Calendar, BookOpen, GraduationCap, Bell, Search, Menu, X, ChevronRight,
+  Heart, CheckSquare, FileText,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -16,6 +17,9 @@ const NAV_ITEMS = [
   { to: "/app/chat", label: "Chat", icon: MessageSquare },
   { to: "/app/clubs", label: "Clubs & Events", icon: Calendar },
   { to: "/app/study", label: "Study Rooms", icon: BookOpen },
+  { to: "/app/dating", label: "Campus Match", icon: Heart },
+  { to: "/app/attendance", label: "Attendance", icon: CheckSquare },
+  { to: "/app/resources", label: "Resources", icon: FileText },
 ];
 
 function AppShell() {
@@ -101,7 +105,7 @@ function AppShell() {
         <div className="border-t border-border px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">
                 SM
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500" />
@@ -139,7 +143,7 @@ function AppShell() {
               <Bell className="h-4 w-4" />
               <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
             </button>
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-accent text-[10px] font-bold text-primary-foreground">
+            <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-[10px] font-bold text-primary-foreground">
               SM
             </div>
           </div>

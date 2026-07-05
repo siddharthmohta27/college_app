@@ -26,11 +26,11 @@ type Msg = {
 };
 
 const SERVERS = [
-  { id: "cs", name: "CS", color: "from-fuchsia-500 to-violet-600" },
-  { id: "math", name: "MA", color: "from-cyan-400 to-blue-600" },
-  { id: "hall", name: "H4", color: "from-pink-500 to-rose-600" },
-  { id: "club", name: "AI", color: "from-emerald-400 to-teal-600" },
-  { id: "mkt", name: "MK", color: "from-amber-400 to-orange-600" },
+  { id: "cs", name: "CS", color: "from-primary to-yellow-500 text-primary-foreground font-black" },
+  { id: "math", name: "MA", color: "bg-surface border border-border text-muted-foreground hover:text-foreground" },
+  { id: "hall", name: "H4", color: "bg-surface border border-border text-muted-foreground hover:text-foreground" },
+  { id: "club", name: "AI", color: "bg-surface border border-border text-muted-foreground hover:text-foreground" },
+  { id: "mkt", name: "MK", color: "bg-surface border border-border text-muted-foreground hover:text-foreground" },
 ];
 
 const CHANNELS = {

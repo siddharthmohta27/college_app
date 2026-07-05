@@ -1,0 +1,174 @@
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
+import {
+  LayoutDashboard, ShoppingBag, UtensilsCrossed, MessageSquare,
+  Calendar, BookOpen, GraduationCap, Bell, Search, Menu, X, ChevronRight,
+} from "lucide-react";
+import { useState } from "react";
+
+export const Route = createFileRoute("/app")({
+  component: AppShell,
+});
+
+const NAV_ITEMS = [
+  { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/app/marketplace", label: "Marketplace", icon: ShoppingBag },
+  { to: "/app/canteen", label: "Canteen", icon: UtensilsCrossed },
+  { to: "/app/chat", label: "Chat", icon: MessageSquare },
+  { to: "/app/clubs", label: "Clubs & Events", icon: Calendar },
+  { to: "/app/study", label: "Study Rooms", icon: BookOpen },
+];
+
+function AppShell() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  const currentPage = NAV_ITEMS.find((n) =>
+    n.exact ? location.pathname === n.to : location.pathname.startsWith(n.to)
+  );
+
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-background">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-surface/60 backdrop-blur-xl transition-transform duration-300 md:relative md:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Logo */}
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary/20 transition group-hover:bg-primary/30">
+              <GraduationCap className="h-4.5 w-4.5 text-primary" />
+            </div>
+            <span className="text-sm font-bold tracking-tight">Campus Connect</span>
+          </Link>
+          <button
+            className="text-muted-foreground hover:text-foreground md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="px-4 py-3">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              id="sidebar-search"
+              placeholder="Quick search..."
+              className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-xs outline-none transition placeholder:text-muted-foreground/60 focus:border-primary"
+            />
+          </div>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-4">
+          <div className="mb-2 px-2 pt-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Main
+          </div>
+          {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => {
+            const active = exact ? location.pathname === to : location.pathname.startsWith(to);
+            return (
+              <Link
+                key={to}
+                to={to}
+                id={`nav-${label.toLowerCase().replace(/[^a-z]/g, "-")}`}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-150 ${
+                  active
+                    ? "bg-primary/15 text-foreground font-medium shadow-sm"
+                    : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
+                }`}
+              >
+                <Icon className={`h-4 w-4 shrink-0 ${active ? "text-primary" : ""}`} />
+                <span className="flex-1">{label}</span>
+                {active && <ChevronRight className="h-3.5 w-3.5 text-primary/60" />}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* User profile bottom */}
+        <div className="border-t border-border px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
+                SM
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-medium">Siddharth M.</div>
+              <div className="truncate text-[10px] text-muted-foreground">3rd Year · CS</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Top bar */}
+        <header className="flex items-center justify-between border-b border-border bg-background/60 px-5 py-3.5 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <button
+              id="sidebar-toggle-btn"
+              className="text-muted-foreground transition hover:text-foreground md:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div>
+              <h1 className="text-sm font-semibold">{currentPage?.label ?? "Campus Connect"}</h1>
+              <p className="text-[10px] text-muted-foreground">Saturday, July 5, 2026</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              id="notifications-btn"
+              className="relative grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-surface hover:text-foreground"
+            >
+              <Bell className="h-4 w-4" />
+              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
+            </button>
+            <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-accent text-[10px] font-bold text-primary-foreground">
+              SM
+            </div>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
+      </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-30 flex border-t border-border bg-surface/90 backdrop-blur-xl md:hidden">
+        {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => {
+          const active = exact ? location.pathname === to : location.pathname.startsWith(to);
+          return (
+            <Link
+              key={to}
+              to={to}
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[9px] transition ${
+                active ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              <Icon className={`h-5 w-5 ${active ? "text-primary" : ""}`} />
+              <span className="font-medium">{label.split(" ")[0]}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}

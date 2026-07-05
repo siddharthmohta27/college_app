@@ -10,11 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppStudyRouteImport } from './routes/app/study'
+import { Route as AppMarketplaceRouteImport } from './routes/app/marketplace'
+import { Route as AppClubsRouteImport } from './routes/app/clubs'
+import { Route as AppChatRouteImport } from './routes/app/chat'
+import { Route as AppCanteenRouteImport } from './routes/app/canteen'
 
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,30 +34,108 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStudyRoute = AppStudyRouteImport.update({
+  id: '/study',
+  path: '/study',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMarketplaceRoute = AppMarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClubsRoute = AppClubsRouteImport.update({
+  id: '/clubs',
+  path: '/clubs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCanteenRoute = AppCanteenRouteImport.update({
+  id: '/canteen',
+  path: '/canteen',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
   '/chat': typeof ChatRoute
+  '/app/canteen': typeof AppCanteenRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/clubs': typeof AppClubsRoute
+  '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/study': typeof AppStudyRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/chat': typeof ChatRoute
+  '/app/canteen': typeof AppCanteenRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/clubs': typeof AppClubsRoute
+  '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/study': typeof AppStudyRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
   '/chat': typeof ChatRoute
+  '/app/canteen': typeof AppCanteenRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/clubs': typeof AppClubsRoute
+  '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/study': typeof AppStudyRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chat'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/chat'
+    | '/app/canteen'
+    | '/app/chat'
+    | '/app/clubs'
+    | '/app/marketplace'
+    | '/app/study'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chat'
-  id: '__root__' | '/' | '/chat'
+  to:
+    | '/'
+    | '/chat'
+    | '/app/canteen'
+    | '/app/chat'
+    | '/app/clubs'
+    | '/app/marketplace'
+    | '/app/study'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/chat'
+    | '/app/canteen'
+    | '/app/chat'
+    | '/app/clubs'
+    | '/app/marketplace'
+    | '/app/study'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   ChatRoute: typeof ChatRoute
 }
 
@@ -58,6 +148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,11 +162,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/study': {
+      id: '/app/study'
+      path: '/study'
+      fullPath: '/app/study'
+      preLoaderRoute: typeof AppStudyRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/marketplace': {
+      id: '/app/marketplace'
+      path: '/marketplace'
+      fullPath: '/app/marketplace'
+      preLoaderRoute: typeof AppMarketplaceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/clubs': {
+      id: '/app/clubs'
+      path: '/clubs'
+      fullPath: '/app/clubs'
+      preLoaderRoute: typeof AppClubsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/chat': {
+      id: '/app/chat'
+      path: '/chat'
+      fullPath: '/app/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/canteen': {
+      id: '/app/canteen'
+      path: '/canteen'
+      fullPath: '/app/canteen'
+      preLoaderRoute: typeof AppCanteenRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppCanteenRoute: typeof AppCanteenRoute
+  AppChatRoute: typeof AppChatRoute
+  AppClubsRoute: typeof AppClubsRoute
+  AppMarketplaceRoute: typeof AppMarketplaceRoute
+  AppStudyRoute: typeof AppStudyRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCanteenRoute: AppCanteenRoute,
+  AppChatRoute: AppChatRoute,
+  AppClubsRoute: AppClubsRoute,
+  AppMarketplaceRoute: AppMarketplaceRoute,
+  AppStudyRoute: AppStudyRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   ChatRoute: ChatRoute,
 }
 export const routeTree = rootRouteImport

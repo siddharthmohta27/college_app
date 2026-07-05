@@ -4,6 +4,7 @@ import {
   TrendingUp, Bell, Clock, Megaphone, ChevronRight, Zap, Star,
   Heart, CheckSquare, FileText, GraduationCap
 } from "lucide-react";
+import { TodaysOverview } from "@/components/dashboard/todays-overview";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
@@ -71,14 +72,16 @@ function Dashboard() {
           { label: "Active Listings", value: "3", icon: ShoppingBag, color: "text-primary" },
           { label: "Events This Week", value: "5", icon: Calendar, color: "text-primary" },
           { label: "Study Hours Today", value: "2.5h", icon: Clock, color: "text-primary" },
-        ].map((stat) => (
-          <div key={stat.label} className="rounded-2xl border border-border glass p-4 animate-fade-up">
-            <stat.icon className={`h-5 w-5 ${stat.color}`} />
-            <div className="mt-2 text-2xl font-bold">{stat.value}</div>
+        ].map((stat, i) => (
+          <div key={stat.label} className="rounded-2xl border border-border glass p-4 animate-fade-up card-hover" style={{ animationDelay: `${i * 60}ms` }}>
+            <stat.icon className={`h-5 w-5 ${stat.color} icon-hover`} />
+            <div className="mt-2 text-2xl font-bold stat-count" style={{ animationDelay: `${i * 60 + 200}ms` }}>{stat.value}</div>
             <div className="mt-0.5 text-xs text-muted-foreground">{stat.label}</div>
           </div>
         ))}
       </section>
+
+      <TodaysOverview />
 
       {/* Quick nav cards */}
       <section>
@@ -91,17 +94,17 @@ function Dashboard() {
               key={to}
               to={to}
               id={`dashboard-${label.toLowerCase().replace(/[^a-z]/g, "-")}`}
-              className="group flex items-center gap-4 rounded-2xl border border-border glass p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg animate-fade-up"
+              className="group flex items-center gap-4 rounded-2xl border border-border glass p-4 transition duration-200 animate-fade-up card-hover"
               style={{ animationDelay: `${i * 55}ms` }}
             >
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-surface-elevated">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-surface-elevated transition-transform duration-150 group-hover:scale-105">
                 <Icon className={`h-5 w-5 ${iconColor}`} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-sm text-foreground">{label}</div>
                 <div className="mt-0.5 truncate text-xs text-muted-foreground">{count}</div>
               </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           ))}
         </div>

@@ -97,7 +97,7 @@ function ResourcesDirectory() {
             <div
               key={res.id}
               id={`resource-${res.id}`}
-              className="flex items-center justify-between gap-4 rounded-2xl border border-border glass p-4 transition hover:bg-surface-elevated animate-fade-up"
+              className="group flex items-center justify-between gap-4 rounded-2xl border border-border glass p-4 animate-fade-up card-hover"
               style={{ animationDelay: `${i * 45}ms` }}
             >
               <div className="flex items-center gap-3.5 min-w-0">
@@ -139,8 +139,8 @@ function ResourcesDirectory() {
                 <button
                   id={`btn-dl-${res.id}`}
                   onClick={() => handleDownload(res.id)}
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
-                    isDownloaded ? "bg-emerald-500/20 text-emerald-400" : "bg-primary text-primary-foreground hover:opacity-90"
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl transition btn-press ${
+                    isDownloaded ? "bg-emerald-500/20 text-emerald-400" : "bg-primary text-primary-foreground"
                   }`}
                 >
                   {isDownloaded ? <CheckCircle className="h-4 w-4" /> : <Download className="h-4 w-4" />}

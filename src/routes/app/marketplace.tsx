@@ -74,7 +74,7 @@ function Marketplace() {
         <button
           id="post-listing-btn"
           onClick={() => setShowPost(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition glow-primary btn-press"
         >
           <Plus className="h-4 w-4" /> Post Listing
         </button>
@@ -137,7 +137,7 @@ function Marketplace() {
           <div
             key={listing.id}
             id={`listing-${listing.id}`}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-border glass transition-all duration-200 hover:-translate-y-1 hover:shadow-lg animate-fade-up"
+            className="group relative flex flex-col overflow-hidden rounded-2xl border border-border glass transition-all duration-200 animate-fade-up card-hover"
             style={{ animationDelay: `${i * 50}ms` }}
           >
             {/* Image area */}
@@ -193,7 +193,7 @@ function Marketplace() {
                 {listing.location}
               </div>
 
-              <button className="mt-3 w-full rounded-lg bg-primary/15 py-2 text-xs font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground">
+              <button className="mt-3 w-full rounded-lg bg-primary/15 py-2 text-xs font-semibold text-primary transition-all duration-150 hover:bg-primary hover:text-primary-foreground btn-press">
                 Contact Seller
               </button>
             </div>

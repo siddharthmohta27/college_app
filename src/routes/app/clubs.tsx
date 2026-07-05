@@ -144,7 +144,7 @@ function ClubsEvents() {
             <div
               key={club.id}
               id={`club-${club.id}`}
-              className={`relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br ${club.gradient} p-5 transition hover:-translate-y-0.5 hover:shadow-lg animate-fade-up`}
+              className={`relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br ${club.gradient} p-5 animate-fade-up card-hover`}
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex items-start justify-between gap-3">
@@ -160,7 +160,7 @@ function ClubsEvents() {
                 <button
                   id={`join-club-${club.id}`}
                   onClick={() => toggleJoin(club.id)}
-                  className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                  className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition btn-press ${
                     club.joined ? "bg-primary/20 text-primary" : "bg-surface-elevated border border-border hover:border-primary hover:text-primary"
                   }`}
                 >
@@ -196,7 +196,7 @@ function ClubsEvents() {
               <div
                 key={event.id}
                 id={`event-${event.id}`}
-                className="group overflow-hidden rounded-2xl border border-border glass p-5 transition hover:-translate-y-0.5 hover:shadow-lg animate-fade-up"
+                className="group overflow-hidden rounded-2xl border border-border glass p-5 animate-fade-up card-hover"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className="flex items-start gap-4">
@@ -212,8 +212,8 @@ function ClubsEvents() {
                       <button
                         id={`rsvp-event-${event.id}`}
                         onClick={() => toggleRSVP(event.id)}
-                        className={`shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                          event.rsvpd ? "bg-emerald-500/20 text-emerald-400" : "bg-primary text-primary-foreground hover:opacity-90"
+                        className={`shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition btn-press ${
+                          event.rsvpd ? "bg-emerald-500/20 text-emerald-400" : "bg-primary text-primary-foreground"
                         }`}
                       >
                         {event.rsvpd && <CheckCircle className="h-3.5 w-3.5" />}

@@ -5,6 +5,10 @@ import {
   Heart, CheckSquare, FileText,
 } from "lucide-react";
 import { useState } from "react";
+import { SearchProvider } from "@/components/search";
+import { SearchTrigger } from "@/components/search";
+import { SearchOverlay } from "@/components/search";
+import { FloatingActionButton } from "@/components/fab";
 
 export const Route = createFileRoute("/app")({
   component: AppShell,
@@ -31,7 +35,8 @@ function AppShell() {
   );
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
+    <SearchProvider>
+      <div className="flex h-screen w-full overflow-hidden bg-background">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -64,14 +69,7 @@ function AppShell() {
 
         {/* Search */}
         <div className="px-4 py-3">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              id="sidebar-search"
-              placeholder="Quick search..."
-              className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-xs outline-none transition placeholder:text-muted-foreground/60 focus:border-primary"
-            />
-          </div>
+          <SearchTrigger />
         </div>
 
         {/* Nav */}
@@ -87,15 +85,17 @@ function AppShell() {
                 to={to}
                 id={`nav-${label.toLowerCase().replace(/[^a-z]/g, "-")}`}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-150 ${
+                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200 ${
                   active
                     ? "bg-primary/15 text-foreground font-medium shadow-sm"
-                    : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
+                    : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground hover:translate-x-0.5"
                 }`}
               >
-                <Icon className={`h-4 w-4 shrink-0 ${active ? "text-primary" : ""}`} />
+                <Icon className={`h-4 w-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${active ? "text-primary" : ""}`} />
                 <span className="flex-1">{label}</span>
-                {active && <ChevronRight className="h-3.5 w-3.5 text-primary/60" />}
+                {active && (
+                  <ChevronRight className="h-3.5 w-3.5 text-primary/60 transition-transform duration-200 group-hover:translate-x-0.5" />
+                )}
               </Link>
             );
           })}
@@ -138,10 +138,10 @@ function AppShell() {
           <div className="flex items-center gap-2">
             <button
               id="notifications-btn"
-              className="relative grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-surface hover:text-foreground"
+              className="relative grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-surface hover:text-foreground icon-hover"
             >
               <Bell className="h-4 w-4" />
-              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
+              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary bell-pulse" />
             </button>
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-[10px] font-bold text-primary-foreground">
               SM
@@ -174,5 +174,8 @@ function AppShell() {
         })}
       </nav>
     </div>
+    <SearchOverlay />
+    <FloatingActionButton />
+    </SearchProvider>
   );
 }

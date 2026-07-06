@@ -4,6 +4,7 @@ import {
   Hash, Volume2, Plus, Search, Bell, Settings, Smile, Paperclip, Send,
   Users, GraduationCap, ShoppingBag, BookOpen, Sparkles, Pin, Phone, Video,
 } from "lucide-react";
+import { io, Socket } from "socket.io-client";
 
 export const Route = createFileRoute("/app/chat")({
   head: () => ({
@@ -23,6 +24,13 @@ type Msg = {
   time: string;
   text: string;
   reactions?: { emoji: string; count: number }[];
+};
+
+type Member = {
+  name: string;
+  status: string;
+  role: string;
+  color: string;
 };
 
 const SERVERS = [
@@ -48,48 +56,95 @@ const CHANNELS = {
   ],
 };
 
-const INITIAL_MSGS: Msg[] = [
-  { id: "1", user: "Priya S.", color: "text-fuchsia-400", avatar: "PS", time: "10:24", text: "yo did anyone finish the algo pset? 😭 stuck on Q3", reactions: [{ emoji: "😭", count: 4 }] },
-  { id: "2", user: "Marcus K.", color: "text-cyan-400", avatar: "MK", time: "10:26", text: "same boat. the DP transition is cursed" },
-  { id: "3", user: "Aisha R.", color: "text-emerald-400", avatar: "AR", time: "10:28", text: "hop in Study Room 1 — im screensharing rn", reactions: [{ emoji: "🔥", count: 6 }, { emoji: "🙏", count: 3 }] },
-  { id: "4", user: "Leo T.", color: "text-amber-400", avatar: "LT", time: "10:31", text: "btw someone selling a used GPU in #marketplace, checked it, legit" },
-  { id: "5", user: "Priya S.", color: "text-fuchsia-400", avatar: "PS", time: "10:33", text: "omw to the study room 🚀" },
-];
-
-const MEMBERS = [
-  { name: "Priya S.", status: "online", role: "TA", color: "bg-fuchsia-500" },
-  { name: "Marcus K.", status: "online", role: "Student", color: "bg-cyan-500" },
-  { name: "Aisha R.", status: "online", role: "Mod", color: "bg-emerald-500" },
-  { name: "Leo T.", status: "idle", role: "Student", color: "bg-amber-500" },
-  { name: "Sana M.", status: "dnd", role: "Student", color: "bg-rose-500" },
-  { name: "Kenji O.", status: "offline", role: "Student", color: "bg-slate-500" },
-];
-
 function ChatApp() {
   const [activeServer, setActiveServer] = useState("cs");
   const [activeChannel, setActiveChannel] = useState("general");
-  const [messages, setMessages] = useState<Msg[]>(INITIAL_MSGS);
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<Socket | null>(null);
 
+  // Connect to Socket.io server
+  useEffect(() => {
+    // Connect to local mock server dynamically (helps testing over same Wi-Fi)
+    const socketUrl = typeof window !== "undefined"
+      ? `http://${window.location.hostname}:3001`
+      : "http://localhost:3001";
+    const socket = io(socketUrl);
+    socketRef.current = socket;
+
+    // Join default room
+    socket.emit("join", {
+      name: "Siddharth M.",
+      avatar: "SM",
+      role: "Student",
+      color: "bg-primary",
+      channelId: activeChannel,
+    });
+
+    // Event listeners
+    socket.on("history", (history: Msg[]) => {
+      setMessages(history);
+    });
+
+    socket.on("message", (newMsg: Msg) => {
+      setMessages((prev) => [...prev, newMsg]);
+    });
+
+    socket.on("reactionUpdate", ({ msgId, reactions }) => {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === msgId ? { ...m, reactions } : m))
+      );
+    });
+
+    socket.on("members", (updatedMembers: Member[]) => {
+      setMembers(updatedMembers);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  // Handle switching channels
+  const handleChannelChange = (newChannelId: string) => {
+    if (newChannelId === activeChannel) return;
+    const oldChannelId = activeChannel;
+    setActiveChannel(newChannelId);
+
+    if (socketRef.current) {
+      socketRef.current.emit("change_channel", {
+        oldChannel: oldChannelId,
+        newChannel: newChannelId,
+      });
+    }
+  };
+
+  // Scroll to bottom when messages update
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   const send = () => {
     if (!draft.trim()) return;
-    setMessages((m) => [
-      ...m,
-      {
-        id: crypto.randomUUID(),
-        user: "You",
-        color: "text-primary",
-        avatar: "SM",
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    if (socketRef.current) {
+      socketRef.current.emit("message", {
         text: draft.trim(),
-      },
-    ]);
+        channelId: activeChannel,
+      });
+    }
     setDraft("");
+  };
+
+  const handleAddReaction = (msgId: string, emoji: string) => {
+    if (socketRef.current) {
+      socketRef.current.emit("reaction", {
+        msgId,
+        emoji,
+        channelId: activeChannel,
+      });
+    }
   };
 
   return (
@@ -137,7 +192,7 @@ function ChatApp() {
                 label={c.name}
                 badge={c.unread}
                 active={c.id === activeChannel}
-                onClick={() => setActiveChannel(c.id)}
+                onClick={() => handleChannelChange(c.id)}
               />
             ))}
           </ChannelGroup>
@@ -161,7 +216,7 @@ function ChatApp() {
         {/* User card */}
         <div className="flex items-center gap-2 border-t border-border bg-background/50 px-3 py-2.5">
           <div className="relative">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">SM</div>
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">SM</div>
             <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-500" />
           </div>
           <div className="min-w-0 flex-1">
@@ -206,7 +261,7 @@ function ChatApp() {
           {messages.map((m, i) => {
             const prev = messages[i - 1];
             const grouped = prev && prev.user === m.user;
-            return <Message key={m.id} m={m} grouped={grouped} />;
+            return <Message key={m.id} m={m} grouped={grouped} onAddReaction={handleAddReaction} />;
           })}
         </div>
 
@@ -246,11 +301,11 @@ function ChatApp() {
       <aside className="hidden w-52 flex-col border-l border-border bg-surface/40 lg:flex">
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-semibold">Members — {MEMBERS.length}</span>
+          <span className="text-sm font-semibold">Members — {members.length}</span>
         </div>
         <div className="flex-1 space-y-4 overflow-y-auto px-2 py-3">
           {["online", "idle", "dnd", "offline"].map((s) => {
-            const list = MEMBERS.filter((m) => m.status === s);
+            const list = members.filter((m) => m.status === s);
             if (!list.length) return null;
             return (
               <div key={s}>
@@ -317,7 +372,7 @@ function ChannelBtn({
     <button
       onClick={onClick}
       className={`group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition ${
-        active ? "bg-primary/15 text-foreground" : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
+        active ? "bg-primary/15 text-foreground font-semibold" : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
       }`}
     >
       <span className={active ? "text-primary" : ""}>{icon}</span>
@@ -329,15 +384,18 @@ function ChannelBtn({
   );
 }
 
-function Message({ m, grouped }: { m: Msg; grouped: boolean }) {
+function Message({ m, grouped, onAddReaction }: { m: Msg; grouped: boolean; onAddReaction: (id: string, emoji: string) => void }) {
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const emojis = ["🔥", "😭", "👍", "👀", "🙏", "❤️"];
+
   return (
-    <div className={`group flex gap-3 rounded-lg px-2 py-1 transition hover:bg-surface/50 ${grouped ? "" : "mt-3"}`}>
+    <div className={`group flex gap-3 rounded-lg px-2 py-1 transition hover:bg-surface/50 relative ${grouped ? "" : "mt-3"}`}>
       {grouped ? (
         <div className="w-10 shrink-0 pt-1 text-right font-mono text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100">
           {m.time}
         </div>
       ) : (
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
           {m.avatar}
         </div>
       )}
@@ -349,15 +407,51 @@ function Message({ m, grouped }: { m: Msg; grouped: boolean }) {
           </div>
         )}
         <div className="text-sm text-foreground/95">{m.text}</div>
-        {m.reactions && (
+        {m.reactions && m.reactions.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
             {m.reactions.map((r) => (
               <button
                 key={r.emoji}
+                onClick={() => onAddReaction(m.id, r.emoji)}
                 className="flex items-center gap-1 rounded-full border border-border bg-surface/70 px-2 py-0.5 text-xs transition hover:border-primary hover:bg-primary/10"
               >
                 <span>{r.emoji}</span>
                 <span className="font-mono text-[10px] text-muted-foreground">{r.count}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Floating Reaction Bar */}
+      <div className="absolute right-2 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center gap-0.5 rounded-lg border border-border bg-surface-elevated p-1 shadow-md z-10">
+        {emojis.slice(0, 4).map((emoji) => (
+          <button
+            key={emoji}
+            onClick={() => onAddReaction(m.id, emoji)}
+            className="hover:bg-surface rounded p-1 transition text-xs"
+          >
+            {emoji}
+          </button>
+        ))}
+        <button
+          onClick={() => setShowReactionPicker(!showReactionPicker)}
+          className="hover:bg-surface rounded p-1 transition text-[10px] font-bold text-muted-foreground px-1.5"
+        >
+          ＋
+        </button>
+        {showReactionPicker && (
+          <div className="absolute right-0 top-8 flex gap-1 border border-border bg-surface-elevated p-1.5 rounded-lg shadow-lg z-20">
+            {emojis.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => {
+                  onAddReaction(m.id, emoji);
+                  setShowReactionPicker(false);
+                }}
+                className="hover:bg-surface rounded p-1.5 transition text-sm"
+              >
+                {emoji}
               </button>
             ))}
           </div>

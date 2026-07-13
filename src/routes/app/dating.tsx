@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Heart, X, Sparkles, MessageSquare, Star, Award, Shield } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Heart, X, Sparkles, MessageSquare, Star, Award, Shield, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app/dating")({
   head: () => ({
@@ -8,6 +8,14 @@ export const Route = createFileRoute("/app/dating")({
   }),
   component: CampusDating,
 });
+
+// No auth for now — hardcoded current user ID (matches seed row 6 = Siddharth M.)
+const CURRENT_USER_ID = 6;
+
+// Base URL of the mock backend
+const API = typeof window !== "undefined"
+  ? `http://${window.location.hostname}:3001/api/dating`
+  : "http://localhost:3001/api/dating";
 
 type Profile = {
   id: number;
@@ -21,50 +29,109 @@ type Profile = {
   verified: boolean;
 };
 
-const PROFILES: Profile[] = [
-  { id: 1, name: "Anjali Sharma", age: 20, year: "3rd Year", major: "Design", bio: "Always sketchin' in class. Coffee lover, indie music fan, and looking for someone to review campus cafes with!", interests: ["Art", "Indie Rock", "Cafes", "UI/UX"], emoji: "🎨", verified: true },
-  { id: 2, name: "Vikram Sen", age: 21, year: "4th Year", major: "Mechanical Eng.", bio: "Car enthusiast, amateur guitar player, and gym regular. Let's study (or skip lectures) together.", interests: ["Gym", "Guitars", "Anime", "Formula 1"], emoji: "🎸", verified: false },
-  { id: 3, name: "Kavya Iyer", age: 19, year: "2nd Year", major: "Economics", bio: "If you love debate, board games, and late night chai, we will probably get along. Bookworm 📚", interests: ["Chai", "Debating", "Chess", "Reading"], emoji: "♟️", verified: true },
-  { id: 4, name: "Rohan Varma", age: 20, year: "3rd Year", major: "Computer Science", bio: "I build websites and compile errors for fun. Let's match if you want someone to debug your life.", interests: ["Coding", "Hackathons", "Valorant", "Memes"], emoji: "💻", verified: true },
-  { id: 5, name: "Tanya Kapoor", age: 20, year: "3rd Year", major: "English Lit.", bio: "Poetry, street photography, and vintage vinyl records are my jam. Tell me your favorite movie?", interests: ["Poetry", "Cinema", "Vinyls", "Travel"], emoji: "📷", verified: false },
-];
+type Match = {
+  id: number;
+  name: string;
+  major: string;
+  emoji: string;
+  year: string;
+  matched_at: string;
+};
 
 function CampusDating() {
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [profileIndex, setProfileIndex] = useState(0);
-  const [matches, setMatches] = useState<Profile[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [swiping, setSwiping] = useState(false);
+  const [dbStatus, setDbStatus] = useState<"database" | "fallback" | null>(null);
 
-  const activeProfile = PROFILES[profileIndex];
+  // Fetch profiles from backend on mount
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${API}/profiles?userId=${CURRENT_USER_ID}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setProfiles(data.profiles || []);
+        setDbStatus(data.source);
+      })
+      .catch(() => {
+        // If server is not running, show nothing
+        setProfiles([]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  const handleAction = (like: boolean) => {
-    if (like) {
-      // Simulate random matching chance (70% for demo purposes)
-      if (Math.random() > 0.3) {
+  // Fetch matches from backend on mount
+  useEffect(() => {
+    fetch(`${API}/matches/${CURRENT_USER_ID}`)
+      .then((r) => r.json())
+      .then((data) => setMatches(data.matches || []))
+      .catch(() => setMatches([]));
+  }, [showMatchModal]); // Refetch after every modal close (new match may have appeared)
+
+  const activeProfile = profiles[profileIndex];
+
+  const handleAction = async (like: boolean) => {
+    if (!activeProfile || swiping) return;
+    setSwiping(true);
+
+    try {
+      const res = await fetch(`${API}/swipe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          swiperId: CURRENT_USER_ID,
+          swipedId: activeProfile.id,
+          action: like ? "like" : "pass",
+        }),
+      });
+      const data = await res.json();
+
+      if (data.isMatch) {
         setMatchedProfile(activeProfile);
-        setMatches((prev) => [...prev, activeProfile]);
         setShowMatchModal(true);
       }
+    } catch {
+      // Server offline — silently move on
     }
-    nextProfile();
-  };
 
-  const nextProfile = () => {
-    setProfileIndex((prev) => (prev + 1) % PROFILES.length);
+    setProfileIndex((prev) => prev + 1);
+    setSwiping(false);
   };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6 pb-28 md:pb-8">
       {/* Header */}
-      <div className="animate-fade-up">
-        <h2 className="text-xl font-bold">Campus Match</h2>
-        <p className="mt-0.5 text-sm text-muted-foreground">Find study partners, coffee buddies, or matches on campus</p>
+      <div className="animate-fade-up flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-bold">Campus Match</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Find study partners, coffee buddies, or matches on campus
+          </p>
+        </div>
+        {dbStatus && (
+          <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
+            dbStatus === "database"
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+              : "border-amber-500/30 bg-amber-500/10 text-amber-400"
+          }`}>
+            {dbStatus === "database" ? "🟢 Live DB" : "🟡 Offline Mode"}
+          </span>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Main Swiper card */}
         <div className="md:col-span-2 space-y-4">
-          {activeProfile ? (
+          {loading ? (
+            <div className="rounded-2xl border border-border glass min-h-[460px] flex flex-col items-center justify-center gap-3">
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+              <p className="text-sm text-muted-foreground">Loading profiles...</p>
+            </div>
+          ) : activeProfile ? (
             <div className="relative overflow-hidden rounded-2xl border border-border glass p-6 flex flex-col justify-between min-h-[460px] animate-fade-up">
               {/* Top info */}
               <div>
@@ -94,13 +161,18 @@ function CampusDating() {
                 <div className="mt-6">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Interests</h4>
                   <div className="flex flex-wrap gap-1.5">
-                    {activeProfile.interests.map((interest) => (
+                    {(activeProfile.interests || []).map((interest) => (
                       <span key={interest} className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
                         {interest}
                       </span>
                     ))}
                   </div>
                 </div>
+
+                {/* Profile counter */}
+                <p className="mt-4 text-[10px] text-muted-foreground text-center">
+                  {profileIndex + 1} of {profiles.length} profiles
+                </p>
               </div>
 
               {/* Action buttons */}
@@ -108,20 +180,23 @@ function CampusDating() {
                 <button
                   id="dating-pass-btn"
                   onClick={() => handleAction(false)}
-                  className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface hover:bg-red-500/10 hover:border-red-500/40 text-red-400 transition"
+                  disabled={swiping}
+                  className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface hover:bg-red-500/10 hover:border-red-500/40 text-red-400 transition disabled:opacity-50"
                 >
                   <X className="h-6 w-6" />
                 </button>
                 <button
                   id="dating-like-btn"
                   onClick={() => handleAction(true)}
-                  className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 transition glow-primary"
+                  disabled={swiping}
+                  className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 transition glow-primary disabled:opacity-50"
                 >
-                  <Heart className="h-7 w-7 fill-current" />
+                  {swiping ? <Loader2 className="h-6 w-6 animate-spin" /> : <Heart className="h-7 w-7 fill-current" />}
                 </button>
                 <button
-                  onClick={nextProfile}
-                  className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface hover:border-primary hover:text-primary transition"
+                  onClick={() => setProfileIndex((p) => p + 1)}
+                  disabled={swiping}
+                  className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface hover:border-primary hover:text-primary transition disabled:opacity-50"
                 >
                   <Star className="h-5 w-5 fill-current" />
                 </button>
@@ -130,13 +205,22 @@ function CampusDating() {
           ) : (
             <div className="rounded-2xl border border-border glass p-8 text-center min-h-[460px] flex flex-col justify-center items-center">
               <Sparkles className="h-10 w-10 text-primary animate-pulse" />
-              <h3 className="mt-4 font-bold">Looking for more students...</h3>
-              <p className="mt-1 text-sm text-muted-foreground">You have viewed all active profiles on campus today.</p>
+              <h3 className="mt-4 font-bold">You've seen everyone!</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {profiles.length === 0
+                  ? "Start the backend server to load real profiles."
+                  : "You have viewed all active profiles on campus today."}
+              </p>
+              {profiles.length === 0 && (
+                <code className="mt-3 block rounded-lg bg-surface px-4 py-2 text-xs text-muted-foreground font-mono">
+                  cd chat-server && npm run start
+                </code>
+              )}
             </div>
           )}
         </div>
 
-        {/* Sidebar list of Matches */}
+        {/* Sidebar — Matches */}
         <div className="space-y-4">
           <div className="rounded-2xl border border-border glass p-5">
             <h3 className="font-bold text-sm flex items-center gap-2 mb-4">
@@ -180,10 +264,12 @@ function CampusDating() {
               🎉
             </div>
             <h3 className="mt-4 text-xl font-bold">It's a Match!</h3>
-            <p className="mt-2 text-sm text-muted-foreground">You and <strong className="text-foreground">{matchedProfile.name}</strong> liked each other.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              You and <strong className="text-foreground">{matchedProfile.name}</strong> liked each other.
+            </p>
 
             <div className="my-6 flex justify-center gap-4">
-              <div className="text-5xl">⚡</div>
+              <div className="text-5xl">🚀</div>
               <div className="text-5xl">{matchedProfile.emoji}</div>
             </div>
 

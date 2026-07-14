@@ -20,11 +20,20 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Prevent duplicate app initialization in dev (hot reload)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const firebaseConfigured = !!firebaseConfig.apiKey && !!firebaseConfig.projectId;
 
-export const auth = getAuth(app);
+if (!firebaseConfigured) {
+  console.warn("⚠️ Firebase not configured. Add VITE_FIREBASE_* keys to college_app/.env");
+}
+
+// Only initialize if config is present
+const app = firebaseConfigured
+  ? (getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0])
+  : null;
+
+export const auth = app ? getAuth(app) : null as unknown as ReturnType<typeof getAuth>;
 export const googleProvider = new GoogleAuthProvider();
+
 
 // ─── Auth Helpers ──────────────────────────────────────────────
 export const firebaseAuth = {

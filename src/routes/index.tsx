@@ -354,8 +354,10 @@ function Landing() {
           mode={mode}
           setMode={setMode}
           formData={formData}
+          setFormData={setFormData}
           handleChange={handleChange}
           authError={authError}
+          setAuthError={setAuthError}
           authLoading={authLoading}
           handleSignupSubmit={handleSignupSubmit}
           handleLoginSubmit={handleLoginSubmit}
@@ -370,8 +372,10 @@ function AuthCard({
   mode,
   setMode,
   formData,
+  setFormData,
   handleChange,
   authError,
+  setAuthError,
   authLoading,
   handleSignupSubmit,
   handleLoginSubmit,
@@ -380,8 +384,10 @@ function AuthCard({
   mode: "login" | "signup";
   setMode: (m: "landing" | "login" | "signup") => void;
   formData: { email: string; password: string; name: string; college: string };
+  setFormData: (d: { email: string; password: string; name: string; college: string }) => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   authError: string | null;
+  setAuthError: (e: string | null) => void;
   authLoading: boolean;
   handleSignupSubmit: (e: React.FormEvent) => void;
   handleLoginSubmit: (e: React.FormEvent) => void;

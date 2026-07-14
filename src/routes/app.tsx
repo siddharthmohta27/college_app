@@ -28,12 +28,16 @@ import { auth } from "@/lib/firebase";
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async () => {
-    // Check Firebase session before loading app routes
+    if (!auth) {
+      console.warn("Firebase not configured — skipping auth check");
+      return { userId: null, email: null, displayName: null };
+    }
     const user = auth.currentUser;
     if (!user) {
       throw new Error("UNAUTHORIZED");
     }
-    return { user };
+    // Return plain serializable data only (no Firebase User object)
+    return { userId: user.uid, email: user.email, displayName: user.displayName };
   },
   component: AppShell,
 });
@@ -53,16 +57,23 @@ const NAV_ITEMS = [
 function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const session = Route.useLoaderData();
-  const [user, setUser] = useState(session?.user ?? null);
+  const loaderData = Route.useLoaderData() as { userId: string | null; email: string | null; displayName: string | null } | undefined;
+  const [displayName, setDisplayName] = useState<string | null>(loaderData?.displayName ?? null);
+  const [email, setEmail] = useState<string | null>(loaderData?.email ?? null);
 
   // Keep user state in sync with Firebase auth
   useEffect(() => {
     const unsub = firebaseAuth.onAuthStateChanged((fbUser) => {
-      setUser(fbUser as unknown as typeof user);
+      setDisplayName(fbUser?.displayName ?? null);
+      setEmail(fbUser?.email ?? null);
     });
     return unsub;
   }, []);
+
+  const initials =
+    displayName?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) ||
+    email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
+    "SM";
 
   const currentPage = NAV_ITEMS.find((n) =>
     n.exact ? location.pathname === n.to : location.pathname.startsWith(n.to),
@@ -147,19 +158,13 @@ function AppShell() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">
-                  {(user as { displayName?: string })?.displayName
-                    ?.split(" ")
-                    .map((n: string) => n[0])
-                    .join("")
-                    .toUpperCase() ||
-                    (user as { email?: string })?.email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
-                    "SM"}
+                  {initials}
                 </div>
                 <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium">
-                  {(user as { displayName?: string })?.displayName || (user as { email?: string })?.email?.split("@")[0] || "Student"}
+                  {displayName || email?.split("@")[0] || "Student"}
                 </div>
                 <div className="truncate text-[10px] text-muted-foreground">
                   Campus Connect · Student
@@ -209,13 +214,7 @@ function AppShell() {
                 <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary bell-pulse" />
               </button>
               <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-[10px] font-bold text-primary-foreground">
-                {user?.user_metadata?.full_name
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase() ||
-                  user?.email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
-                  "SM"}
+                {initials}
               </div>
             </div>
           </header>

@@ -102,40 +102,24 @@ function ChatApp() {
   const [currentUser, setCurrentUser] = useState<{
     id: string;
     email: string;
-    user_metadata: Record<string, unknown>;
+    displayName: string | null;
   } | null>(null);
 
-  // Get current user from Supabase auth
+  // Get current user from Firebase auth
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const { firebaseAuth } = require("@/lib/firebase");
+    const unsub = firebaseAuth.onAuthStateChanged((user: { uid: string; email: string | null; displayName: string | null } | null) => {
       if (user) {
         setCurrentUser({
-          id: user.id,
+          id: user.uid,
           email: user.email || "",
-          user_metadata: user.user_metadata || {},
-        });
-      }
-    };
-    getUser();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setCurrentUser({
-          id: session.user.id,
-          email: session.user.email || "",
-          user_metadata: session.user.user_metadata || {},
+          displayName: user.displayName,
         });
       } else {
         setCurrentUser(null);
       }
     });
-
-    return () => subscription.unsubscribe();
+    return unsub;
   }, []);
 
   // Connect to Socket.io server with JWT auth
@@ -165,11 +149,11 @@ function ChatApp() {
 
       // Join default room with user info from auth
       const displayName =
-        currentUser.user_metadata?.full_name || currentUser.email?.split("@")[0] || "Student";
+        currentUser.displayName || currentUser.email?.split("@")[0] || "Student";
       const avatar =
         displayName
           .split(" ")
-          .map((n) => n[0])
+          .map((n: string) => n[0])
           .join("")
           .toUpperCase()
           .substring(0, 2) || "SM";
@@ -321,9 +305,9 @@ function ChatApp() {
         <div className="flex items-center gap-2 border-t border-border bg-background/50 px-3 py-2.5">
           <div className="relative">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">
-              {currentUser?.user_metadata?.full_name
+              {currentUser?.displayName
                 ?.split(" ")
-                .map((n) => n[0])
+                .map((n: string) => n[0])
                 .join("")
                 .toUpperCase() ||
                 currentUser?.email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
@@ -333,12 +317,12 @@ function ChatApp() {
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium">
-              {currentUser?.user_metadata?.full_name ||
+              {currentUser?.displayName ||
                 currentUser?.email?.split("@")[0] ||
                 "Student"}
             </div>
             <div className="truncate font-mono text-[10px] text-muted-foreground">
-              online · {currentUser?.user_metadata?.college || "College"}#0127
+              online · Campus Connect#0127
             </div>
           </div>
           <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground">

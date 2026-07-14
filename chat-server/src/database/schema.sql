@@ -48,3 +48,4 @@ VALUES
   ('Tanya Kapoor',   20, '3rd Year', 'English Lit.',      'Poetry, street photography, and vintage vinyl records are my jam. Tell me your favorite movie?',                ARRAY['Poetry', 'Cinema', 'Vinyls', 'Travel'], '📷', false),
   ('Siddharth M.',   20, '3rd Year', 'Computer Science',  'Building campus apps for fun. Hackathon enthusiast. Ask me about my startup idea.',                             ARRAY['Coding', 'Startups', 'Chess', 'Coffee'], '🚀', true)
 ON CONFLICT DO NOTHING;
+

@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { supabase } from "@/lib/supabase";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -124,6 +125,24 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  // Handle auth state changes globally
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
+        // Only redirect if not already on landing page
+        if (router.state.location.pathname !== "/") {
+          router.navigate({ to: "/" });
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />

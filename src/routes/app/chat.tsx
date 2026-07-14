@@ -20,6 +20,7 @@ import {
   Video,
 } from "lucide-react";
 import { io, Socket } from "socket.io-client";
+import { supabase, supabaseAuth } from "@/lib/supabase";
 
 export const Route = createFileRoute("/app/chat")({
   head: () => ({
@@ -98,47 +99,115 @@ function ChatApp() {
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    id: string;
+    email: string;
+    user_metadata: Record<string, unknown>;
+  } | null>(null);
 
-  // Connect to Socket.io server
+  // Get current user from Supabase auth
   useEffect(() => {
-    // Connect to local mock server dynamically (helps testing over same Wi-Fi)
-    const socketUrl =
-      typeof window !== "undefined"
-        ? `http://${window.location.hostname}:3001`
-        : "http://localhost:3001";
-    const socket = io(socketUrl);
-    socketRef.current = socket;
-
-    // Join default room
-    socket.emit("join", {
-      name: "Siddharth M.",
-      avatar: "SM",
-      role: "Student",
-      color: "bg-primary",
-      channelId: activeChannel,
-    });
-
-    // Event listeners
-    socket.on("history", (history: Msg[]) => {
-      setMessages(history);
-    });
-
-    socket.on("message", (newMsg: Msg) => {
-      setMessages((prev) => [...prev, newMsg]);
-    });
-
-    socket.on("reactionUpdate", ({ msgId, reactions }) => {
-      setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, reactions } : m)));
-    });
-
-    socket.on("members", (updatedMembers: Member[]) => {
-      setMembers(updatedMembers);
-    });
-
-    return () => {
-      socket.disconnect();
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser({
+          id: user.id,
+          email: user.email || "",
+          user_metadata: user.user_metadata || {},
+        });
+      }
     };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser({
+          id: session.user.id,
+          email: session.user.email || "",
+          user_metadata: session.user.user_metadata || {},
+        });
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  // Connect to Socket.io server with JWT auth
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const getToken = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      return session?.access_token;
+    };
+
+    getToken().then((token) => {
+      if (!token) return;
+
+      const socketUrl =
+        typeof window !== "undefined"
+          ? `http://${window.location.hostname}:3001`
+          : "http://localhost:3001";
+
+      const socket = io(socketUrl, {
+        auth: { token },
+        transports: ["websocket", "polling"],
+      });
+      socketRef.current = socket;
+
+      // Join default room with user info from auth
+      const displayName =
+        currentUser.user_metadata?.full_name || currentUser.email?.split("@")[0] || "Student";
+      const avatar =
+        displayName
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+          .substring(0, 2) || "SM";
+
+      socket.emit("join", {
+        name: displayName,
+        avatar,
+        role: "Student",
+        color: "bg-primary",
+        channelId: activeChannel,
+      });
+
+      // Event listeners
+      socket.on("history", (history: Msg[]) => {
+        setMessages(history);
+      });
+
+      socket.on("message", (newMsg: Msg) => {
+        setMessages((prev) => [...prev, newMsg]);
+      });
+
+      socket.on("reactionUpdate", ({ msgId, reactions }) => {
+        setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, reactions } : m)));
+      });
+
+      socket.on("members", (updatedMembers: Member[]) => {
+        setMembers(updatedMembers);
+      });
+
+      socket.on("connect_error", (err) => {
+        console.error("Socket connection error:", err.message);
+      });
+
+      return () => {
+        socket.disconnect();
+      };
+    });
+  }, [currentUser]);
 
   // Handle switching channels
   const handleChannelChange = (newChannelId: string) => {
@@ -252,14 +321,24 @@ function ChatApp() {
         <div className="flex items-center gap-2 border-t border-border bg-background/50 px-3 py-2.5">
           <div className="relative">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">
-              SM
+              {currentUser?.user_metadata?.full_name
+                ?.split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase() ||
+                currentUser?.email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
+                "SM"}
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-500" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-medium">Siddharth M.</div>
+            <div className="truncate text-sm font-medium">
+              {currentUser?.user_metadata?.full_name ||
+                currentUser?.email?.split("@")[0] ||
+                "Student"}
+            </div>
             <div className="truncate font-mono text-[10px] text-muted-foreground">
-              online · CS#0127
+              online · {currentUser?.user_metadata?.college || "College"}#0127
             </div>
           </div>
           <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground">

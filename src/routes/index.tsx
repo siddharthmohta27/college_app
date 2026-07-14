@@ -13,7 +13,9 @@ import {
   Calendar,
   MessageSquare,
   Zap,
+  Loader2,
 } from "lucide-react";
+import { supabase, supabaseAuth } from "@/lib/supabase";
 import heroBg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/")({
@@ -34,9 +36,91 @@ function Landing() {
   const [mode, setMode] = useState<"landing" | "login" | "signup">("landing");
   const navigate = useNavigate();
 
-  const submit = (e: React.FormEvent) => {
+  const handleAuthSubmit = async (
+    e: React.FormEvent,
+    type: "login" | "signup",
+    formData: { email: string; password: string; name?: string; college?: string },
+  ) => {
     e.preventDefault();
-    navigate({ to: "/app" });
+    setAuthLoading(true);
+    setAuthError(null);
+
+    try {
+      let result;
+
+      if (type === "signup") {
+        result = await supabaseAuth.signUp(formData.email, formData.password, {
+          full_name: formData.name,
+          college: formData.college,
+        });
+      } else {
+        result = await supabaseAuth.signIn(formData.email, formData.password);
+      }
+
+      if (result.error) {
+        setAuthError(result.error.message);
+        return;
+      }
+
+      // Wait for session to be established
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        navigate({ to: "/app" });
+      }
+    } catch (err) {
+      setAuthError("Something went wrong. Please try again.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setAuthLoading(true);
+    setAuthError(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        setAuthLoading(false);
+      }
+      // OAuth redirects - won't reach here
+    } catch (err) {
+      setAuthError("Google sign-in failed. Please try again.");
+      setAuthLoading(false);
+    }
+  };
+
+  // Auth form state
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    name: "",
+    college: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setAuthError(null);
+  };
+
+  const handleSignupSubmit = (e: React.FormEvent) => {
+    handleAuthSubmit(e, "signup", formData);
+  };
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    handleAuthSubmit(e, "login", formData);
   };
 
   return (
@@ -82,14 +166,20 @@ function Landing() {
         <div className="flex items-center gap-2">
           <button
             id="signin-btn"
-            onClick={() => setMode("login")}
+            onClick={() => {
+              setMode("login");
+              setAuthError(null);
+            }}
             className="rounded-lg px-4 py-2 text-sm text-muted-foreground transition hover:text-foreground"
           >
             Sign in
           </button>
           <button
             id="getstarted-btn"
-            onClick={() => setMode("signup")}
+            onClick={() => {
+              setMode("signup");
+              setAuthError(null);
+            }}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 glow-primary"
           >
             Get started
@@ -115,14 +205,20 @@ function Landing() {
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <button
                 id="hero-getstarted-btn"
-                onClick={() => setMode("signup")}
+                onClick={() => {
+                  setMode("signup");
+                  setAuthError(null);
+                }}
                 className="group inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary"
               >
                 Join Campus Connect
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
               <button
-                onClick={() => setMode("login")}
+                onClick={() => {
+                  setMode("login");
+                  setAuthError(null);
+                }}
                 className="inline-flex items-center gap-2 rounded-xl border border-border glass px-7 py-3.5 text-sm font-semibold transition hover:bg-surface-elevated"
               >
                 Sign in
@@ -254,7 +350,17 @@ function Landing() {
           </footer>
         </main>
       ) : (
-        <AuthCard mode={mode} setMode={setMode} onSubmit={submit} />
+        <AuthCard
+          mode={mode}
+          setMode={setMode}
+          formData={formData}
+          handleChange={handleChange}
+          authError={authError}
+          authLoading={authLoading}
+          handleSignupSubmit={handleSignupSubmit}
+          handleLoginSubmit={handleLoginSubmit}
+          handleGoogleSignIn={handleGoogleSignIn}
+        />
       )}
     </div>
   );
@@ -263,13 +369,26 @@ function Landing() {
 function AuthCard({
   mode,
   setMode,
-  onSubmit,
+  formData,
+  handleChange,
+  authError,
+  authLoading,
+  handleSignupSubmit,
+  handleLoginSubmit,
+  handleGoogleSignIn,
 }: {
   mode: "login" | "signup";
   setMode: (m: "landing" | "login" | "signup") => void;
-  onSubmit: (e: React.FormEvent) => void;
+  formData: { email: string; password: string; name: string; college: string };
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  authError: string | null;
+  authLoading: boolean;
+  handleSignupSubmit: (e: React.FormEvent) => void;
+  handleLoginSubmit: (e: React.FormEvent) => void;
+  handleGoogleSignIn: () => void;
 }) {
   const isSignup = mode === "signup";
+
   return (
     <main className="relative z-10 mx-auto flex max-w-md flex-col items-center px-6 pt-8 pb-16">
       <div className="w-full rounded-3xl glass-strong neon-border p-8 shadow-elevated animate-fade-up">
@@ -285,14 +404,23 @@ function AuthCard({
           </p>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-4">
+        {authError && (
+          <div className="mb-4 rounded-lg bg-rose-500/10 border border-rose-500/30 p-3 text-sm text-rose-400">
+            {authError}
+          </div>
+        )}
+
+        <form onSubmit={isSignup ? handleSignupSubmit : handleLoginSubmit} className="space-y-4">
           {isSignup && (
             <Field
               label="Full name"
               icon={<Users className="h-4 w-4" />}
               type="text"
               id="signup-name"
+              name="name"
               placeholder="Your Name"
+              value={formData.name}
+              onChange={handleChange}
             />
           )}
           {isSignup && (
@@ -301,7 +429,10 @@ function AuthCard({
               icon={<GraduationCap className="h-4 w-4" />}
               type="text"
               id="signup-college"
+              name="college"
               placeholder="e.g. IIT Delhi, Delhi University"
+              value={formData.college}
+              onChange={handleChange}
             />
           )}
           <Field
@@ -309,23 +440,39 @@ function AuthCard({
             icon={<Mail className="h-4 w-4" />}
             type="email"
             id="auth-email"
+            name="email"
             placeholder="you@university.edu"
+            value={formData.email}
+            onChange={handleChange}
           />
           <Field
             label="Password"
             icon={<Lock className="h-4 w-4" />}
             type="password"
             id="auth-password"
+            name="password"
             placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
           />
 
           <button
             id="auth-submit-btn"
             type="submit"
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary"
+            disabled={authLoading}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary disabled:opacity-50"
           >
-            {isSignup ? "Create account" : "Sign in"}
-            <ArrowRight className="h-4 w-4" />
+            {authLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {isSignup ? "Creating account..." : "Signing in..."}
+              </>
+            ) : (
+              <>
+                {isSignup ? "Create account" : "Sign in"}
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </button>
         </form>
 
@@ -338,7 +485,9 @@ function AuthCard({
         <button
           id="google-auth-btn"
           type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface/60 px-4 py-2.5 text-sm font-medium transition hover:bg-surface-elevated"
+          onClick={handleGoogleSignIn}
+          disabled={authLoading}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface/60 px-4 py-2.5 text-sm font-medium transition hover:bg-surface-elevated disabled:opacity-50"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24">
             <path
@@ -365,7 +514,10 @@ function AuthCard({
           {isSignup ? "Already have an account? " : "New to Campus Connect? "}
           <button
             className="font-medium text-accent hover:underline"
-            onClick={() => setMode(isSignup ? "login" : "signup")}
+            onClick={() => {
+              setMode(isSignup ? "login" : "signup");
+              setFormData({ email: "", password: "", name: "", college: "" });
+            }}
           >
             {isSignup ? "Sign in" : "Create one"}
           </button>
@@ -373,7 +525,11 @@ function AuthCard({
       </div>
 
       <button
-        onClick={() => setMode("landing")}
+        onClick={() => {
+          setMode("landing");
+          setAuthError(null);
+          setFormData({ email: "", password: "", name: "", college: "" });
+        }}
         className="mt-6 text-xs text-muted-foreground hover:text-foreground"
       >
         ← Back home
@@ -386,11 +542,13 @@ function Field({
   label,
   icon,
   id,
+  name,
   ...props
 }: {
   label: string;
   icon: React.ReactNode;
   id: string;
+  name: string;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block" htmlFor={id}>
@@ -402,6 +560,7 @@ function Field({
         <input
           {...props}
           id={id}
+          name={name}
           required
           className="w-full rounded-xl border border-border bg-input/60 py-2.5 pl-10 pr-3 text-sm outline-none transition placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/30"
         />

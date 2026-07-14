@@ -21,11 +21,7 @@ export const Route = createFileRoute("/app/dating")({
   component: CampusDating,
 });
 
-// No auth for now — hardcoded current user ID (matches seed row 6 = Siddharth M.)
-const CURRENT_USER_ID = 6;
-
 // Base URL of the mock backend (chat-server)
-// For direct Supabase access (future): use `supabaseHelpers` from "@/lib/supabase"
 const API =
   typeof window !== "undefined"
     ? `http://${window.location.hostname}:3001/api/dating`
@@ -62,11 +58,38 @@ function CampusDating() {
   const [swiping, setSwiping] = useState(false);
   const [dbStatus, setDbStatus] = useState<"database" | "fallback" | null>(null);
   const [checkingUpdates, setCheckingUpdates] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Get current user from Supabase auth
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUserId(session.user.id);
+      } else {
+        setCurrentUserId(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const fetchProfiles = async () => {
+    if (!currentUserId) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API}/profiles?userId=${CURRENT_USER_ID}`);
+      const res = await fetch(`${API}/profiles?userId=${currentUserId}`);
       const data = await res.json();
       setProfiles(data.profiles || []);
       setDbStatus(data.source);
@@ -78,9 +101,10 @@ function CampusDating() {
   };
 
   const checkForNewProfiles = async () => {
+    if (!currentUserId) return;
     setCheckingUpdates(true);
     try {
-      const res = await fetch(`${API}/profiles?userId=${CURRENT_USER_ID}`);
+      const res = await fetch(`${API}/profiles?userId=${currentUserId}`);
       const data = await res.json();
       const newProfiles = data.profiles || [];
       setProfiles(newProfiles);
@@ -96,20 +120,21 @@ function CampusDating() {
   // Fetch profiles from backend on mount
   useEffect(() => {
     fetchProfiles();
-  }, []);
+  }, [currentUserId]);
 
   // Fetch matches from backend on mount
   useEffect(() => {
-    fetch(`${API}/matches/${CURRENT_USER_ID}`)
+    if (!currentUserId) return;
+    fetch(`${API}/matches/${currentUserId}`)
       .then((r) => r.json())
       .then((data) => setMatches(data.matches || []))
       .catch(() => setMatches([]));
-  }, [showMatchModal]); // Refetch after every modal close (new match may have appeared)
+  }, [currentUserId, showMatchModal]);
 
   const activeProfile = profiles[profileIndex];
 
   const handleAction = async (like: boolean) => {
-    if (!activeProfile || swiping) return;
+    if (!activeProfile || swiping || !currentUserId) return;
     setSwiping(true);
 
     try {
@@ -117,7 +142,7 @@ function CampusDating() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          swiperId: CURRENT_USER_ID,
+          swiperId: currentUserId,
           swipedId: activeProfile.id,
           action: like ? "like" : "pass",
         }),

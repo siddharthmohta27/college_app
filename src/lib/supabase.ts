@@ -166,6 +166,40 @@ export const supabaseHelpers = {
 };
 
 // ──────────────────────────────────────────────────────────────
+// Auth export (compatible with existing imports)
+// ──────────────────────────────────────────────────────────────
+
+export const supabaseAuth = {
+  async signUp(email: string, password: string, metadata?: Record<string, unknown>) {
+    return supabaseHelpers.signUp(email, password, metadata);
+  },
+
+  async signIn(email: string, password: string) {
+    return supabaseHelpers.signIn(email, password);
+  },
+
+  async signInWithOAuth(provider: "google", options?: { redirectTo?: string }) {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options,
+    });
+    return { data, error };
+  },
+
+  async signOut() {
+    return supabaseHelpers.signOut();
+  },
+
+  async getSession() {
+    return supabaseHelpers.getSession();
+  },
+
+  onAuthStateChange(callback: (event: string, session: unknown) => void) {
+    return supabaseHelpers.onAuthStateChange(callback);
+  },
+};
+
+// ──────────────────────────────────────────────────────────────
 // Type helpers (extend as you add tables)
 // ──────────────────────────────────────────────────────────────
 

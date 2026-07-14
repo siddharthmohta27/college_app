@@ -1,5 +1,72 @@
--- Run this file to initialize the Campus Match dating tables
--- Execute with: psql -d YOUR_DB_NAME -f src/database/schema.sql
+-- ============================================================
+--  Campus Connect — Full Database Schema
+--  Run this in Supabase SQL Editor to set up all tables
+-- ============================================================
+
+
+-- ────────────────────────────────────────────────────────────
+--  SECTION 1: CHAT
+-- ────────────────────────────────────────────────────────────
+
+-- Chat users (one row per connected student)
+CREATE TABLE IF NOT EXISTS chat_users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    avatar VARCHAR(10) DEFAULT 'SM',
+    role VARCHAR(50) DEFAULT 'Student',       -- Student, TA, Mod, HOD
+    color VARCHAR(30) DEFAULT 'bg-primary',   -- Tailwind class for avatar bg
+    status VARCHAR(20) DEFAULT 'offline',     -- online | idle | offline
+    college_email VARCHAR(200) UNIQUE,
+    last_seen TIMESTAMP DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Channels (general, announcements, assignments, random, internships …)
+CREATE TABLE IF NOT EXISTS channels (
+    id VARCHAR(50) PRIMARY KEY,               -- e.g. 'general', 'assignments'
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    is_voice BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Chat messages (all text messages across all channels)
+CREATE TABLE IF NOT EXISTS messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    channel_id VARCHAR(50) REFERENCES channels(id) ON DELETE CASCADE,
+    sender_id INT REFERENCES chat_users(id) ON DELETE SET NULL,
+    text TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Emoji reactions on messages
+CREATE TABLE IF NOT EXISTS reactions (
+    id SERIAL PRIMARY KEY,
+    message_id UUID REFERENCES messages(id) ON DELETE CASCADE,
+    user_id INT REFERENCES chat_users(id) ON DELETE CASCADE,
+    emoji VARCHAR(10) NOT NULL,
+    UNIQUE(message_id, user_id, emoji)        -- one reaction per user per emoji
+);
+
+-- Performance indexes
+CREATE INDEX IF NOT EXISTS idx_messages_channel ON messages(channel_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reactions_message ON reactions(message_id);
+CREATE INDEX IF NOT EXISTS idx_users_status ON chat_users(status);
+
+-- Seed default channels
+INSERT INTO channels (id, name, description) VALUES
+  ('general',       'general',          'Open campus discussion'),
+  ('announcements', 'announcements',    'Official notices from admin'),
+  ('assignments',   'assignments-help', 'Ask for help with assignments'),
+  ('random',        'random',           'Memes, fun, and everything else'),
+  ('internships',   'internships',      'Internship leads and placement news')
+ON CONFLICT DO NOTHING;
+
+
+-- ────────────────────────────────────────────────────────────
+--  SECTION 2: DATING (Campus Match)
+-- ────────────────────────────────────────────────────────────
+
 
 -- Dating profiles table
 CREATE TABLE IF NOT EXISTS dating_profiles (

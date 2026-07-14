@@ -4,6 +4,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const datingRouter = require("./src/routes/dating");
+const pool = require("./src/config/db");
 
 const app = express();
 app.use(cors());
@@ -22,196 +23,117 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3001;
 
-// Seed Initial Channel message history
-const messageHistory = {
-  general: [
-    {
-      id: "1",
-      user: "Priya S.",
-      color: "text-fuchsia-400",
-      avatar: "PS",
-      time: "10:24",
-      text: "yo did anyone finish the algo pset? 😭 stuck on Q3",
-      reactions: [{ emoji: "😭", count: 4 }],
-    },
-    {
-      id: "2",
-      user: "Marcus K.",
-      color: "text-cyan-400",
-      avatar: "MK",
-      time: "10:26",
-      text: "same boat. the DP transition is cursed",
-    },
-    {
-      id: "3",
-      user: "Aisha R.",
-      color: "text-emerald-400",
-      avatar: "AR",
-      time: "10:28",
-      text: "hop in Study Room 1 — im screensharing rn",
-      reactions: [
-        { emoji: "🔥", count: 6 },
-        { emoji: "🙏", count: 3 },
-      ],
-    },
-  ],
-  announcements: [
-    {
-      id: "ann-1",
-      user: "HOD Office",
-      color: "text-primary",
-      avatar: "HO",
-      time: "09:00",
-      text: "End Semester timetable has been posted in the resources wing.",
-    },
-  ],
-  assignments: [
-    {
-      id: "assign-1",
-      user: "Aisha R.",
-      color: "text-emerald-400",
-      avatar: "AR",
-      time: "Yesterday",
-      text: "Lab 5 submissions are open on the portal now.",
-    },
-  ],
-  random: [
-    {
-      id: "rand-1",
-      user: "Leo T.",
-      color: "text-amber-400",
-      avatar: "LT",
-      time: "12:00",
-      text: "Who wants to order pizza from Dominoes tonight? 🍕",
-    },
-  ],
-  internships: [
-    {
-      id: "int-1",
-      user: "Placement Cell",
-      color: "text-primary",
-      avatar: "PC",
-      time: "11:00",
-      text: "Summer internship applications for Google open next Monday. Get your resumes reviewed!",
-    },
-  ],
-};
-
-// Tracks active sockets: socket.id -> { name, avatar, status, role, color, activeChannel }
+// In-memory presence tracking (socket.id -> user info)
 const activeUsers = new Map();
 
-io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
+// ─── Helpers ────────────────────────────────────────────────────────
 
-  // User registers their presence and enters a channel
-  socket.on("join", ({ name, avatar, role, color, channelId }) => {
-    // Save user info associated with socket
-    activeUsers.set(socket.id, {
-      name: name || "Anonymous",
-      avatar: avatar || "AN",
-      status: "online",
-      role: role || "Student",
-      color: color || "bg-primary",
-      activeChannel: channelId || "general",
-    });
+async function ensureUserExists(name, avatar, role, color, email) {
+  const avatarShort = avatar || name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "AN";
+  const roleClean = role || "Student";
+  const colorClean = color || "bg-primary";
 
-    // Join room for this channel
-    socket.join(channelId);
-    console.log(`${name || "Anonymous"} joined channel: ${channelId}`);
-
-    // Send history of this channel to the user
-    const history = messageHistory[channelId] || [];
-    socket.emit("history", history);
-
-    // Broadcast updated active members list to all clients in the channel
-    broadcastChannelMembers(channelId);
-  });
-
-  // Client sent a chat message
-  socket.on("message", ({ text, channelId }) => {
-    const user = activeUsers.get(socket.id);
-    if (!user) return;
-
-    const newMsg = {
-      id: crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 9),
-      user: user.name,
-      color: "text-primary",
-      avatar: user.avatar,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }),
-      text: text,
-      reactions: [],
-    };
-
-    // Store in history
-    if (!messageHistory[channelId]) {
-      messageHistory[channelId] = [];
+  // Try to find by email first (if provided), then by username
+  let client;
+  if (email) {
+    const res = await pool.query(
+      `SELECT id, username, avatar, role, color, status FROM chat_users WHERE college_email = $1`,
+      [email]
+    );
+    if (res.rows.length > 0) {
+      return res.rows[0];
     }
-    messageHistory[channelId].push(newMsg);
+  }
 
-    // Keep history capped at 100 messages to prevent memory leak
-    if (messageHistory[channelId].length > 100) {
-      messageHistory[channelId].shift();
-    }
+  const resByName = await pool.query(
+    `SELECT id, username, avatar, role, color, status FROM chat_users WHERE username = $1`,
+    [name]
+  );
+  if (resByName.rows.length > 0) {
+    // Update last_seen
+    await pool.query(
+      `UPDATE chat_users SET last_seen = NOW() WHERE id = $1`,
+      [resByName.rows[0].id]
+    );
+    return resByName.rows[0];
+  }
 
-    // Broadcast to the channel room
-    io.to(channelId).emit("message", newMsg);
-  });
+  // Create new user
+  const insert = await pool.query(
+    `INSERT INTO chat_users (username, avatar, role, color, college_email, status)
+     VALUES ($1, $2, $3, $4, $5, 'online')
+     RETURNING id, username, avatar, role, color, status`,
+    [name || "Anonymous", avatarShort, roleClean, colorClean, email]
+  );
+  return insert.rows[0];
+}
 
-  // Client reacted to a message
-  socket.on("reaction", ({ msgId, emoji, channelId }) => {
-    const history = messageHistory[channelId] || [];
-    const msg = history.find((m) => m.id === msgId);
-    if (msg) {
-      if (!msg.reactions) msg.reactions = [];
-      const reactIdx = msg.reactions.findIndex((r) => r.emoji === emoji);
-      if (reactIdx !== -1) {
-        msg.reactions[reactIdx].count += 1;
-      } else {
-        msg.reactions.push({ emoji, count: 1 });
-      }
+async function loadChannelHistory(channelId, limit = 100) {
+  const res = await pool.query(
+    `SELECT m.id, m.text, m.created_at,
+            u.username as "user", u.color, u.avatar
+       FROM messages m
+       LEFT JOIN chat_users u ON m.sender_id = u.id
+      WHERE m.channel_id = $1
+      ORDER BY m.created_at DESC
+      LIMIT $2`,
+    [channelId, limit]
+  );
+  // Return in chronological order (oldest first)
+  return res.rows.reverse().map(row => ({
+    id: row.id,
+    user: row.user,
+    color: row.color || "text-primary",
+    avatar: row.avatar,
+    time: new Date(row.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
+    text: row.text,
+    reactions: [],
+  }));
+}
 
-      // Broadcast reaction update to channel
-      io.to(channelId).emit("reactionUpdate", { msgId, reactions: msg.reactions });
-    }
-  });
+async function loadMessageReactions(messageIds) {
+  if (messageIds.length === 0) return {};
+  const placeholders = messageIds.map((_, i) => `$${i + 1}`).join(",");
+  const res = await pool.query(
+    `SELECT r.message_id, r.emoji, COUNT(*) as count
+       FROM reactions r
+      WHERE r.message_id IN (${placeholders})
+      GROUP BY r.message_id, r.emoji`,
+    messageIds
+  );
+  const reactionsByMessage = {};
+  for (const row of res.rows) {
+    if (!reactionsByMessage[row.message_id]) reactionsByMessage[row.message_id] = [];
+    reactionsByMessage[row.message_id].push({ emoji: row.emoji, count: parseInt(row.count) });
+  }
+  return reactionsByMessage;
+}
 
-  // Client switching channels
-  socket.on("change_channel", ({ oldChannel, newChannel }) => {
-    const user = activeUsers.get(socket.id);
-    if (user) {
-      user.activeChannel = newChannel;
-      socket.leave(oldChannel);
-      socket.join(newChannel);
+async function saveMessage(channelId, senderId, text) {
+  const res = await pool.query(
+    `INSERT INTO messages (channel_id, sender_id, text)
+     VALUES ($1, $2, $3)
+     RETURNING id, created_at`,
+    [channelId, senderId, text]
+  );
+  return res.rows[0];
+}
 
-      // Send history of the new channel
-      const history = messageHistory[newChannel] || [];
-      socket.emit("history", history);
+async function upsertReaction(messageId, userId, emoji) {
+  await pool.query(
+    `INSERT INTO reactions (message_id, user_id, emoji)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (message_id, user_id, emoji) DO NOTHING`,
+    [messageId, userId, emoji]
+  );
+  // Get updated count
+  const res = await pool.query(
+    `SELECT emoji, COUNT(*) as count FROM reactions WHERE message_id = $1 GROUP BY emoji`,
+    [messageId]
+  );
+  return res.rows.map(r => ({ emoji: r.emoji, count: parseInt(r.count) }));
+}
 
-      // Update rosters for both rooms
-      broadcastChannelMembers(oldChannel);
-      broadcastChannelMembers(newChannel);
-    }
-  });
-
-  // User disconnected
-  socket.on("disconnect", () => {
-    const user = activeUsers.get(socket.id);
-    if (user) {
-      const channelId = user.activeChannel;
-      activeUsers.delete(socket.id);
-      console.log(`User disconnected: ${user.name} (${socket.id})`);
-
-      // Update roster for the channel they were in
-      broadcastChannelMembers(channelId);
-    }
-  });
-});
-
-// Helper to broadcast list of active members in a room
 function broadcastChannelMembers(channelId) {
   const membersInChannel = [];
   activeUsers.forEach((user, id) => {
@@ -225,7 +147,7 @@ function broadcastChannelMembers(channelId) {
     }
   });
 
-  // Always append some seeded offline/idle mock members to make the chat feel alive
+  // Always append seeded offline/idle mock members
   const seededMembers = [
     { name: "Aisha R.", status: "online", role: "Mod", color: "bg-emerald-500" },
     { name: "Marcus K.", status: "online", role: "Student", color: "bg-cyan-500" },
@@ -233,10 +155,9 @@ function broadcastChannelMembers(channelId) {
     { name: "Leo T.", status: "offline", role: "Student", color: "bg-amber-500" },
   ];
 
-  // De-duplicate members to prevent doubles if a real user matches a seeded name
   const allMembers = [...membersInChannel];
-  seededMembers.forEach((seeded) => {
-    if (!allMembers.some((m) => m.name === seeded.name)) {
+  seededMembers.forEach(seeded => {
+    if (!allMembers.some(m => m.name === seeded.name)) {
       allMembers.push(seeded);
     }
   });
@@ -244,10 +165,129 @@ function broadcastChannelMembers(channelId) {
   io.to(channelId).emit("members", allMembers);
 }
 
+// ─── Socket.io Connection ──────────────────────────────────────────
+
+io.on("connection", (socket) => {
+  console.log(`🔌 User connected: ${socket.id}`);
+
+  // User registers presence and enters a channel
+  socket.on("join", async ({ name, avatar, role, color, channelId, email }) => {
+    try {
+      const user = await ensureUserExists(name, avatar, role, color, email);
+
+      activeUsers.set(socket.id, {
+        id: user.id,
+        name: user.username,
+        avatar: user.avatar,
+        status: "online",
+        role: user.role,
+        color: user.color,
+        activeChannel: channelId || "general",
+      });
+
+      socket.join(channelId || "general");
+      console.log(`👤 ${user.username} joined channel: ${channelId || "general"}`);
+
+      // Load history from DB
+      const history = await loadChannelHistory(channelId || "general");
+      const messageIds = history.map(m => m.id);
+      const reactionsMap = await loadMessageReactions(messageIds);
+
+      // Attach reactions to messages
+      const historyWithReactions = history.map(msg => ({
+        ...msg,
+        reactions: reactionsMap[msg.id] || [],
+      }));
+
+      socket.emit("history", historyWithReactions);
+      broadcastChannelMembers(channelId || "general");
+    } catch (err) {
+      console.error("❌ Error on join:", err.message);
+      // Fallback to empty history
+      socket.emit("history", []);
+    }
+  });
+
+  // Client sent a chat message
+  socket.on("message", async ({ text, channelId }) => {
+    const user = activeUsers.get(socket.id);
+    if (!user) return;
+
+    try {
+      const saved = await saveMessage(channelId, user.id, text);
+
+      const newMsg = {
+        id: saved.id,
+        user: user.name,
+        color: user.color,
+        avatar: user.avatar,
+        time: new Date(saved.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
+        text,
+        reactions: [],
+      };
+
+      io.to(channelId).emit("message", newMsg);
+    } catch (err) {
+      console.error("❌ Error saving message:", err.message);
+    }
+  });
+
+  // Client reacted to a message
+  socket.on("reaction", async ({ msgId, emoji, channelId }) => {
+    const user = activeUsers.get(socket.id);
+    if (!user) return;
+
+    try {
+      const reactions = await upsertReaction(msgId, user.id, emoji);
+      io.to(channelId).emit("reactionUpdate", { msgId, reactions });
+    } catch (err) {
+      console.error("❌ Error saving reaction:", err.message);
+    }
+  });
+
+  // Client switching channels
+  socket.on("change_channel", async ({ oldChannel, newChannel }) => {
+    const user = activeUsers.get(socket.id);
+    if (!user) return;
+
+    user.activeChannel = newChannel;
+    socket.leave(oldChannel);
+    socket.join(newChannel);
+
+    try {
+      const history = await loadChannelHistory(newChannel);
+      const messageIds = history.map(m => m.id);
+      const reactionsMap = await loadMessageReactions(messageIds);
+      const historyWithReactions = history.map(msg => ({
+        ...msg,
+        reactions: reactionsMap[msg.id] || [],
+      }));
+      socket.emit("history", historyWithReactions);
+    } catch (err) {
+      console.error("❌ Error loading channel history:", err.message);
+      socket.emit("history", []);
+    }
+
+    broadcastChannelMembers(oldChannel);
+    broadcastChannelMembers(newChannel);
+  });
+
+  // User disconnected
+  socket.on("disconnect", () => {
+    const user = activeUsers.get(socket.id);
+    if (user) {
+      const channelId = user.activeChannel;
+      activeUsers.delete(socket.id);
+      console.log(`👋 User disconnected: ${user.name} (${socket.id})`);
+      broadcastChannelMembers(channelId);
+    }
+  });
+});
+
 app.get("/", (req, res) => {
-  res.send("Campus Connect Mock Chat server running.");
+  res.send("Campus Connect Chat + Dating server running.");
 });
 
 server.listen(PORT, () => {
-  console.log(`Mock chat server running on port http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

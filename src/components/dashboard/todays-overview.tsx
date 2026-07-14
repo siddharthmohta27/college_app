@@ -67,9 +67,7 @@ function OverviewCard({ item, index }: { item: OverviewItem; index: number }) {
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 transition-transform duration-300 group-hover:scale-110">
           <Icon className="h-5 w-5 text-primary" />
         </div>
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          Today
-        </span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Today</span>
       </div>
 
       <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">

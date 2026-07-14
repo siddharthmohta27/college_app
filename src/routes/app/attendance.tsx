@@ -19,11 +19,46 @@ type Subject = {
 };
 
 const INITIAL_SUBJECTS: Subject[] = [
-  { id: 1, name: "Design & Analysis of Algorithms", code: "CS301", lecturesConducted: 24, lecturesAttended: 20, lastUpdated: "Today, 10:30 AM" },
-  { id: 2, name: "Database Management Systems", code: "CS302", lecturesConducted: 20, lecturesAttended: 18, lastUpdated: "Yesterday" },
-  { id: 3, name: "Operating Systems", code: "CS303", lecturesConducted: 22, lecturesAttended: 15, lastUpdated: "July 3" },
-  { id: 4, name: "Compiler Design", code: "CS304", lecturesConducted: 18, lecturesAttended: 12, lastUpdated: "July 2" },
-  { id: 5, name: "Machine Learning Basic", code: "CS305", lecturesConducted: 16, lecturesAttended: 14, lastUpdated: "Today, 11:30 AM" },
+  {
+    id: 1,
+    name: "Design & Analysis of Algorithms",
+    code: "CS301",
+    lecturesConducted: 24,
+    lecturesAttended: 20,
+    lastUpdated: "Today, 10:30 AM",
+  },
+  {
+    id: 2,
+    name: "Database Management Systems",
+    code: "CS302",
+    lecturesConducted: 20,
+    lecturesAttended: 18,
+    lastUpdated: "Yesterday",
+  },
+  {
+    id: 3,
+    name: "Operating Systems",
+    code: "CS303",
+    lecturesConducted: 22,
+    lecturesAttended: 15,
+    lastUpdated: "July 3",
+  },
+  {
+    id: 4,
+    name: "Compiler Design",
+    code: "CS304",
+    lecturesConducted: 18,
+    lecturesAttended: 12,
+    lastUpdated: "July 2",
+  },
+  {
+    id: 5,
+    name: "Machine Learning Basic",
+    code: "CS305",
+    lecturesConducted: 16,
+    lecturesAttended: 14,
+    lastUpdated: "Today, 11:30 AM",
+  },
 ];
 
 function AttendanceTracker() {
@@ -44,7 +79,7 @@ function AttendanceTracker() {
           };
         }
         return sub;
-      })
+      }),
     );
   };
 
@@ -76,7 +111,9 @@ function AttendanceTracker() {
       <div className="flex flex-wrap items-center justify-between gap-3 animate-fade-up">
         <div>
           <h2 className="text-xl font-bold">Attendance Tracker</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">Keep track of your classes and ensure you stay above the 75% limit</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Keep track of your classes and ensure you stay above the 75% limit
+          </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -89,17 +126,26 @@ function AttendanceTracker() {
       {/* Overview Card */}
       <div className="rounded-2xl border border-border bg-yellow-500/5 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 animate-fade-up">
         <div className="space-y-2">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-primary">Overview</span>
+          <span className="text-[10px] uppercase font-bold tracking-widest text-primary">
+            Overview
+          </span>
           <h3 className="text-2xl font-black">Semester Attendance</h3>
           <p className="text-sm text-muted-foreground">
-            You have attended <span className="font-semibold text-foreground">{totalAttended}</span> out of <span className="font-semibold text-foreground">{totalConducted}</span> total lectures conducted.
+            You have attended <span className="font-semibold text-foreground">{totalAttended}</span>{" "}
+            out of <span className="font-semibold text-foreground">{totalConducted}</span> total
+            lectures conducted.
           </p>
           <div className="flex gap-4 pt-2">
             <div className="text-xs text-muted-foreground">
               Required: <span className="font-bold text-foreground">75.0%</span>
             </div>
             <div className="text-xs text-muted-foreground">
-              Current: <span className={`font-bold ${overallPct >= 75 ? "text-emerald-400" : "text-rose-400"}`}>{overallPct.toFixed(1)}%</span>
+              Current:{" "}
+              <span
+                className={`font-bold ${overallPct >= 75 ? "text-emerald-400" : "text-rose-400"}`}
+              >
+                {overallPct.toFixed(1)}%
+              </span>
             </div>
           </div>
         </div>
@@ -107,10 +153,22 @@ function AttendanceTracker() {
         {/* Large Circle Progress */}
         <div className="relative h-28 w-28 shrink-0 flex items-center justify-center">
           <svg className="-rotate-90 h-full w-full" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="6" className="text-surface-elevated" />
             <circle
-              cx="50" cy="50" r="42" fill="none"
-              stroke="currentColor" strokeWidth="8"
+              cx="50"
+              cy="50"
+              r="42"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="6"
+              className="text-surface-elevated"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="42"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="8"
               strokeDasharray={2 * Math.PI * 42}
               strokeDashoffset={2 * Math.PI * 42 * (1 - overallPct / 100)}
               className={overallPct >= 75 ? "text-primary" : "text-rose-400"}
@@ -119,7 +177,9 @@ function AttendanceTracker() {
           </svg>
           <div className="absolute text-center">
             <span className="text-xl font-black">{overallPct.toFixed(0)}%</span>
-            <span className="block text-[8px] uppercase tracking-wider text-muted-foreground">Overall</span>
+            <span className="block text-[8px] uppercase tracking-wider text-muted-foreground">
+              Overall
+            </span>
           </div>
         </div>
       </div>
@@ -127,7 +187,8 @@ function AttendanceTracker() {
       {/* Grid of Subject Cards */}
       <div className="grid gap-4 sm:grid-cols-2">
         {subjects.map((sub, i) => {
-          const pct = sub.lecturesConducted > 0 ? (sub.lecturesAttended / sub.lecturesConducted) * 100 : 100;
+          const pct =
+            sub.lecturesConducted > 0 ? (sub.lecturesAttended / sub.lecturesConducted) * 100 : 100;
           const isDanger = pct < 75;
 
           // Calculate safe skips: number of future classes we can miss OR need to attend to reach 75%
@@ -135,11 +196,16 @@ function AttendanceTracker() {
           if (sub.lecturesConducted > 0) {
             if (pct >= 75) {
               // safe to skip = floor((attended - 0.75 * conducted) / 0.75)
-              const maxSkip = Math.floor((sub.lecturesAttended - 0.75 * sub.lecturesConducted) / 0.75);
-              safeSkipsMsg = maxSkip > 0 ? `Safe to skip ${maxSkip} next classes` : "Cannot skip next class";
+              const maxSkip = Math.floor(
+                (sub.lecturesAttended - 0.75 * sub.lecturesConducted) / 0.75,
+              );
+              safeSkipsMsg =
+                maxSkip > 0 ? `Safe to skip ${maxSkip} next classes` : "Cannot skip next class";
             } else {
               // need to attend = ceiling((0.75 * conducted - attended) / 0.25)
-              const needAttend = Math.ceil((0.75 * sub.lecturesConducted - sub.lecturesAttended) / 0.25);
+              const needAttend = Math.ceil(
+                (0.75 * sub.lecturesConducted - sub.lecturesAttended) / 0.25,
+              );
               safeSkipsMsg = `Must attend next ${needAttend} classes`;
             }
           } else {
@@ -161,13 +227,20 @@ function AttendanceTracker() {
                     <span className="font-mono text-[10px] text-muted-foreground">{sub.code}</span>
                     <h4 className="font-bold text-sm leading-snug">{sub.name}</h4>
                   </div>
-                  <span className={`text-base font-black ${isDanger ? "text-rose-400" : "text-primary"}`}>
+                  <span
+                    className={`text-base font-black ${isDanger ? "text-rose-400" : "text-primary"}`}
+                  >
                     {pct.toFixed(0)}%
                   </span>
                 </div>
 
                 <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Attended: <strong className="text-foreground">{sub.lecturesAttended}/{sub.lecturesConducted}</strong></span>
+                  <span>
+                    Attended:{" "}
+                    <strong className="text-foreground">
+                      {sub.lecturesAttended}/{sub.lecturesConducted}
+                    </strong>
+                  </span>
                   <span className="text-[10px] flex items-center gap-1">
                     <RefreshCw className="h-2.5 w-2.5" /> {sub.lastUpdated}
                   </span>
@@ -183,8 +256,14 @@ function AttendanceTracker() {
               </div>
 
               <div className="mt-4 pt-4 border-t border-border flex items-center justify-between flex-wrap gap-2">
-                <span className={`text-[10px] font-semibold flex items-center gap-1 ${isDanger ? "text-rose-400" : "text-emerald-400"}`}>
-                  {isDanger ? <AlertTriangle className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
+                <span
+                  className={`text-[10px] font-semibold flex items-center gap-1 ${isDanger ? "text-rose-400" : "text-emerald-400"}`}
+                >
+                  {isDanger ? (
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                  ) : (
+                    <Check className="h-3.5 w-3.5" />
+                  )}
                   {safeSkipsMsg}
                 </span>
 
@@ -220,7 +299,12 @@ function AttendanceTracker() {
             </h3>
             <form onSubmit={handleAddSubject} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="add-code">Course Code</label>
+                <label
+                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                  htmlFor="add-code"
+                >
+                  Course Code
+                </label>
                 <input
                   id="add-code"
                   required
@@ -231,7 +315,12 @@ function AttendanceTracker() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="add-name">Course Name</label>
+                <label
+                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                  htmlFor="add-name"
+                >
+                  Course Name
+                </label>
                 <input
                   id="add-name"
                   required

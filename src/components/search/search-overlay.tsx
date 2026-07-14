@@ -9,8 +9,7 @@ import { RecentSearches } from "./RecentSearches";
 import { TrendingSearches } from "./TrendingSearches";
 
 export function SearchOverlay() {
-  const { open, setOpen, toggle, query, setQuery, addRecentSearch } =
-    useSearch();
+  const { open, setOpen, toggle, query, setQuery, addRecentSearch } = useSearch();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -19,9 +18,7 @@ export function SearchOverlay() {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isVisible, setIsVisible] = useState(false);
 
-  const results: SearchResult[] = query.trim()
-    ? filterSearchResults(query)
-    : [];
+  const results: SearchResult[] = query.trim() ? filterSearchResults(query) : [];
 
   // ── Animation state ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -175,10 +172,9 @@ export function SearchOverlay() {
           ${open ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-2"}
         `}
         style={{
-          boxShadow:
-            open
-              ? "0 25px 60px -15px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04)"
-              : undefined,
+          boxShadow: open
+            ? "0 25px 60px -15px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04)"
+            : undefined,
         }}
       >
         {/* ── Search Input ─────────────────────────────────── */}
@@ -209,7 +205,10 @@ export function SearchOverlay() {
 
           {query && (
             <button
-              onClick={() => { setQuery(""); setActiveIndex(-1); }}
+              onClick={() => {
+                setQuery("");
+                setActiveIndex(-1);
+              }}
               className="text-xs text-muted-foreground transition hover:text-foreground px-1"
               aria-label="Clear search"
             >
@@ -249,16 +248,22 @@ export function SearchOverlay() {
         <div className="flex items-center justify-between border-t border-border px-5 py-2.5 text-[11px] text-muted-foreground">
           <div className="flex gap-4">
             <span>
-              <kbd className="rounded border border-border bg-surface-elevated px-1.5 py-0.5 font-mono">↑↓</kbd>{" "}
+              <kbd className="rounded border border-border bg-surface-elevated px-1.5 py-0.5 font-mono">
+                ↑↓
+              </kbd>{" "}
               Navigate
             </span>
             <span>
-              <kbd className="rounded border border-border bg-surface-elevated px-1.5 py-0.5 font-mono">↵</kbd>{" "}
+              <kbd className="rounded border border-border bg-surface-elevated px-1.5 py-0.5 font-mono">
+                ↵
+              </kbd>{" "}
               Select
             </span>
           </div>
           <span>
-            <kbd className="rounded border border-border bg-surface-elevated px-1.5 py-0.5 font-mono">Esc</kbd>{" "}
+            <kbd className="rounded border border-border bg-surface-elevated px-1.5 py-0.5 font-mono">
+              Esc
+            </kbd>{" "}
             Close
           </span>
         </div>

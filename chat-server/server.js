@@ -25,21 +25,75 @@ const PORT = process.env.PORT || 3001;
 // Seed Initial Channel message history
 const messageHistory = {
   general: [
-    { id: "1", user: "Priya S.", color: "text-fuchsia-400", avatar: "PS", time: "10:24", text: "yo did anyone finish the algo pset? 😭 stuck on Q3", reactions: [{ emoji: "😭", count: 4 }] },
-    { id: "2", user: "Marcus K.", color: "text-cyan-400", avatar: "MK", time: "10:26", text: "same boat. the DP transition is cursed" },
-    { id: "3", user: "Aisha R.", color: "text-emerald-400", avatar: "AR", time: "10:28", text: "hop in Study Room 1 — im screensharing rn", reactions: [{ emoji: "🔥", count: 6 }, { emoji: "🙏", count: 3 }] },
+    {
+      id: "1",
+      user: "Priya S.",
+      color: "text-fuchsia-400",
+      avatar: "PS",
+      time: "10:24",
+      text: "yo did anyone finish the algo pset? 😭 stuck on Q3",
+      reactions: [{ emoji: "😭", count: 4 }],
+    },
+    {
+      id: "2",
+      user: "Marcus K.",
+      color: "text-cyan-400",
+      avatar: "MK",
+      time: "10:26",
+      text: "same boat. the DP transition is cursed",
+    },
+    {
+      id: "3",
+      user: "Aisha R.",
+      color: "text-emerald-400",
+      avatar: "AR",
+      time: "10:28",
+      text: "hop in Study Room 1 — im screensharing rn",
+      reactions: [
+        { emoji: "🔥", count: 6 },
+        { emoji: "🙏", count: 3 },
+      ],
+    },
   ],
   announcements: [
-    { id: "ann-1", user: "HOD Office", color: "text-primary", avatar: "HO", time: "09:00", text: "End Semester timetable has been posted in the resources wing." },
+    {
+      id: "ann-1",
+      user: "HOD Office",
+      color: "text-primary",
+      avatar: "HO",
+      time: "09:00",
+      text: "End Semester timetable has been posted in the resources wing.",
+    },
   ],
   assignments: [
-    { id: "assign-1", user: "Aisha R.", color: "text-emerald-400", avatar: "AR", time: "Yesterday", text: "Lab 5 submissions are open on the portal now." },
+    {
+      id: "assign-1",
+      user: "Aisha R.",
+      color: "text-emerald-400",
+      avatar: "AR",
+      time: "Yesterday",
+      text: "Lab 5 submissions are open on the portal now.",
+    },
   ],
   random: [
-    { id: "rand-1", user: "Leo T.", color: "text-amber-400", avatar: "LT", time: "12:00", text: "Who wants to order pizza from Dominoes tonight? 🍕" },
+    {
+      id: "rand-1",
+      user: "Leo T.",
+      color: "text-amber-400",
+      avatar: "LT",
+      time: "12:00",
+      text: "Who wants to order pizza from Dominoes tonight? 🍕",
+    },
   ],
   internships: [
-    { id: "int-1", user: "Placement Cell", color: "text-primary", avatar: "PC", time: "11:00", text: "Summer internship applications for Google open next Monday. Get your resumes reviewed!" },
+    {
+      id: "int-1",
+      user: "Placement Cell",
+      color: "text-primary",
+      avatar: "PC",
+      time: "11:00",
+      text: "Summer internship applications for Google open next Monday. Get your resumes reviewed!",
+    },
   ],
 };
 
@@ -83,7 +137,11 @@ io.on("connection", (socket) => {
       user: user.name,
       color: "text-primary",
       avatar: user.avatar,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
       text: text,
       reactions: [],
     };

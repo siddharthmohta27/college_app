@@ -8,12 +8,7 @@ interface FloatingActionItemProps {
   onSelect: () => void;
 }
 
-export function FloatingActionItem({
-  action,
-  index,
-  total,
-  onSelect,
-}: FloatingActionItemProps) {
+export function FloatingActionItem({ action, index, total, onSelect }: FloatingActionItemProps) {
   const navigate = useNavigate();
   const Icon = action.icon;
 

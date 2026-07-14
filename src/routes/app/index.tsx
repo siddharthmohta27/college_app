@@ -1,8 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ShoppingBag, UtensilsCrossed, MessageSquare, Calendar, BookOpen,
-  TrendingUp, Bell, Clock, Megaphone, ChevronRight, Zap, Star,
-  Heart, CheckSquare, FileText, GraduationCap
+  ShoppingBag,
+  UtensilsCrossed,
+  MessageSquare,
+  Calendar,
+  BookOpen,
+  TrendingUp,
+  Bell,
+  Clock,
+  Megaphone,
+  ChevronRight,
+  Zap,
+  Star,
+  Heart,
+  CheckSquare,
+  FileText,
+  GraduationCap,
 } from "lucide-react";
 import { TodaysOverview } from "@/components/dashboard/todays-overview";
 
@@ -14,21 +27,97 @@ export const Route = createFileRoute("/app/")({
 });
 
 const ANNOUNCEMENTS = [
-  { id: 1, badge: "Exam", badgeColor: "bg-red-500/10 text-red-400 border border-red-500/20", title: "End Semester Exams Start July 14", time: "2 hours ago", urgent: true },
-  { id: 2, badge: "Holiday", badgeColor: "bg-yellow-500/10 text-primary border border-yellow-500/20", title: "College closed on July 8 — Holiday", time: "5 hours ago", urgent: false },
-  { id: 3, badge: "Fee", badgeColor: "bg-red-500/10 text-red-400 border border-red-500/20", title: "Last date to pay semester fees: July 10", time: "Yesterday", urgent: true },
-  { id: 4, badge: "Event", badgeColor: "bg-yellow-500/10 text-primary border border-yellow-500/20", title: "Tech Fest 2026 registrations now open!", time: "2 days ago", urgent: false },
+  {
+    id: 1,
+    badge: "Exam",
+    badgeColor: "bg-red-500/10 text-red-400 border border-red-500/20",
+    title: "End Semester Exams Start July 14",
+    time: "2 hours ago",
+    urgent: true,
+  },
+  {
+    id: 2,
+    badge: "Holiday",
+    badgeColor: "bg-yellow-500/10 text-primary border border-yellow-500/20",
+    title: "College closed on July 8 — Holiday",
+    time: "5 hours ago",
+    urgent: false,
+  },
+  {
+    id: 3,
+    badge: "Fee",
+    badgeColor: "bg-red-500/10 text-red-400 border border-red-500/20",
+    title: "Last date to pay semester fees: July 10",
+    time: "Yesterday",
+    urgent: true,
+  },
+  {
+    id: 4,
+    badge: "Event",
+    badgeColor: "bg-yellow-500/10 text-primary border border-yellow-500/20",
+    title: "Tech Fest 2026 registrations now open!",
+    time: "2 days ago",
+    urgent: false,
+  },
 ];
 
 const QUICK_LINKS = [
-  { to: "/app/marketplace", label: "Marketplace", icon: ShoppingBag, iconColor: "text-primary", count: "24 new listings" },
-  { to: "/app/canteen", label: "Canteen Menu", icon: UtensilsCrossed, iconColor: "text-primary", count: "Lunch: 12:00 - 2:30" },
-  { to: "/app/chat", label: "Campus Chat", icon: MessageSquare, iconColor: "text-primary", count: "12 unread" },
-  { to: "/app/clubs", label: "Clubs & Events", icon: Calendar, iconColor: "text-primary", count: "3 events this week" },
-  { to: "/app/study", label: "Study Rooms", icon: BookOpen, iconColor: "text-primary", count: "2 rooms available" },
-  { to: "/app/dating", label: "Campus Match", icon: Heart, iconColor: "text-primary", count: "Dating / swiping matches" },
-  { to: "/app/attendance", label: "Attendance Tracker", icon: CheckSquare, iconColor: "text-primary", count: "82% overall avg" },
-  { to: "/app/resources", label: "Academic Resources", icon: FileText, iconColor: "text-primary", count: "Syllabus, notes, papers" },
+  {
+    to: "/app/marketplace",
+    label: "Marketplace",
+    icon: ShoppingBag,
+    iconColor: "text-primary",
+    count: "24 new listings",
+  },
+  {
+    to: "/app/canteen",
+    label: "Canteen Menu",
+    icon: UtensilsCrossed,
+    iconColor: "text-primary",
+    count: "Lunch: 12:00 - 2:30",
+  },
+  {
+    to: "/app/chat",
+    label: "Campus Chat",
+    icon: MessageSquare,
+    iconColor: "text-primary",
+    count: "12 unread",
+  },
+  {
+    to: "/app/clubs",
+    label: "Clubs & Events",
+    icon: Calendar,
+    iconColor: "text-primary",
+    count: "3 events this week",
+  },
+  {
+    to: "/app/study",
+    label: "Study Rooms",
+    icon: BookOpen,
+    iconColor: "text-primary",
+    count: "2 rooms available",
+  },
+  {
+    to: "/app/dating",
+    label: "Campus Match",
+    icon: Heart,
+    iconColor: "text-primary",
+    count: "Dating / swiping matches",
+  },
+  {
+    to: "/app/attendance",
+    label: "Attendance Tracker",
+    icon: CheckSquare,
+    iconColor: "text-primary",
+    count: "82% overall avg",
+  },
+  {
+    to: "/app/resources",
+    label: "Academic Resources",
+    icon: FileText,
+    iconColor: "text-primary",
+    count: "Syllabus, notes, papers",
+  },
 ];
 
 const TRENDING = [
@@ -53,7 +142,9 @@ function Dashboard() {
         <div className="relative">
           <p className="text-sm text-muted-foreground">{greeting} 👋</p>
           <h2 className="mt-1 text-2xl font-bold">Siddharth Mohta</h2>
-          <p className="mt-1 text-sm text-muted-foreground">3rd Year · Computer Science · Roll No. CS21B027</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            3rd Year · Computer Science · Roll No. CS21B027
+          </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs text-primary">
               <Zap className="h-3 w-3" /> 8 days to exams
@@ -73,9 +164,18 @@ function Dashboard() {
           { label: "Events This Week", value: "5", icon: Calendar, color: "text-primary" },
           { label: "Study Hours Today", value: "2.5h", icon: Clock, color: "text-primary" },
         ].map((stat, i) => (
-          <div key={stat.label} className="rounded-2xl border border-border glass p-4 animate-fade-up card-hover" style={{ animationDelay: `${i * 60}ms` }}>
+          <div
+            key={stat.label}
+            className="rounded-2xl border border-border glass p-4 animate-fade-up card-hover"
+            style={{ animationDelay: `${i * 60}ms` }}
+          >
             <stat.icon className={`h-5 w-5 ${stat.color} icon-hover`} />
-            <div className="mt-2 text-2xl font-bold stat-count" style={{ animationDelay: `${i * 60 + 200}ms` }}>{stat.value}</div>
+            <div
+              className="mt-2 text-2xl font-bold stat-count"
+              style={{ animationDelay: `${i * 60 + 200}ms` }}
+            >
+              {stat.value}
+            </div>
             <div className="mt-0.5 text-xs text-muted-foreground">{stat.label}</div>
           </div>
         ))}
@@ -119,9 +219,14 @@ function Dashboard() {
           </h2>
           <div className="space-y-2.5">
             {ANNOUNCEMENTS.map((a) => (
-              <div key={a.id} className={`rounded-xl border p-3.5 transition hover:bg-surface-elevated ${a.urgent ? "border-red-500/20 bg-red-500/5" : "border-border glass"}`}>
+              <div
+                key={a.id}
+                className={`rounded-xl border p-3.5 transition hover:bg-surface-elevated ${a.urgent ? "border-red-500/20 bg-red-500/5" : "border-border glass"}`}
+              >
                 <div className="flex items-start gap-3">
-                  <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${a.badgeColor}`}>
+                  <span
+                    className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${a.badgeColor}`}
+                  >
                     {a.badge}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -142,14 +247,19 @@ function Dashboard() {
           </h2>
           <div className="space-y-2.5">
             {TRENDING.map((t, i) => (
-              <div key={i} className="flex items-start gap-3 rounded-xl border border-border glass p-3.5 transition hover:bg-surface-elevated">
+              <div
+                key={i}
+                className="flex items-start gap-3 rounded-xl border border-border glass p-3.5 transition hover:bg-surface-elevated"
+              >
                 <div className="grid h-6 w-6 shrink-0 place-items-center rounded bg-primary text-[10px] font-bold text-primary-foreground">
                   {i + 1}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold leading-snug">{t.text}</p>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="rounded bg-surface px-1.5 py-0.5 text-[9px] text-muted-foreground border border-border">{t.tag}</span>
+                    <span className="rounded bg-surface px-1.5 py-0.5 text-[9px] text-muted-foreground border border-border">
+                      {t.tag}
+                    </span>
                     <span className="text-[9px] text-muted-foreground">{t.time}</span>
                   </div>
                 </div>
@@ -164,9 +274,18 @@ function Dashboard() {
 
 function GraduationCapBig() {
   return (
-    <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-      <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+    <svg
+      width="120"
+      height="120"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+      <path d="M6 12v5c3 3 9 3 12 0v-5" />
     </svg>
   );
 }

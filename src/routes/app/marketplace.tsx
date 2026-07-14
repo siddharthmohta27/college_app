@@ -1,7 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  ShoppingBag, Search, Filter, Plus, Heart, MapPin, Clock, Tag, X, Star,
+  ShoppingBag,
+  Search,
+  Filter,
+  Plus,
+  Heart,
+  MapPin,
+  Clock,
+  Tag,
+  X,
+  Star,
 } from "lucide-react";
 
 export const Route = createFileRoute("/app/marketplace")({
@@ -31,14 +40,134 @@ type Listing = {
 const CATEGORIES = ["All", "Books", "Electronics", "Dorm Gear", "Tickets", "Clothes", "Others"];
 
 const LISTINGS: Listing[] = [
-  { id: 1, title: "DSA by Cormen (4th Ed.)", price: 550, category: "Books", seller: "Ananya S.", sellerInitials: "AS", sellerColor: "from-fuchsia-500 to-violet-600", location: "Hostel Block A", time: "2 min ago", condition: "Good", description: "Slightly used, no highlights. Essential for CS students.", emoji: "📚", liked: false, rating: 4.8 },
-  { id: 2, title: "MacBook Charger (MagSafe 2)", price: 1200, category: "Electronics", seller: "Rahul K.", sellerInitials: "RK", sellerColor: "from-cyan-400 to-blue-600", location: "PG Boys Hostel", time: "15 min ago", condition: "Like New", description: "Original Apple charger, used for 2 months only.", emoji: "💻", liked: true, rating: 5.0 },
-  { id: 3, title: "Tefal Electric Kettle 1.2L", price: 700, category: "Dorm Gear", seller: "Priya M.", sellerInitials: "PM", sellerColor: "from-pink-500 to-rose-600", location: "Girls Hostel C", time: "1 hr ago", condition: "Good", description: "Works perfectly. Selling because I'm going home for summer.", emoji: "☕", liked: false, rating: 4.5 },
-  { id: 4, title: "Techfest 2026 — 2-Day Pass", price: 250, category: "Tickets", seller: "Dev P.", sellerInitials: "DP", sellerColor: "from-emerald-400 to-teal-600", location: "Main Gate", time: "2 hr ago", condition: "New", description: "Can't attend anymore. Full access both days.", emoji: "🎟️", liked: false, rating: 4.9 },
-  { id: 5, title: "Scientific Calculator (Casio fx-991)", price: 400, category: "Electronics", seller: "Meera R.", sellerInitials: "MR", sellerColor: "from-amber-400 to-orange-600", location: "Dept Library", time: "3 hr ago", condition: "Good", description: "Used for 2 semesters. All functions working.", emoji: "🔢", liked: false, rating: 4.3 },
-  { id: 6, title: "Network Engineering (Forouzan)", price: 300, category: "Books", seller: "Akash T.", sellerInitials: "AT", sellerColor: "from-violet-400 to-purple-600", location: "Hostel Block B", time: "5 hr ago", condition: "Acceptable", description: "Some notes inside, but all chapters intact.", emoji: "📖", liked: true, rating: 4.0 },
-  { id: 7, title: "Mini Desk Fan (USB)", price: 350, category: "Dorm Gear", seller: "Sneha V.", sellerInitials: "SV", sellerColor: "from-sky-400 to-indigo-600", location: "Girls Hostel A", time: "Yesterday", condition: "Like New", description: "Silent, 3-speed settings. Perfect for hostel rooms.", emoji: "🌀", liked: false, rating: 4.7 },
-  { id: 8, title: "College Hoodie (XL) — Unused", price: 450, category: "Clothes", seller: "Kartik N.", sellerInitials: "KN", sellerColor: "from-rose-400 to-pink-600", location: "Hostel Block D", time: "2 days ago", condition: "New", description: "Got the wrong size. Original with tags.", emoji: "👕", liked: false, rating: 5.0 },
+  {
+    id: 1,
+    title: "DSA by Cormen (4th Ed.)",
+    price: 550,
+    category: "Books",
+    seller: "Ananya S.",
+    sellerInitials: "AS",
+    sellerColor: "from-fuchsia-500 to-violet-600",
+    location: "Hostel Block A",
+    time: "2 min ago",
+    condition: "Good",
+    description: "Slightly used, no highlights. Essential for CS students.",
+    emoji: "📚",
+    liked: false,
+    rating: 4.8,
+  },
+  {
+    id: 2,
+    title: "MacBook Charger (MagSafe 2)",
+    price: 1200,
+    category: "Electronics",
+    seller: "Rahul K.",
+    sellerInitials: "RK",
+    sellerColor: "from-cyan-400 to-blue-600",
+    location: "PG Boys Hostel",
+    time: "15 min ago",
+    condition: "Like New",
+    description: "Original Apple charger, used for 2 months only.",
+    emoji: "💻",
+    liked: true,
+    rating: 5.0,
+  },
+  {
+    id: 3,
+    title: "Tefal Electric Kettle 1.2L",
+    price: 700,
+    category: "Dorm Gear",
+    seller: "Priya M.",
+    sellerInitials: "PM",
+    sellerColor: "from-pink-500 to-rose-600",
+    location: "Girls Hostel C",
+    time: "1 hr ago",
+    condition: "Good",
+    description: "Works perfectly. Selling because I'm going home for summer.",
+    emoji: "☕",
+    liked: false,
+    rating: 4.5,
+  },
+  {
+    id: 4,
+    title: "Techfest 2026 — 2-Day Pass",
+    price: 250,
+    category: "Tickets",
+    seller: "Dev P.",
+    sellerInitials: "DP",
+    sellerColor: "from-emerald-400 to-teal-600",
+    location: "Main Gate",
+    time: "2 hr ago",
+    condition: "New",
+    description: "Can't attend anymore. Full access both days.",
+    emoji: "🎟️",
+    liked: false,
+    rating: 4.9,
+  },
+  {
+    id: 5,
+    title: "Scientific Calculator (Casio fx-991)",
+    price: 400,
+    category: "Electronics",
+    seller: "Meera R.",
+    sellerInitials: "MR",
+    sellerColor: "from-amber-400 to-orange-600",
+    location: "Dept Library",
+    time: "3 hr ago",
+    condition: "Good",
+    description: "Used for 2 semesters. All functions working.",
+    emoji: "🔢",
+    liked: false,
+    rating: 4.3,
+  },
+  {
+    id: 6,
+    title: "Network Engineering (Forouzan)",
+    price: 300,
+    category: "Books",
+    seller: "Akash T.",
+    sellerInitials: "AT",
+    sellerColor: "from-violet-400 to-purple-600",
+    location: "Hostel Block B",
+    time: "5 hr ago",
+    condition: "Acceptable",
+    description: "Some notes inside, but all chapters intact.",
+    emoji: "📖",
+    liked: true,
+    rating: 4.0,
+  },
+  {
+    id: 7,
+    title: "Mini Desk Fan (USB)",
+    price: 350,
+    category: "Dorm Gear",
+    seller: "Sneha V.",
+    sellerInitials: "SV",
+    sellerColor: "from-sky-400 to-indigo-600",
+    location: "Girls Hostel A",
+    time: "Yesterday",
+    condition: "Like New",
+    description: "Silent, 3-speed settings. Perfect for hostel rooms.",
+    emoji: "🌀",
+    liked: false,
+    rating: 4.7,
+  },
+  {
+    id: 8,
+    title: "College Hoodie (XL) — Unused",
+    price: 450,
+    category: "Clothes",
+    seller: "Kartik N.",
+    sellerInitials: "KN",
+    sellerColor: "from-rose-400 to-pink-600",
+    location: "Hostel Block D",
+    time: "2 days ago",
+    condition: "New",
+    description: "Got the wrong size. Original with tags.",
+    emoji: "👕",
+    liked: false,
+    rating: 5.0,
+  },
 ];
 
 function Marketplace() {
@@ -51,7 +180,9 @@ function Marketplace() {
   const filtered = listings
     .filter((l) => {
       const matchCat = selectedCategory === "All" || l.category === selectedCategory;
-      const matchSearch = l.title.toLowerCase().includes(search.toLowerCase()) || l.description.toLowerCase().includes(search.toLowerCase());
+      const matchSearch =
+        l.title.toLowerCase().includes(search.toLowerCase()) ||
+        l.description.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     })
     .sort((a, b) => {
@@ -61,7 +192,7 @@ function Marketplace() {
     });
 
   const toggleLike = (id: number) =>
-    setListings((prev) => prev.map((l) => l.id === id ? { ...l, liked: !l.liked } : l));
+    setListings((prev) => prev.map((l) => (l.id === id ? { ...l, liked: !l.liked } : l)));
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6 pb-28 md:pb-8">
@@ -69,7 +200,9 @@ function Marketplace() {
       <div className="flex flex-wrap items-center justify-between gap-3 animate-fade-up">
         <div>
           <h2 className="text-xl font-bold">Student Marketplace</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Buy, sell and swap with your campus peers</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Buy, sell and swap with your campus peers
+          </p>
         </div>
         <button
           id="post-listing-btn"
@@ -149,7 +282,9 @@ function Marketplace() {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <h3 className="truncate font-semibold text-sm">{listing.title}</h3>
-                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{listing.description}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+                    {listing.description}
+                  </p>
                 </div>
                 <button
                   onClick={() => toggleLike(listing.id)}
@@ -160,15 +295,21 @@ function Marketplace() {
               </div>
 
               <div className="mt-3 flex items-center gap-2 flex-wrap">
-                <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] text-muted-foreground">{listing.category}</span>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] ${listing.condition === "New" || listing.condition === "Like New" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
+                <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] text-muted-foreground">
+                  {listing.category}
+                </span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] ${listing.condition === "New" || listing.condition === "Like New" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}
+                >
                   {listing.condition}
                 </span>
               </div>
 
               <div className="mt-auto pt-3 border-t border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br ${listing.sellerColor} text-[9px] font-bold text-white`}>
+                  <div
+                    className={`grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br ${listing.sellerColor} text-[9px] font-bold text-white`}
+                  >
                     {listing.sellerInitials}
                   </div>
                   <div>
@@ -209,23 +350,63 @@ function Marketplace() {
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <ShoppingBag className="h-5 w-5 text-primary" /> Post a Listing
               </h3>
-              <button id="close-post-modal" onClick={() => setShowPost(false)} className="text-muted-foreground hover:text-foreground">
+              <button
+                id="close-post-modal"
+                onClick={() => setShowPost(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setShowPost(false); }}>
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setShowPost(false);
+              }}
+            >
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-title">Title</label>
-                <input id="post-title" required placeholder="e.g. Calculus textbook 3rd ed." className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary" />
+                <label
+                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                  htmlFor="post-title"
+                >
+                  Title
+                </label>
+                <input
+                  id="post-title"
+                  required
+                  placeholder="e.g. Calculus textbook 3rd ed."
+                  className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-price">Price (₹)</label>
-                  <input id="post-price" required type="number" min={0} placeholder="500" className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary" />
+                  <label
+                    className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                    htmlFor="post-price"
+                  >
+                    Price (₹)
+                  </label>
+                  <input
+                    id="post-price"
+                    required
+                    type="number"
+                    min={0}
+                    placeholder="500"
+                    className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
+                  />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-category">Category</label>
-                  <select id="post-category" className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary">
+                  <label
+                    className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                    htmlFor="post-category"
+                  >
+                    Category
+                  </label>
+                  <select
+                    id="post-category"
+                    className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
+                  >
                     {CATEGORIES.filter((c) => c !== "All").map((c) => (
                       <option key={c}>{c}</option>
                     ))}
@@ -233,8 +414,16 @@ function Marketplace() {
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-condition">Condition</label>
-                <select id="post-condition" className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary">
+                <label
+                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                  htmlFor="post-condition"
+                >
+                  Condition
+                </label>
+                <select
+                  id="post-condition"
+                  className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
+                >
                   <option>New</option>
                   <option>Like New</option>
                   <option>Good</option>
@@ -242,16 +431,38 @@ function Marketplace() {
                 </select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-desc">Description</label>
-                <textarea id="post-desc" rows={3} placeholder="Describe your item..." className="w-full resize-none rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary" />
+                <label
+                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                  htmlFor="post-desc"
+                >
+                  Description
+                </label>
+                <textarea
+                  id="post-desc"
+                  rows={3}
+                  placeholder="Describe your item..."
+                  className="w-full resize-none rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
+                />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-location">
-                  <MapPin className="inline h-3 w-3 mr-1" />Pickup Location
+                <label
+                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                  htmlFor="post-location"
+                >
+                  <MapPin className="inline h-3 w-3 mr-1" />
+                  Pickup Location
                 </label>
-                <input id="post-location" placeholder="e.g. Hostel Block A, Room 204" className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary" />
+                <input
+                  id="post-location"
+                  placeholder="e.g. Hostel Block A, Room 204"
+                  className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
+                />
               </div>
-              <button id="post-submit-btn" type="submit" className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary">
+              <button
+                id="post-submit-btn"
+                type="submit"
+                className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary"
+              >
                 Post Listing
               </button>
             </form>

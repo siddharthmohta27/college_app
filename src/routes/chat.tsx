@@ -1,8 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Hash, Volume2, Plus, Search, Bell, Settings, Smile, Paperclip, Send,
-  Users, GraduationCap, ShoppingBag, BookOpen, Sparkles, Pin, Phone, Video,
+  Hash,
+  Volume2,
+  Plus,
+  Search,
+  Bell,
+  Settings,
+  Smile,
+  Paperclip,
+  Send,
+  Users,
+  GraduationCap,
+  ShoppingBag,
+  BookOpen,
+  Sparkles,
+  Pin,
+  Phone,
+  Video,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -10,7 +25,10 @@ export const Route = createFileRoute("/chat")({
   head: () => ({
     meta: [
       { title: "Nexus — Chat" },
-      { name: "description", content: "Real-time campus chat: servers, channels, DMs and study rooms." },
+      {
+        name: "description",
+        content: "Real-time campus chat: servers, channels, DMs and study rooms.",
+      },
     ],
   }),
   component: ChatApp,
@@ -50,11 +68,51 @@ const CHANNELS = {
 };
 
 const INITIAL_MSGS: Msg[] = [
-  { id: "1", user: "Priya S.", color: "text-fuchsia-400", avatar: "PS", time: "10:24", text: "yo did anyone finish the algo pset? 😭 stuck on Q3", reactions: [{ emoji: "😭", count: 4 }] },
-  { id: "2", user: "Marcus K.", color: "text-cyan-400", avatar: "MK", time: "10:26", text: "same boat. the DP transition is cursed" },
-  { id: "3", user: "Aisha R.", color: "text-emerald-400", avatar: "AR", time: "10:28", text: "hop in Study Room 1 — im screensharing rn", reactions: [{ emoji: "🔥", count: 6 }, { emoji: "🙏", count: 3 }] },
-  { id: "4", user: "Leo T.", color: "text-amber-400", avatar: "LT", time: "10:31", text: "btw someone selling a used GPU in #marketplace, checked it, legit" },
-  { id: "5", user: "Priya S.", color: "text-fuchsia-400", avatar: "PS", time: "10:33", text: "omw to the study room 🚀" },
+  {
+    id: "1",
+    user: "Priya S.",
+    color: "text-fuchsia-400",
+    avatar: "PS",
+    time: "10:24",
+    text: "yo did anyone finish the algo pset? 😭 stuck on Q3",
+    reactions: [{ emoji: "😭", count: 4 }],
+  },
+  {
+    id: "2",
+    user: "Marcus K.",
+    color: "text-cyan-400",
+    avatar: "MK",
+    time: "10:26",
+    text: "same boat. the DP transition is cursed",
+  },
+  {
+    id: "3",
+    user: "Aisha R.",
+    color: "text-emerald-400",
+    avatar: "AR",
+    time: "10:28",
+    text: "hop in Study Room 1 — im screensharing rn",
+    reactions: [
+      { emoji: "🔥", count: 6 },
+      { emoji: "🙏", count: 3 },
+    ],
+  },
+  {
+    id: "4",
+    user: "Leo T.",
+    color: "text-amber-400",
+    avatar: "LT",
+    time: "10:31",
+    text: "btw someone selling a used GPU in #marketplace, checked it, legit",
+  },
+  {
+    id: "5",
+    user: "Priya S.",
+    color: "text-fuchsia-400",
+    avatar: "PS",
+    time: "10:33",
+    text: "omw to the study room 🚀",
+  },
 ];
 
 const MEMBERS = [
@@ -97,7 +155,10 @@ function ChatApp() {
     <div className="flex h-screen w-full overflow-hidden">
       {/* Server rail */}
       <aside className="flex w-[76px] flex-col items-center gap-3 border-r border-border bg-background/60 py-4">
-        <Link to="/" className="grid h-12 w-12 place-items-center rounded-2xl glass transition hover:bg-primary/20">
+        <Link
+          to="/"
+          className="grid h-12 w-12 place-items-center rounded-2xl glass transition hover:bg-primary/20"
+        >
           <img src={logo} alt="Nexus" className="h-7 w-7" width={28} height={28} />
         </Link>
         <div className="my-1 h-px w-8 bg-border" />
@@ -110,7 +171,9 @@ function ChatApp() {
               className={`group relative grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br ${s.color} text-xs font-bold text-white transition-all hover:rounded-xl ${active ? "rounded-xl shadow-lg shadow-primary/30" : "opacity-80 hover:opacity-100"}`}
             >
               {s.name}
-              {active && <span className="absolute -left-3 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-primary" />}
+              {active && (
+                <span className="absolute -left-3 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
+              )}
             </button>
           );
         })}
@@ -164,12 +227,16 @@ function ChatApp() {
         {/* User card */}
         <div className="flex items-center gap-2 border-t border-border bg-background/50 px-3 py-2.5">
           <div className="relative">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">YO</div>
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground">
+              YO
+            </div>
             <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-500" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium">You</div>
-            <div className="truncate font-mono text-[10px] text-muted-foreground">online · #4210</div>
+            <div className="truncate font-mono text-[10px] text-muted-foreground">
+              online · #4210
+            </div>
           </div>
           <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground">
             <Settings className="h-4 w-4" />
@@ -184,7 +251,9 @@ function ChatApp() {
           <div className="flex min-w-0 items-center gap-3">
             <Hash className="h-5 w-5 text-muted-foreground" />
             <h2 className="truncate font-semibold">{activeChannel}</h2>
-            <span className="hidden text-xs text-muted-foreground md:inline">|  Ask questions, share memes, find study buddies</span>
+            <span className="hidden text-xs text-muted-foreground md:inline">
+              | Ask questions, share memes, find study buddies
+            </span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <HeaderIcon icon={<Phone className="h-4 w-4" />} />
@@ -208,15 +277,15 @@ function ChatApp() {
               <Hash className="h-5 w-5 text-primary" />
             </div>
             <h3 className="mt-2 font-semibold">Welcome to #{activeChannel}</h3>
-            <p className="mt-1 text-xs text-muted-foreground">This is the start of the channel. Say hi 👋</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              This is the start of the channel. Say hi 👋
+            </p>
           </div>
 
           {messages.map((m, i) => {
             const prev = messages[i - 1];
             const grouped = prev && prev.user === m.user;
-            return (
-              <Message key={m.id} m={m} grouped={grouped} />
-            );
+            return <Message key={m.id} m={m} grouped={grouped} />;
           })}
         </div>
 
@@ -230,7 +299,10 @@ function ChatApp() {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  send();
+                }
               }}
               rows={1}
               placeholder={`Message #${activeChannel}`}
@@ -248,7 +320,8 @@ function ChatApp() {
             </button>
           </div>
           <p className="mt-1.5 px-2 text-[10px] text-muted-foreground">
-            Press <kbd className="rounded bg-surface px-1 font-mono">Enter</kbd> to send · <kbd className="rounded bg-surface px-1 font-mono">Shift+Enter</kbd> for newline
+            Press <kbd className="rounded bg-surface px-1 font-mono">Enter</kbd> to send ·{" "}
+            <kbd className="rounded bg-surface px-1 font-mono">Shift+Enter</kbd> for newline
           </p>
         </div>
       </section>
@@ -269,15 +342,27 @@ function ChatApp() {
                   {s === "dnd" ? "Do not disturb" : s} — {list.length}
                 </div>
                 {list.map((m) => (
-                  <div key={m.name} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-surface-elevated">
+                  <div
+                    key={m.name}
+                    className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-surface-elevated"
+                  >
                     <div className="relative">
-                      <div className={`grid h-8 w-8 place-items-center rounded-full ${m.color} text-[10px] font-bold text-white`}>
-                        {m.name.split(" ").map((n) => n[0]).join("")}
+                      <div
+                        className={`grid h-8 w-8 place-items-center rounded-full ${m.color} text-[10px] font-bold text-white`}
+                      >
+                        {m.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </div>
                       <StatusDot status={m.status} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className={`truncate text-sm ${s === "offline" ? "text-muted-foreground" : ""}`}>{m.name}</div>
+                      <div
+                        className={`truncate text-sm ${s === "offline" ? "text-muted-foreground" : ""}`}
+                      >
+                        {m.name}
+                      </div>
                       <div className="truncate text-[10px] text-muted-foreground">{m.role}</div>
                     </div>
                   </div>
@@ -293,10 +378,18 @@ function ChatApp() {
 
 function StatusDot({ status }: { status: string }) {
   const c =
-    status === "online" ? "bg-emerald-500" :
-    status === "idle" ? "bg-amber-500" :
-    status === "dnd" ? "bg-rose-500" : "bg-slate-500";
-  return <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface ${c}`} />;
+    status === "online"
+      ? "bg-emerald-500"
+      : status === "idle"
+        ? "bg-amber-500"
+        : status === "dnd"
+          ? "bg-rose-500"
+          : "bg-slate-500";
+  return (
+    <span
+      className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface ${c}`}
+    />
+  );
 }
 
 function HeaderIcon({ icon }: { icon: React.ReactNode }) {
@@ -311,7 +404,9 @@ function ChannelGroup({ label, children }: { label: string; children: React.Reac
   return (
     <div>
       <div className="mb-1 flex items-center justify-between px-2">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {label}
+        </span>
         <button className="text-muted-foreground hover:text-foreground">
           <Plus className="h-3.5 w-3.5" />
         </button>
@@ -322,10 +417,21 @@ function ChannelGroup({ label, children }: { label: string; children: React.Reac
 }
 
 function ChannelBtn({
-  icon, label, badge, subtle, active, pill, onClick,
+  icon,
+  label,
+  badge,
+  subtle,
+  active,
+  pill,
+  onClick,
 }: {
-  icon: React.ReactNode; label: string; badge?: number; subtle?: string;
-  active?: boolean; pill?: string; onClick?: () => void;
+  icon: React.ReactNode;
+  label: string;
+  badge?: number;
+  subtle?: string;
+  active?: boolean;
+  pill?: string;
+  onClick?: () => void;
 }) {
   return (
     <button
@@ -339,11 +445,15 @@ function ChannelBtn({
       <span className={active ? "text-primary" : ""}>{icon}</span>
       <span className="flex-1 truncate text-left">{label}</span>
       {pill && (
-        <span className="rounded-full bg-accent/20 px-1.5 py-0.5 font-mono text-[9px] uppercase text-accent">{pill}</span>
+        <span className="rounded-full bg-accent/20 px-1.5 py-0.5 font-mono text-[9px] uppercase text-accent">
+          {pill}
+        </span>
       )}
       {subtle && <span className="font-mono text-[10px] text-muted-foreground">{subtle}</span>}
       {!!badge && (
-        <span className="grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">{badge}</span>
+        <span className="grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+          {badge}
+        </span>
       )}
     </button>
   );
@@ -351,13 +461,17 @@ function ChannelBtn({
 
 function Message({ m, grouped }: { m: Msg; grouped: boolean }) {
   return (
-    <div className={`group flex gap-3 rounded-lg px-2 py-1 transition hover:bg-surface/50 ${grouped ? "" : "mt-3"}`}>
+    <div
+      className={`group flex gap-3 rounded-lg px-2 py-1 transition hover:bg-surface/50 ${grouped ? "" : "mt-3"}`}
+    >
       {grouped ? (
         <div className="w-10 shrink-0 pt-1 text-right font-mono text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100">
           {m.time}
         </div>
       ) : (
-        <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground`}>
+        <div
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-accent text-xs font-bold text-primary-foreground`}
+        >
           {m.avatar}
         </div>
       )}

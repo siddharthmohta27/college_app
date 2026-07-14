@@ -23,13 +23,7 @@ import {
 } from "lucide-react";
 
 export type SearchCategory =
-  | "Pages"
-  | "Resources"
-  | "Marketplace"
-  | "Clubs"
-  | "Events"
-  | "Students"
-  | "Chat";
+  "Pages" | "Resources" | "Marketplace" | "Clubs" | "Events" | "Students" | "Chat";
 
 export interface SearchResult {
   id: string;
@@ -420,9 +414,7 @@ export function getRecentSearches(): string[] {
 
 export function addRecentSearch(term: string): void {
   if (!term.trim()) return;
-  const existing = getRecentSearches().filter(
-    (s) => s.toLowerCase() !== term.toLowerCase(),
-  );
+  const existing = getRecentSearches().filter((s) => s.toLowerCase() !== term.toLowerCase());
   const next = [term, ...existing].slice(0, 5);
   localStorage.setItem(RECENT_KEY, JSON.stringify(next));
 }

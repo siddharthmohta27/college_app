@@ -26,8 +26,7 @@ export function SearchResults({
         <div>
           <p className="text-sm font-semibold">No results found</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            No results for{" "}
-            <span className="font-medium text-foreground">"{query}"</span>
+            No results for <span className="font-medium text-foreground">"{query}"</span>
           </p>
         </div>
       </div>

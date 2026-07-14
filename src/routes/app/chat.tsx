@@ -1,8 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Hash, Volume2, Plus, Search, Bell, Settings, Smile, Paperclip, Send,
-  Users, GraduationCap, ShoppingBag, BookOpen, Sparkles, Pin, Phone, Video,
+  Hash,
+  Volume2,
+  Plus,
+  Search,
+  Bell,
+  Settings,
+  Smile,
+  Paperclip,
+  Send,
+  Users,
+  GraduationCap,
+  ShoppingBag,
+  BookOpen,
+  Sparkles,
+  Pin,
+  Phone,
+  Video,
 } from "lucide-react";
 import { io, Socket } from "socket.io-client";
 
@@ -10,7 +25,10 @@ export const Route = createFileRoute("/app/chat")({
   head: () => ({
     meta: [
       { title: "Campus Chat — Campus Connect" },
-      { name: "description", content: "Real-time campus chat: servers, channels, DMs and study rooms." },
+      {
+        name: "description",
+        content: "Real-time campus chat: servers, channels, DMs and study rooms.",
+      },
     ],
   }),
   component: ChatApp,
@@ -35,10 +53,26 @@ type Member = {
 
 const SERVERS = [
   { id: "cs", name: "CS", color: "from-primary to-yellow-500 text-primary-foreground font-black" },
-  { id: "math", name: "MA", color: "bg-surface border border-border text-muted-foreground hover:text-foreground" },
-  { id: "hall", name: "H4", color: "bg-surface border border-border text-muted-foreground hover:text-foreground" },
-  { id: "club", name: "AI", color: "bg-surface border border-border text-muted-foreground hover:text-foreground" },
-  { id: "mkt", name: "MK", color: "bg-surface border border-border text-muted-foreground hover:text-foreground" },
+  {
+    id: "math",
+    name: "MA",
+    color: "bg-surface border border-border text-muted-foreground hover:text-foreground",
+  },
+  {
+    id: "hall",
+    name: "H4",
+    color: "bg-surface border border-border text-muted-foreground hover:text-foreground",
+  },
+  {
+    id: "club",
+    name: "AI",
+    color: "bg-surface border border-border text-muted-foreground hover:text-foreground",
+  },
+  {
+    id: "mkt",
+    name: "MK",
+    color: "bg-surface border border-border text-muted-foreground hover:text-foreground",
+  },
 ];
 
 const CHANNELS = {
@@ -68,9 +102,10 @@ function ChatApp() {
   // Connect to Socket.io server
   useEffect(() => {
     // Connect to local mock server dynamically (helps testing over same Wi-Fi)
-    const socketUrl = typeof window !== "undefined"
-      ? `http://${window.location.hostname}:3001`
-      : "http://localhost:3001";
+    const socketUrl =
+      typeof window !== "undefined"
+        ? `http://${window.location.hostname}:3001`
+        : "http://localhost:3001";
     const socket = io(socketUrl);
     socketRef.current = socket;
 
@@ -93,9 +128,7 @@ function ChatApp() {
     });
 
     socket.on("reactionUpdate", ({ msgId, reactions }) => {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === msgId ? { ...m, reactions } : m))
-      );
+      setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, reactions } : m)));
     });
 
     socket.on("members", (updatedMembers: Member[]) => {
@@ -162,7 +195,9 @@ function ChatApp() {
               className={`group relative grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br ${s.color} text-xs font-bold text-white transition-all hover:rounded-xl ${active ? "rounded-xl shadow-lg shadow-primary/30" : "opacity-75 hover:opacity-100"}`}
             >
               {s.name}
-              {active && <span className="absolute -left-3 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-primary" />}
+              {active && (
+                <span className="absolute -left-3 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
+              )}
             </button>
           );
         })}
@@ -216,12 +251,16 @@ function ChatApp() {
         {/* User card */}
         <div className="flex items-center gap-2 border-t border-border bg-background/50 px-3 py-2.5">
           <div className="relative">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">SM</div>
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">
+              SM
+            </div>
             <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-500" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium">Siddharth M.</div>
-            <div className="truncate font-mono text-[10px] text-muted-foreground">online · CS#0127</div>
+            <div className="truncate font-mono text-[10px] text-muted-foreground">
+              online · CS#0127
+            </div>
           </div>
           <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground">
             <Settings className="h-4 w-4" />
@@ -235,7 +274,9 @@ function ChatApp() {
           <div className="flex min-w-0 items-center gap-3">
             <Hash className="h-5 w-5 text-muted-foreground" />
             <h2 className="truncate font-semibold">{activeChannel}</h2>
-            <span className="hidden text-xs text-muted-foreground md:inline">| Ask questions, share memes, find study buddies</span>
+            <span className="hidden text-xs text-muted-foreground md:inline">
+              | Ask questions, share memes, find study buddies
+            </span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <HeaderIcon icon={<Phone className="h-4 w-4" />} />
@@ -244,7 +285,11 @@ function ChatApp() {
             <HeaderIcon icon={<Bell className="h-4 w-4" />} />
             <div className="relative ml-2 hidden md:block">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <input id="chat-search" placeholder="Search" className="w-40 rounded-lg border border-border bg-surface/60 py-1.5 pl-8 pr-2 text-xs outline-none focus:border-primary" />
+              <input
+                id="chat-search"
+                placeholder="Search"
+                className="w-40 rounded-lg border border-border bg-surface/60 py-1.5 pl-8 pr-2 text-xs outline-none focus:border-primary"
+              />
             </div>
           </div>
         </header>
@@ -255,7 +300,9 @@ function ChatApp() {
               <Hash className="h-5 w-5 text-primary" />
             </div>
             <h3 className="mt-2 font-semibold">Welcome to #{activeChannel}</h3>
-            <p className="mt-1 text-xs text-muted-foreground">This is the start of the channel. Say hi 👋</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              This is the start of the channel. Say hi 👋
+            </p>
           </div>
 
           {messages.map((m, i) => {
@@ -276,7 +323,10 @@ function ChatApp() {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  send();
+                }
               }}
               rows={1}
               placeholder={`Message #${activeChannel}`}
@@ -313,15 +363,27 @@ function ChatApp() {
                   {s === "dnd" ? "Do not disturb" : s} — {list.length}
                 </div>
                 {list.map((m) => (
-                  <div key={m.name} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-surface-elevated">
+                  <div
+                    key={m.name}
+                    className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-surface-elevated"
+                  >
                     <div className="relative">
-                      <div className={`grid h-8 w-8 place-items-center rounded-full ${m.color} text-[10px] font-bold text-white`}>
-                        {m.name.split(" ").map((n) => n[0]).join("")}
+                      <div
+                        className={`grid h-8 w-8 place-items-center rounded-full ${m.color} text-[10px] font-bold text-white`}
+                      >
+                        {m.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </div>
                       <StatusDot status={m.status} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className={`truncate text-sm ${s === "offline" ? "text-muted-foreground" : ""}`}>{m.name}</div>
+                      <div
+                        className={`truncate text-sm ${s === "offline" ? "text-muted-foreground" : ""}`}
+                      >
+                        {m.name}
+                      </div>
                       <div className="truncate text-[10px] text-muted-foreground">{m.role}</div>
                     </div>
                   </div>
@@ -336,8 +398,19 @@ function ChatApp() {
 }
 
 function StatusDot({ status }: { status: string }) {
-  const c = status === "online" ? "bg-emerald-500" : status === "idle" ? "bg-amber-500" : status === "dnd" ? "bg-rose-500" : "bg-slate-500";
-  return <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface ${c}`} />;
+  const c =
+    status === "online"
+      ? "bg-emerald-500"
+      : status === "idle"
+        ? "bg-amber-500"
+        : status === "dnd"
+          ? "bg-rose-500"
+          : "bg-slate-500";
+  return (
+    <span
+      className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface ${c}`}
+    />
+  );
 }
 
 function HeaderIcon({ icon }: { icon: React.ReactNode }) {
@@ -352,7 +425,9 @@ function ChannelGroup({ label, children }: { label: string; children: React.Reac
   return (
     <div>
       <div className="mb-1 flex items-center justify-between px-2">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{label}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {label}
+        </span>
         <button className="text-muted-foreground hover:text-foreground">
           <Plus className="h-3.5 w-3.5" />
         </button>
@@ -363,33 +438,64 @@ function ChannelGroup({ label, children }: { label: string; children: React.Reac
 }
 
 function ChannelBtn({
-  icon, label, badge, subtle, active, pill, onClick,
+  icon,
+  label,
+  badge,
+  subtle,
+  active,
+  pill,
+  onClick,
 }: {
-  icon: React.ReactNode; label: string; badge?: number; subtle?: string;
-  active?: boolean; pill?: string; onClick?: () => void;
+  icon: React.ReactNode;
+  label: string;
+  badge?: number;
+  subtle?: string;
+  active?: boolean;
+  pill?: string;
+  onClick?: () => void;
 }) {
   return (
     <button
       onClick={onClick}
       className={`group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition ${
-        active ? "bg-primary/15 text-foreground font-semibold" : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
+        active
+          ? "bg-primary/15 text-foreground font-semibold"
+          : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
       }`}
     >
       <span className={active ? "text-primary" : ""}>{icon}</span>
       <span className="flex-1 truncate text-left">{label}</span>
-      {pill && <span className="rounded-full bg-accent/20 px-1.5 py-0.5 font-mono text-[9px] uppercase text-accent">{pill}</span>}
+      {pill && (
+        <span className="rounded-full bg-accent/20 px-1.5 py-0.5 font-mono text-[9px] uppercase text-accent">
+          {pill}
+        </span>
+      )}
       {subtle && <span className="font-mono text-[10px] text-muted-foreground">{subtle}</span>}
-      {!!badge && <span className="grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">{badge}</span>}
+      {!!badge && (
+        <span className="grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+          {badge}
+        </span>
+      )}
     </button>
   );
 }
 
-function Message({ m, grouped, onAddReaction }: { m: Msg; grouped: boolean; onAddReaction: (id: string, emoji: string) => void }) {
+function Message({
+  m,
+  grouped,
+  onAddReaction,
+}: {
+  m: Msg;
+  grouped: boolean;
+  onAddReaction: (id: string, emoji: string) => void;
+}) {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const emojis = ["🔥", "😭", "👍", "👀", "🙏", "❤️"];
 
   return (
-    <div className={`group flex gap-3 rounded-lg px-2 py-1 transition hover:bg-surface/50 relative ${grouped ? "" : "mt-3"}`}>
+    <div
+      className={`group flex gap-3 rounded-lg px-2 py-1 transition hover:bg-surface/50 relative ${grouped ? "" : "mt-3"}`}
+    >
       {grouped ? (
         <div className="w-10 shrink-0 pt-1 text-right font-mono text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100">
           {m.time}

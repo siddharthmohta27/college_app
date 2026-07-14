@@ -5,11 +5,12 @@ const { Pool } = require("pg");
 // If DATABASE_URL is set in .env, use it. Otherwise fall back to individual params.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes("localhost")
-    ? false
-    : process.env.DATABASE_URL
-    ? { rejectUnauthorized: false } // Required for cloud providers like Neon / Supabase
-    : false,
+  ssl:
+    process.env.DATABASE_URL && process.env.DATABASE_URL.includes("localhost")
+      ? false
+      : process.env.DATABASE_URL
+        ? { rejectUnauthorized: false } // Required for cloud providers like Neon / Supabase
+        : false,
 });
 
 pool.on("connect", () => {

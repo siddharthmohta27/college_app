@@ -9,13 +9,7 @@ interface SearchItemProps {
   index: number;
 }
 
-export function SearchItem({
-  result,
-  isActive,
-  onSelect,
-  onHover,
-  index,
-}: SearchItemProps) {
+export function SearchItem({ result, isActive, onSelect, onHover, index }: SearchItemProps) {
   const Icon = result.icon;
 
   return (
@@ -48,23 +42,19 @@ export function SearchItem({
 
       {/* Text */}
       <div className="min-w-0 flex-1">
-        <p className={`truncate text-sm font-semibold ${isActive ? "text-foreground" : "text-foreground/90"}`}>
+        <p
+          className={`truncate text-sm font-semibold ${isActive ? "text-foreground" : "text-foreground/90"}`}
+        >
           {result.title}
         </p>
-        <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-          {result.subtitle}
-        </p>
+        <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{result.subtitle}</p>
       </div>
 
       {/* Badge */}
       <CategoryBadge category={result.category} />
 
       {/* Enter hint */}
-      {isActive && (
-        <span className="shrink-0 text-[10px] text-muted-foreground">
-          ↵
-        </span>
-      )}
+      {isActive && <span className="shrink-0 text-[10px] text-muted-foreground">↵</span>}
     </button>
   );
 }

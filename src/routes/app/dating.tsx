@@ -1,6 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Heart, X, Sparkles, MessageSquare, Star, Award, Shield, Loader2 } from "lucide-react";
+import {
+  Heart,
+  X,
+  Sparkles,
+  MessageSquare,
+  Star,
+  Award,
+  Shield,
+  Loader2,
+  RefreshCw,
+  CheckCircle2,
+} from "lucide-react";
+import { supabase, supabaseHelpers } from "@/lib/supabase";
 
 export const Route = createFileRoute("/app/dating")({
   head: () => ({
@@ -12,10 +24,12 @@ export const Route = createFileRoute("/app/dating")({
 // No auth for now — hardcoded current user ID (matches seed row 6 = Siddharth M.)
 const CURRENT_USER_ID = 6;
 
-// Base URL of the mock backend
-const API = typeof window !== "undefined"
-  ? `http://${window.location.hostname}:3001/api/dating`
-  : "http://localhost:3001/api/dating";
+// Base URL of the mock backend (chat-server)
+// For direct Supabase access (future): use `supabaseHelpers` from "@/lib/supabase"
+const API =
+  typeof window !== "undefined"
+    ? `http://${window.location.hostname}:3001/api/dating`
+    : "http://localhost:3001/api/dating";
 
 type Profile = {
   id: number;
@@ -47,21 +61,41 @@ function CampusDating() {
   const [loading, setLoading] = useState(true);
   const [swiping, setSwiping] = useState(false);
   const [dbStatus, setDbStatus] = useState<"database" | "fallback" | null>(null);
+  const [checkingUpdates, setCheckingUpdates] = useState(false);
+
+  const fetchProfiles = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/profiles?userId=${CURRENT_USER_ID}`);
+      const data = await res.json();
+      setProfiles(data.profiles || []);
+      setDbStatus(data.source);
+    } catch {
+      setProfiles([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkForNewProfiles = async () => {
+    setCheckingUpdates(true);
+    try {
+      const res = await fetch(`${API}/profiles?userId=${CURRENT_USER_ID}`);
+      const data = await res.json();
+      const newProfiles = data.profiles || [];
+      setProfiles(newProfiles);
+      setDbStatus(data.source);
+      setProfileIndex(0);
+    } catch {
+      // Silently handle error, keep existing profiles
+    } finally {
+      setCheckingUpdates(false);
+    }
+  };
 
   // Fetch profiles from backend on mount
   useEffect(() => {
-    setLoading(true);
-    fetch(`${API}/profiles?userId=${CURRENT_USER_ID}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setProfiles(data.profiles || []);
-        setDbStatus(data.source);
-      })
-      .catch(() => {
-        // If server is not running, show nothing
-        setProfiles([]);
-      })
-      .finally(() => setLoading(false));
+    fetchProfiles();
   }, []);
 
   // Fetch matches from backend on mount
@@ -113,11 +147,13 @@ function CampusDating() {
           </p>
         </div>
         {dbStatus && (
-          <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
-            dbStatus === "database"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-              : "border-amber-500/30 bg-amber-500/10 text-amber-400"
-          }`}>
+          <span
+            className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
+              dbStatus === "database"
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                : "border-amber-500/30 bg-amber-500/10 text-amber-400"
+            }`}
+          >
             {dbStatus === "database" ? "🟢 Live DB" : "🟡 Offline Mode"}
           </span>
         )}
@@ -140,12 +176,16 @@ function CampusDating() {
                     <span className="text-5xl">{activeProfile.emoji}</span>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <h3 className="text-lg font-bold">{activeProfile.name}, {activeProfile.age}</h3>
+                        <h3 className="text-lg font-bold">
+                          {activeProfile.name}, {activeProfile.age}
+                        </h3>
                         {activeProfile.verified && (
                           <Shield className="h-4 w-4 fill-primary text-primary-foreground shrink-0" />
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">{activeProfile.year} · {activeProfile.major}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {activeProfile.year} · {activeProfile.major}
+                      </p>
                     </div>
                   </div>
                   <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
@@ -154,15 +194,24 @@ function CampusDating() {
                 </div>
 
                 <div className="mt-6">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">About</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-foreground/90">{activeProfile.bio}</p>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    About
+                  </h4>
+                  <p className="mt-2 text-sm leading-relaxed text-foreground/90">
+                    {activeProfile.bio}
+                  </p>
                 </div>
 
                 <div className="mt-6">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Interests</h4>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                    Interests
+                  </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {(activeProfile.interests || []).map((interest) => (
-                      <span key={interest} className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
+                      <span
+                        key={interest}
+                        className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground"
+                      >
                         {interest}
                       </span>
                     ))}
@@ -191,7 +240,11 @@ function CampusDating() {
                   disabled={swiping}
                   className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 transition glow-primary disabled:opacity-50"
                 >
-                  {swiping ? <Loader2 className="h-6 w-6 animate-spin" /> : <Heart className="h-7 w-7 fill-current" />}
+                  {swiping ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    <Heart className="h-7 w-7 fill-current" />
+                  )}
                 </button>
                 <button
                   onClick={() => setProfileIndex((p) => p + 1)}
@@ -203,19 +256,39 @@ function CampusDating() {
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-border glass p-8 text-center min-h-[460px] flex flex-col justify-center items-center">
-              <Sparkles className="h-10 w-10 text-primary animate-pulse" />
-              <h3 className="mt-4 font-bold">You've seen everyone!</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {profiles.length === 0
-                  ? "Start the backend server to load real profiles."
-                  : "You have viewed all active profiles on campus today."}
+            <div className="rounded-2xl border border-border glass p-8 text-center min-h-[460px] flex flex-col justify-center items-center animate-fade-up">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <CheckCircle2 className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="mt-6 text-xl font-bold">You're all caught up! 🎉</h3>
+              <p className="mt-2 text-sm text-muted-foreground max-w-xs">
+                You've explored all available Campus Match profiles for now.
               </p>
-              {profiles.length === 0 && (
-                <code className="mt-3 block rounded-lg bg-surface px-4 py-2 text-xs text-muted-foreground font-mono">
-                  cd chat-server && npm run start
-                </code>
-              )}
+              <p className="mt-2 text-sm text-muted-foreground max-w-xs">
+                New students join Campus Match every day. Check back later to discover new study
+                partners, coffee buddies, and meaningful campus connections.
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-[10px] font-semibold text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                No new profiles available
+              </span>
+              <button
+                onClick={checkForNewProfiles}
+                disabled={checkingUpdates}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/20 disabled:opacity-50"
+              >
+                {checkingUpdates ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4" />
+                    Check Again
+                  </>
+                )}
+              </button>
             </div>
           )}
         </div>
@@ -224,12 +297,16 @@ function CampusDating() {
         <div className="space-y-4">
           <div className="rounded-2xl border border-border glass p-5">
             <h3 className="font-bold text-sm flex items-center gap-2 mb-4">
-              <Heart className="h-4 w-4 text-primary fill-current" /> Your Matches ({matches.length})
+              <Heart className="h-4 w-4 text-primary fill-current" /> Your Matches ({matches.length}
+              )
             </h3>
             {matches.length > 0 ? (
               <div className="space-y-3">
                 {matches.map((match) => (
-                  <div key={match.id} className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 transition hover:bg-surface-elevated">
+                  <div
+                    key={match.id}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 transition hover:bg-surface-elevated"
+                  >
                     <span className="text-2xl shrink-0">{match.emoji}</span>
                     <div className="min-w-0 flex-1">
                       <h4 className="text-sm font-semibold truncate">{match.name}</h4>
@@ -251,7 +328,10 @@ function CampusDating() {
           {/* Safety card */}
           <div className="rounded-2xl border border-border bg-yellow-500/5 p-4 text-xs text-primary flex items-start gap-3">
             <Award className="h-4 w-4 shrink-0 mt-0.5" />
-            <p><strong>Campus Safety First:</strong> All profiles are verified with active college emails. Always meet in public spots on campus.</p>
+            <p>
+              <strong>Campus Safety First:</strong> All profiles are verified with active college
+              emails. Always meet in public spots on campus.
+            </p>
           </div>
         </div>
       </div>
@@ -265,7 +345,8 @@ function CampusDating() {
             </div>
             <h3 className="mt-4 text-xl font-bold">It's a Match!</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              You and <strong className="text-foreground">{matchedProfile.name}</strong> liked each other.
+              You and <strong className="text-foreground">{matchedProfile.name}</strong> liked each
+              other.
             </p>
 
             <div className="my-6 flex justify-center gap-4">

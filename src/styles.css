@@ -56,7 +56,7 @@
   --popover: oklch(0.16 0.01 250);
   --popover-foreground: oklch(0.98 0.005 250);
 
-  --primary: oklch(0.84 0.18 85);       /* Bold Yellow / Gold */
+  --primary: oklch(0.84 0.18 85); /* Bold Yellow / Gold */
   --primary-foreground: oklch(0.11 0.005 250);
 
   --secondary: oklch(0.22 0.01 250);
@@ -65,10 +65,10 @@
   --muted: oklch(0.18 0.008 250);
   --muted-foreground: oklch(0.65 0.01 250);
 
-  --accent: oklch(0.90 0.15 90);        /* Bright accents */
+  --accent: oklch(0.9 0.15 90); /* Bright accents */
   --accent-foreground: oklch(0.11 0.005 250);
 
-  --destructive: oklch(0.60 0.22 25);
+  --destructive: oklch(0.6 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
 
   --border: oklch(0.24 0.01 250);
@@ -79,10 +79,11 @@
   --neon-violet: oklch(0.88 0.15 90);
   --neon-pink: oklch(0.92 0.12 95);
 
-  --gradient-primary: linear-gradient(135deg, oklch(0.84 0.18 85), oklch(0.80 0.16 75));
+  --gradient-primary: linear-gradient(135deg, oklch(0.84 0.18 85), oklch(0.8 0.16 75));
   --gradient-glow: radial-gradient(circle at 50% 0%, oklch(0.84 0.18 85 / 0.15), transparent 70%);
-  --gradient-mesh: radial-gradient(at 0% 0%, oklch(0.84 0.18 85 / 0.05), transparent 50%),
-                   radial-gradient(at 100% 100%, oklch(0.90 0.15 90 / 0.03), transparent 60%);
+  --gradient-mesh:
+    radial-gradient(at 0% 0%, oklch(0.84 0.18 85 / 0.05), transparent 50%),
+    radial-gradient(at 100% 100%, oklch(0.9 0.15 90 / 0.03), transparent 60%);
 
   --shadow-glow: 0 0 35px oklch(0.84 0.18 85 / 0.3);
   --shadow-glow-cyan: 0 0 25px oklch(0.84 0.18 85 / 0.2);
@@ -93,7 +94,9 @@
   * {
     border-color: var(--color-border);
   }
-  html, body, #root {
+  html,
+  body,
+  #root {
     height: 100%;
   }
   body {
@@ -104,7 +107,10 @@
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }
@@ -112,13 +118,20 @@
     background: oklch(0.84 0.18 85 / 0.35);
   }
   /* Scrollbar */
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
   ::-webkit-scrollbar-thumb {
     background: oklch(0.24 0.01 250 / 0.8);
     border-radius: 8px;
   }
-  ::-webkit-scrollbar-thumb:hover { background: oklch(0.84 0.18 85 / 0.7); }
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.84 0.18 85 / 0.7);
+  }
 }
 
 @utility glass {
@@ -152,8 +165,15 @@
     inset: -1px;
     padding: 1px;
     border-radius: inherit;
-    background: linear-gradient(135deg, oklch(0.84 0.18 85), oklch(0.70 0.15 70), oklch(0.92 0.12 95));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    background: linear-gradient(
+      135deg,
+      oklch(0.84 0.18 85),
+      oklch(0.7 0.15 70),
+      oklch(0.92 0.12 95)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
@@ -161,29 +181,59 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0) }
-  50% { transform: translateY(-8px) }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 15px oklch(0.84 0.18 85 / 0.25); }
-  50% { box-shadow: 0 0 35px oklch(0.84 0.18 85 / 0.55); }
+  0%,
+  100% {
+    box-shadow: 0 0 15px oklch(0.84 0.18 85 / 0.25);
+  }
+  50% {
+    box-shadow: 0 0 35px oklch(0.84 0.18 85 / 0.55);
+  }
 }
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 @keyframes grid-scroll {
-  0% { background-position: 0 0; }
-  100% { background-position: 40px 40px; }
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
 }
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@utility animate-float { animation: float 4s ease-in-out infinite; }
-@utility animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
-@utility animate-fade-up { animation: fade-up 0.6s ease-out both; }
+@utility animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+@utility animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+@utility animate-fade-up {
+  animation: fade-up 0.6s ease-out both;
+}
 @utility grid-bg {
   background-image:
     linear-gradient(oklch(0.84 0.18 85 / 0.03) 1px, transparent 1px),
@@ -203,56 +253,110 @@
 
 /* ── Micro-interaction keyframes ────────────────────────────────────────── */
 @keyframes skeleton-shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position:  400px 0; }
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
 }
 @keyframes notification-pulse {
-  0%, 100% { transform: scale(1);   box-shadow: 0 0  0 0 oklch(0.84 0.18 85 / 0.5); }
-  50%       { transform: scale(1.2); box-shadow: 0 0 0 5px oklch(0.84 0.18 85 / 0);   }
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 oklch(0.84 0.18 85 / 0.5);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 5px oklch(0.84 0.18 85 / 0);
+  }
 }
 @keyframes count-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0);    }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes progress-fill {
-  from { width: 0; }
+  from {
+    width: 0;
+  }
 }
 @keyframes badge-pop {
-  0%   { transform: scale(0.8); opacity: 0; }
-  60%  { transform: scale(1.1); }
-  100% { transform: scale(1);   opacity: 1; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 @keyframes search-overlay-in {
-  from { opacity: 0; transform: scale(0.96) translateY(-8px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0);     }
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 @keyframes search-overlay-out {
-  from { opacity: 1; transform: scale(1)    translateY(0);     }
-  to   { opacity: 0; transform: scale(0.96) translateY(-8px); }
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
 }
 
 /* ── Card hover lift ────────────────────────────────────────────────────── */
 @utility card-hover {
-  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 24px -8px oklch(0 0 0 / 0.5);
     border-color: oklch(0.84 0.18 85 / 0.25);
   }
-  &:active { transform: translateY(-1px); }
+  &:active {
+    transform: translateY(-1px);
+  }
 }
 
 /* ── Button press / gold glow ───────────────────────────────────────────── */
 @utility btn-press {
-  transition: transform 120ms ease, box-shadow 120ms ease;
-  &:hover  { box-shadow: 0 0 16px oklch(0.84 0.18 85 / 0.35); }
-  &:active { transform: scale(0.97); }
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+  &:hover {
+    box-shadow: 0 0 16px oklch(0.84 0.18 85 / 0.35);
+  }
+  &:active {
+    transform: scale(0.97);
+  }
 }
 
 /* ── Icon scale on hover ─────────────────────────────────────────────────── */
 @utility icon-hover {
-  transition: transform 150ms ease, color 150ms ease;
-  &:hover { transform: scale(1.15); }
+  transition:
+    transform 150ms ease,
+    color 150ms ease;
+  &:hover {
+    transform: scale(1.15);
+  }
 }
 
 /* ── Skeleton loader ─────────────────────────────────────────────────────── */
@@ -260,7 +364,7 @@
   background: linear-gradient(
     90deg,
     oklch(0.18 0.008 250) 25%,
-    oklch(0.22 0.01 250)  50%,
+    oklch(0.22 0.01 250) 50%,
     oklch(0.18 0.008 250) 75%
   );
   background-size: 400px 100%;
@@ -275,7 +379,9 @@
 
 /* ── Gold focus ring on inputs ───────────────────────────────────────────── */
 @utility gold-focus {
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
   &:focus {
     outline: none;
     border-color: oklch(0.84 0.18 85 / 0.6);
@@ -338,8 +444,14 @@
 
 /* ── FAB Speed-dial item enter animation ─────────────────────────────────── */
 @keyframes fab-item-in {
-  from { opacity: 0; transform: translateY(10px) scale(0.94); }
-  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .fab-item {
@@ -348,8 +460,14 @@
 
 /* ── FAB menu wrapper ─────────────────────────────────────────────────────── */
 @keyframes fab-menu-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0);   }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fab-menu {

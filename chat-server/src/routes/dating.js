@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const pool = require("../config/db");
+const { pool } = require("../config/db");
 
 // In-memory fallback data (used when DB is not connected)
 const FALLBACK_PROFILES = [

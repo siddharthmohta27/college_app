@@ -15,14 +15,27 @@ import {
   Heart,
   CheckSquare,
   FileText,
+  LogOut,
+  User,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SearchProvider } from "@/components/search";
 import { SearchTrigger } from "@/components/search";
 import { SearchOverlay } from "@/components/search";
 import { FloatingActionButton } from "@/components/fab";
+import { supabase, supabaseAuth } from "@/lib/supabase";
 
 export const Route = createFileRoute("/app")({
+  beforeLoad: async () => {
+    // Check session before loading app routes
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error("UNAUTHORIZED");
+    }
+    return { session };
+  },
   component: AppShell,
 });
 
@@ -41,10 +54,22 @@ const NAV_ITEMS = [
 function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const session = Route.useLoaderData();
+  const [user, setUser] = useState(session?.user ?? null);
+
+  // Keep user state in sync
+  useEffect(() => {
+    setUser(session?.user ?? null);
+  }, [session]);
 
   const currentPage = NAV_ITEMS.find((n) =>
     n.exact ? location.pathname === n.to : location.pathname.startsWith(n.to),
   );
+
+  const handleSignOut = async () => {
+    await supabaseAuth.signOut();
+    // Navigation handled by auth state change listener in __root.tsx
+  };
 
   return (
     <SearchProvider>
@@ -120,15 +145,33 @@ function AppShell() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">
-                  SM
+                  {user?.user_metadata?.full_name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase() ||
+                    user?.email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
+                    "SM"}
                 </div>
                 <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium">Siddharth M.</div>
-                <div className="truncate text-[10px] text-muted-foreground">3rd Year · CS</div>
+                <div className="truncate text-sm font-medium">
+                  {user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Student"}
+                </div>
+                <div className="truncate text-[10px] text-muted-foreground">
+                  {user?.user_metadata?.college || "College"} ·{" "}
+                  {user?.user_metadata?.year || "Year"}
+                </div>
               </div>
             </div>
+            <button
+              onClick={handleSignOut}
+              className="mt-3 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-surface-elevated hover:text-foreground"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Sign Out
+            </button>
           </div>
         </aside>
 
@@ -146,7 +189,14 @@ function AppShell() {
               </button>
               <div>
                 <h1 className="text-sm font-semibold">{currentPage?.label ?? "Campus Connect"}</h1>
-                <p className="text-[10px] text-muted-foreground">Saturday, July 5, 2026</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {new Date().toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -158,7 +208,13 @@ function AppShell() {
                 <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary bell-pulse" />
               </button>
               <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-[10px] font-bold text-primary-foreground">
-                SM
+                {user?.user_metadata?.full_name
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase() ||
+                  user?.email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
+                  "SM"}
               </div>
             </div>
           </header>

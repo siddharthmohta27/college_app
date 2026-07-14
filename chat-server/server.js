@@ -4,14 +4,21 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const datingRouter = require("./src/routes/dating");
-const pool = require("./src/config/db");
+const chatRouter = require("./src/routes/chat");
+const {
+  pool,
+  verifySupabaseToken,
+  getUserIdFromToken,
+  getOrCreateChatUser,
+} = require("./src/config/db");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Dating REST API
+// ─── REST Routes ──────────────────────────────────────────────────
 app.use("/api/dating", datingRouter);
+app.use("/api/chat", chatRouter);
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -26,47 +33,7 @@ const PORT = process.env.PORT || 3001;
 // In-memory presence tracking (socket.id -> user info)
 const activeUsers = new Map();
 
-// ─── Helpers ────────────────────────────────────────────────────────
-
-async function ensureUserExists(name, avatar, role, color, email) {
-  const avatarShort = avatar || name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "AN";
-  const roleClean = role || "Student";
-  const colorClean = color || "bg-primary";
-
-  // Try to find by email first (if provided), then by username
-  let client;
-  if (email) {
-    const res = await pool.query(
-      `SELECT id, username, avatar, role, color, status FROM chat_users WHERE college_email = $1`,
-      [email]
-    );
-    if (res.rows.length > 0) {
-      return res.rows[0];
-    }
-  }
-
-  const resByName = await pool.query(
-    `SELECT id, username, avatar, role, color, status FROM chat_users WHERE username = $1`,
-    [name]
-  );
-  if (resByName.rows.length > 0) {
-    // Update last_seen
-    await pool.query(
-      `UPDATE chat_users SET last_seen = NOW() WHERE id = $1`,
-      [resByName.rows[0].id]
-    );
-    return resByName.rows[0];
-  }
-
-  // Create new user
-  const insert = await pool.query(
-    `INSERT INTO chat_users (username, avatar, role, color, college_email, status)
-     VALUES ($1, $2, $3, $4, $5, 'online')
-     RETURNING id, username, avatar, role, color, status`,
-    [name || "Anonymous", avatarShort, roleClean, colorClean, email]
-  );
-  return insert.rows[0];
-}
+// ─── Helpers ──────────────────────────────────────────────────────
 
 async function loadChannelHistory(channelId, limit = 100) {
   const res = await pool.query(
@@ -77,15 +44,18 @@ async function loadChannelHistory(channelId, limit = 100) {
       WHERE m.channel_id = $1
       ORDER BY m.created_at DESC
       LIMIT $2`,
-    [channelId, limit]
+    [channelId, limit],
   );
-  // Return in chronological order (oldest first)
-  return res.rows.reverse().map(row => ({
+  return res.rows.reverse().map((row) => ({
     id: row.id,
     user: row.user,
     color: row.color || "text-primary",
     avatar: row.avatar,
-    time: new Date(row.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
+    time: new Date(row.created_at).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }),
     text: row.text,
     reactions: [],
   }));
@@ -99,7 +69,7 @@ async function loadMessageReactions(messageIds) {
        FROM reactions r
       WHERE r.message_id IN (${placeholders})
       GROUP BY r.message_id, r.emoji`,
-    messageIds
+    messageIds,
   );
   const reactionsByMessage = {};
   for (const row of res.rows) {
@@ -114,7 +84,7 @@ async function saveMessage(channelId, senderId, text) {
     `INSERT INTO messages (channel_id, sender_id, text)
      VALUES ($1, $2, $3)
      RETURNING id, created_at`,
-    [channelId, senderId, text]
+    [channelId, senderId, text],
   );
   return res.rows[0];
 }
@@ -124,14 +94,13 @@ async function upsertReaction(messageId, userId, emoji) {
     `INSERT INTO reactions (message_id, user_id, emoji)
      VALUES ($1, $2, $3)
      ON CONFLICT (message_id, user_id, emoji) DO NOTHING`,
-    [messageId, userId, emoji]
+    [messageId, userId, emoji],
   );
-  // Get updated count
   const res = await pool.query(
     `SELECT emoji, COUNT(*) as count FROM reactions WHERE message_id = $1 GROUP BY emoji`,
-    [messageId]
+    [messageId],
   );
-  return res.rows.map(r => ({ emoji: r.emoji, count: parseInt(r.count) }));
+  return res.rows.map((r) => ({ emoji: r.emoji, count: parseInt(r.count) }));
 }
 
 function broadcastChannelMembers(channelId) {
@@ -156,8 +125,8 @@ function broadcastChannelMembers(channelId) {
   ];
 
   const allMembers = [...membersInChannel];
-  seededMembers.forEach(seeded => {
-    if (!allMembers.some(m => m.name === seeded.name)) {
+  seededMembers.forEach((seeded) => {
+    if (!allMembers.some((m) => m.name === seeded.name)) {
       allMembers.push(seeded);
     }
   });
@@ -165,18 +134,64 @@ function broadcastChannelMembers(channelId) {
   io.to(channelId).emit("members", allMembers);
 }
 
-// ─── Socket.io Connection ──────────────────────────────────────────
+// ─── Socket.io Auth Middleware ────────────────────────────────────
+
+io.use(async (socket, next) => {
+  try {
+    // Get token from handshake auth or query
+    const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+
+    if (!token) {
+      console.log(`🔌 Socket ${socket.id} - No token provided, rejecting`);
+      return next(new Error("Authentication required"));
+    }
+
+    // Verify JWT
+    const decoded = await verifySupabaseToken(token);
+    const userId = getUserIdFromToken(decoded);
+
+    if (!userId) {
+      return next(new Error("Invalid token: no user ID"));
+    }
+
+    // Attach user info to socket
+    socket.user = {
+      id: userId,
+      email: decoded.email,
+      user_metadata: decoded.user_metadata || {},
+    };
+
+    console.log(`🔌 Socket ${socket.id} - Authenticated user: ${userId}`);
+    next();
+  } catch (err) {
+    console.error(`🔌 Socket ${socket.id} - Auth failed:`, err.message);
+    next(new Error("Authentication failed"));
+  }
+});
+
+// ─── Socket.io Connection ─────────────────────────────────────────
 
 io.on("connection", (socket) => {
-  console.log(`🔌 User connected: ${socket.id}`);
+  console.log(`🔌 User connected: ${socket.id} (${socket.user?.id})`);
 
   // User registers presence and enters a channel
-  socket.on("join", async ({ name, avatar, role, color, channelId, email }) => {
+  socket.on("join", async ({ name, avatar, role, color, channelId }) => {
     try {
-      const user = await ensureUserExists(name, avatar, role, color, email);
+      const authUserId = socket.user.id;
+      const email = socket.user.email;
+
+      // Get or create chat user linked to auth user
+      const user = await getOrCreateChatUser(authUserId, {
+        username: name,
+        avatar,
+        role,
+        color,
+        email,
+      });
 
       activeUsers.set(socket.id, {
-        id: user.id,
+        authUserId,
+        chatUserId: user.id,
         name: user.username,
         avatar: user.avatar,
         status: "online",
@@ -186,15 +201,15 @@ io.on("connection", (socket) => {
       });
 
       socket.join(channelId || "general");
-      console.log(`👤 ${user.username} joined channel: ${channelId || "general"}`);
+      console.log(`👤 ${user.username} (${authUserId}) joined channel: ${channelId || "general"}`);
 
       // Load history from DB
       const history = await loadChannelHistory(channelId || "general");
-      const messageIds = history.map(m => m.id);
+      const messageIds = history.map((m) => m.id);
       const reactionsMap = await loadMessageReactions(messageIds);
 
       // Attach reactions to messages
-      const historyWithReactions = history.map(msg => ({
+      const historyWithReactions = history.map((msg) => ({
         ...msg,
         reactions: reactionsMap[msg.id] || [],
       }));
@@ -203,7 +218,6 @@ io.on("connection", (socket) => {
       broadcastChannelMembers(channelId || "general");
     } catch (err) {
       console.error("❌ Error on join:", err.message);
-      // Fallback to empty history
       socket.emit("history", []);
     }
   });
@@ -214,14 +228,18 @@ io.on("connection", (socket) => {
     if (!user) return;
 
     try {
-      const saved = await saveMessage(channelId, user.id, text);
+      const saved = await saveMessage(channelId, user.chatUserId, text);
 
       const newMsg = {
         id: saved.id,
         user: user.name,
         color: user.color,
         avatar: user.avatar,
-        time: new Date(saved.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
+        time: new Date(saved.created_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }),
         text,
         reactions: [],
       };
@@ -238,7 +256,7 @@ io.on("connection", (socket) => {
     if (!user) return;
 
     try {
-      const reactions = await upsertReaction(msgId, user.id, emoji);
+      const reactions = await upsertReaction(msgId, user.chatUserId, emoji);
       io.to(channelId).emit("reactionUpdate", { msgId, reactions });
     } catch (err) {
       console.error("❌ Error saving reaction:", err.message);
@@ -256,9 +274,9 @@ io.on("connection", (socket) => {
 
     try {
       const history = await loadChannelHistory(newChannel);
-      const messageIds = history.map(m => m.id);
+      const messageIds = history.map((m) => m.id);
       const reactionsMap = await loadMessageReactions(messageIds);
-      const historyWithReactions = history.map(msg => ({
+      const historyWithReactions = history.map((msg) => ({
         ...msg,
         reactions: reactionsMap[msg.id] || [],
       }));

@@ -1,10 +1,10 @@
-const pool = require('./chat-server/src/config/db');
+const { pool } = require("./chat-server/src/config/db");
 
 async function test() {
   try {
     // Test basic connection
-    const time = await pool.query('SELECT NOW() as now');
-    console.log('✅ DB Connected:', time.rows[0].now);
+    const time = await pool.query("SELECT NOW() as now");
+    console.log("✅ DB Connected:", time.rows[0].now);
 
     // Check tables
     const tables = await pool.query(`
@@ -13,16 +13,18 @@ async function test() {
       AND tablename IN ('messages', 'channels', 'reactions', 'chat_users', 'dating_profiles', 'swipes', 'matches')
       ORDER BY tablename
     `);
-    console.log('📋 Tables found:', tables.rows.map(r => r.tablename));
+    console.log(
+      "📋 Tables found:",
+      tables.rows.map((r) => r.tablename),
+    );
 
     // Check channels
-    const channels = await pool.query('SELECT * FROM channels');
-    console.log('📺 Channels:', channels.rows.length, 'rows');
+    const channels = await pool.query("SELECT * FROM channels");
+    console.log("📺 Channels:", channels.rows.length, "rows");
     console.log(channels.rows);
-
   } catch (e) {
-    console.error('❌ Error:', e.message);
-    console.error('Full error:', e);
+    console.error("❌ Error:", e.message);
+    console.error("Full error:", e);
   } finally {
     await pool.end();
   }

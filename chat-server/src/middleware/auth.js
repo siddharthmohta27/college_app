@@ -1,4 +1,4 @@
-const { verifySupabaseToken, getUserIdFromToken } = require("../config/db");
+const { verifyFirebaseToken, getUserIdFromToken } = require("../config/db");
 
 // ──────────────────────────────────────────────────────────────
 // REST API Middleware
@@ -21,7 +21,7 @@ function requireAuth(req, res, next) {
 
   const token = authHeader.slice(7); // Remove "Bearer "
 
-  verifySupabaseToken(token)
+  verifyFirebaseToken(token)
     .then((decoded) => {
       req.user = {
         id: getUserIdFromToken(decoded),
@@ -53,7 +53,7 @@ function optionalAuth(req, res, next) {
 
   const token = authHeader.slice(7);
 
-  verifySupabaseToken(token)
+  verifyFirebaseToken(token)
     .then((decoded) => {
       req.user = {
         id: getUserIdFromToken(decoded),
@@ -98,7 +98,7 @@ function socketAuth(socket, next) {
     return next(new Error("Authentication required"));
   }
 
-  verifySupabaseToken(token)
+  verifyFirebaseToken(token)
     .then((decoded) => {
       socket.user = {
         id: getUserIdFromToken(decoded),

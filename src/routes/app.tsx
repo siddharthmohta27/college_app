@@ -23,18 +23,17 @@ import { SearchProvider } from "@/components/search";
 import { SearchTrigger } from "@/components/search";
 import { SearchOverlay } from "@/components/search";
 import { FloatingActionButton } from "@/components/fab";
-import { supabase, supabaseAuth } from "@/lib/supabase";
+import { firebaseAuth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async () => {
-    // Check session before loading app routes
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+    // Check Firebase session before loading app routes
+    const user = auth.currentUser;
+    if (!user) {
       throw new Error("UNAUTHORIZED");
     }
-    return { session };
+    return { user };
   },
   component: AppShell,
 });
@@ -57,18 +56,21 @@ function AppShell() {
   const session = Route.useLoaderData();
   const [user, setUser] = useState(session?.user ?? null);
 
-  // Keep user state in sync
+  // Keep user state in sync with Firebase auth
   useEffect(() => {
-    setUser(session?.user ?? null);
-  }, [session]);
+    const unsub = firebaseAuth.onAuthStateChanged((fbUser) => {
+      setUser(fbUser as unknown as typeof user);
+    });
+    return unsub;
+  }, []);
 
   const currentPage = NAV_ITEMS.find((n) =>
     n.exact ? location.pathname === n.to : location.pathname.startsWith(n.to),
   );
 
   const handleSignOut = async () => {
-    await supabaseAuth.signOut();
-    // Navigation handled by auth state change listener in __root.tsx
+    await firebaseAuth.signOut();
+    window.location.href = "/login";
   };
 
   return (
@@ -145,23 +147,22 @@ function AppShell() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-xs font-bold text-primary-foreground">
-                  {user?.user_metadata?.full_name
+                  {(user as { displayName?: string })?.displayName
                     ?.split(" ")
-                    .map((n) => n[0])
+                    .map((n: string) => n[0])
                     .join("")
                     .toUpperCase() ||
-                    user?.email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
+                    (user as { email?: string })?.email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
                     "SM"}
                 </div>
                 <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-emerald-500" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium">
-                  {user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Student"}
+                  {(user as { displayName?: string })?.displayName || (user as { email?: string })?.email?.split("@")[0] || "Student"}
                 </div>
                 <div className="truncate text-[10px] text-muted-foreground">
-                  {user?.user_metadata?.college || "College"} ·{" "}
-                  {user?.user_metadata?.year || "Year"}
+                  Campus Connect · Student
                 </div>
               </div>
             </div>

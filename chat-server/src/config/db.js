@@ -1,7 +1,6 @@
 require("dotenv").config();
 const { Pool } = require("pg");
-const jwt = require("jsonwebtoken");
-const jwksClient = require("jwks-rsa");
+const admin = require("firebase-admin");
 
 // ──────────────────────────────────────────────────────────────
 // PostgreSQL Connection Pool
@@ -22,86 +21,82 @@ pool.on("connect", () => {
 
 pool.on("error", (err) => {
   console.error("⚠️  PostgreSQL connection error:", err.message);
-  console.error("   Chat features will be unavailable until DB is connected.");
 });
 
 // ──────────────────────────────────────────────────────────────
-// Supabase JWT Verification
+// Firebase Admin SDK Initialization
 // ──────────────────────────────────────────────────────────────
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_JWKS_URI =
-  process.env.SUPABASE_JWKS_URI ||
-  (SUPABASE_URL ? `${SUPABASE_URL}/auth/v1/.well-known/jwks.json` : null);
+let firebaseInitialized = false;
 
-let jwks;
-if (SUPABASE_JWKS_URI) {
-  jwks = jwksClient({
-    jwksUri: SUPABASE_JWKS_URI,
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 10,
-  });
-} else {
-  console.warn("⚠️  SUPABASE_URL not set - JWT verification will not work");
+try {
+  // Option 1: Use service account JSON file path (FIREBASE_SERVICE_ACCOUNT_PATH)
+  // Option 2: Use individual env vars (FIREBASE_PROJECT_ID, etc.)
+  // Option 3: Auto-detect from GOOGLE_APPLICATION_CREDENTIALS env var
+
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+    const serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      }),
+    });
+  } else {
+    console.warn("⚠️  Firebase Admin credentials not found. Auth will not work.");
+    console.warn("   Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY in .env");
+    console.warn("   Or set FIREBASE_SERVICE_ACCOUNT_PATH to your service account JSON file path.");
+  }
+
+  firebaseInitialized = true;
+  console.log("✅ Firebase Admin initialized");
+} catch (err) {
+  console.error("❌ Firebase Admin initialization failed:", err.message);
 }
 
-function getKey(header, callback) {
-  if (!jwks) return callback(new Error("JWKS client not initialized"));
-  jwks.getSigningKey(header.kid, (err, key) => {
-    if (err) return callback(err);
-    const signingKey = key.getPublicKey();
-    callback(null, signingKey);
-  });
-}
+// ──────────────────────────────────────────────────────────────
+// Firebase JWT Verification
+// ──────────────────────────────────────────────────────────────
 
 /**
- * Verify a Supabase JWT token
- * @param {string} token - JWT token string
- * @returns {Promise<object>} Decoded token payload
+ * Verify a Firebase ID token
+ * @param {string} token - Firebase ID token from client
+ * @returns {Promise<admin.auth.DecodedIdToken>} Decoded token payload
  */
-async function verifySupabaseToken(token) {
-  return new Promise((resolve, reject) => {
-    if (!jwks) return reject(new Error("JWKS not configured"));
-
-    jwt.verify(
-      token,
-      getKey,
-      {
-        algorithms: ["RS256"],
-        audience: "authenticated",
-        issuer: `${SUPABASE_URL}/auth/v1`,
-      },
-      (err, decoded) => {
-        if (err) return reject(err);
-        resolve(decoded);
-      },
-    );
-  });
+async function verifyFirebaseToken(token) {
+  if (!firebaseInitialized) {
+    throw new Error("Firebase Admin not initialized. Check your .env credentials.");
+  }
+  return admin.auth().verifyIdToken(token);
 }
 
 /**
- * Extract user ID from verified Supabase JWT
- * @param {object} decoded - Decoded JWT payload
- * @returns {string} User UUID (sub claim)
+ * Extract user ID from verified Firebase token
+ * @param {object} decoded - Decoded Firebase token
+ * @returns {string} Firebase UID
  */
 function getUserIdFromToken(decoded) {
-  return decoded.sub;
+  return decoded.uid;
 }
 
 /**
- * Verify token and return user ID
- * @param {string} token - JWT token string
- * @returns {Promise<string>} User UUID
+ * Verify token and return Firebase UID
+ * @param {string} token - Firebase ID token
+ * @returns {Promise<string>} Firebase UID
  */
 async function verifyTokenAndGetUserId(token) {
-  const decoded = await verifySupabaseToken(token);
+  const decoded = await verifyFirebaseToken(token);
   return getUserIdFromToken(decoded);
 }
 
 // ──────────────────────────────────────────────────────────────
-// Helper: Get or create chat user for authenticated user
+// Helper: Get or create chat user for Firebase user
 // ──────────────────────────────────────────────────────────────
-async function getOrCreateChatUser(authUserId, userData = {}) {
+async function getOrCreateChatUser(firebaseUid, userData = {}) {
   const { username, avatar, role = "Student", color = "bg-primary", email } = userData;
 
   const avatarShort =
@@ -115,25 +110,25 @@ async function getOrCreateChatUser(authUserId, userData = {}) {
     "AN";
 
   const res = await pool.query(
-    `INSERT INTO chat_users (username, avatar, role, color, status, college_email, auth_user_id)
+    `INSERT INTO chat_users (username, avatar, role, color, status, college_email, firebase_uid)
      VALUES ($1, $2, $3, $4, 'online', $5, $6)
-     ON CONFLICT (auth_user_id) DO UPDATE SET
+     ON CONFLICT (firebase_uid) DO UPDATE SET
        username = EXCLUDED.username,
        avatar = EXCLUDED.avatar,
        role = EXCLUDED.role,
        color = EXCLUDED.color,
        status = 'online',
        last_seen = NOW()
-     RETURNING id, username, avatar, role, color, status, auth_user_id`,
-    [username || "Anonymous", avatarShort, role, color, email, authUserId],
+     RETURNING id, username, avatar, role, color, status, firebase_uid`,
+    [username || "Anonymous", avatarShort, role, color, email, firebaseUid],
   );
   return res.rows[0];
 }
 
 // ──────────────────────────────────────────────────────────────
-// Helper: Get or create dating profile for authenticated user
+// Helper: Get or create dating profile for Firebase user
 // ──────────────────────────────────────────────────────────────
-async function getOrCreateDatingProfile(authUserId, profileData = {}) {
+async function getOrCreateDatingProfile(firebaseUid, profileData = {}) {
   const {
     name,
     age = 20,
@@ -146,9 +141,9 @@ async function getOrCreateDatingProfile(authUserId, profileData = {}) {
   } = profileData;
 
   const res = await pool.query(
-    `INSERT INTO dating_profiles (name, age, year, major, bio, interests, emoji, verified, auth_user_id)
+    `INSERT INTO dating_profiles (name, age, year, major, bio, interests, emoji, verified, firebase_uid)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-     ON CONFLICT (auth_user_id) DO UPDATE SET
+     ON CONFLICT (firebase_uid) DO UPDATE SET
        name = EXCLUDED.name,
        age = EXCLUDED.age,
        year = EXCLUDED.year,
@@ -157,15 +152,15 @@ async function getOrCreateDatingProfile(authUserId, profileData = {}) {
        interests = EXCLUDED.interests,
        emoji = EXCLUDED.emoji,
        verified = EXCLUDED.verified
-     RETURNING id, name, age, year, major, bio, interests, emoji, verified, auth_user_id`,
-    [name, age, year, major, bio, interests, emoji, verified, authUserId],
+     RETURNING id, name, age, year, major, bio, interests, emoji, verified, firebase_uid`,
+    [name, age, year, major, bio, interests, emoji, verified, firebaseUid],
   );
   return res.rows[0];
 }
 
 module.exports = {
   pool,
-  verifySupabaseToken,
+  verifyFirebaseToken,
   getUserIdFromToken,
   verifyTokenAndGetUserId,
   getOrCreateChatUser,

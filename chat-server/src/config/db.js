@@ -1,6 +1,7 @@
 require("dotenv").config();
 const { Pool } = require("pg");
-const admin = require("firebase-admin");
+const { initializeApp, cert, getApps } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
 
 // ──────────────────────────────────────────────────────────────
 // PostgreSQL Connection Pool
@@ -27,33 +28,29 @@ pool.on("error", (err) => {
 // Firebase Admin SDK Initialization
 // ──────────────────────────────────────────────────────────────
 let firebaseInitialized = false;
+let firebaseAuth = null;
 
 try {
-  // Option 1: Use service account JSON file path (FIREBASE_SERVICE_ACCOUNT_PATH)
-  // Option 2: Use individual env vars (FIREBASE_PROJECT_ID, etc.)
-  // Option 3: Auto-detect from GOOGLE_APPLICATION_CREDENTIALS env var
-
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-    const serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-  } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-      }),
-    });
-  } else {
-    console.warn("⚠️  Firebase Admin credentials not found. Auth will not work.");
-    console.warn("   Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY in .env");
-    console.warn("   Or set FIREBASE_SERVICE_ACCOUNT_PATH to your service account JSON file path.");
+  // Only initialize if not already done (prevents re-init on hot reload)
+  if (getApps().length === 0) {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+      const serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+      initializeApp({ credential: cert(serviceAccount) });
+    } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+      initializeApp({
+        credential: cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        }),
+      });
+    } else {
+      console.warn("⚠️  Firebase Admin credentials not found. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY in .env");
+    }
   }
-
+  firebaseAuth = getAuth();
   firebaseInitialized = true;
-  console.log("✅ Firebase Admin initialized");
+  console.log("✅ Firebase Admin initialized for project:", process.env.FIREBASE_PROJECT_ID);
 } catch (err) {
   console.error("❌ Firebase Admin initialization failed:", err.message);
 }
@@ -68,10 +65,10 @@ try {
  * @returns {Promise<admin.auth.DecodedIdToken>} Decoded token payload
  */
 async function verifyFirebaseToken(token) {
-  if (!firebaseInitialized) {
+  if (!firebaseInitialized || !firebaseAuth) {
     throw new Error("Firebase Admin not initialized. Check your .env credentials.");
   }
-  return admin.auth().verifyIdToken(token);
+  return firebaseAuth.verifyIdToken(token);
 }
 
 /**

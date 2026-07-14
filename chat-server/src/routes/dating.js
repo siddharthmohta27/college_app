@@ -15,8 +15,13 @@ let dbAvailable = false;
 
 // Test DB availability on startup
 pool.query("SELECT 1")
-  .then(() => { dbAvailable = true; })
-  .catch(() => { dbAvailable = false; });
+  .then(() => {
+    dbAvailable = true;
+    console.log("✅ Database connection verified");
+  }).catch((err) => {
+  dbAvailable = false;
+  console.error("Database connection failed:", err.message);
+});
 
 // ─── GET /api/dating/profiles ─────────────────────────────────────────────
 // Fetch profiles NOT yet swiped by the current user

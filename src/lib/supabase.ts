@@ -111,35 +111,6 @@ export const supabaseHelpers = {
     return { data, error };
   },
 
-  // ── Auth ──────────────────────────────────────────────────
-  async signUp(email: string, password: string, metadata?: Record<string, unknown>) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: metadata },
-    });
-    return { data, error };
-  },
-
-  async signIn(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    return { data, error };
-  },
-
-  async signOut() {
-    const { error } = await supabase.auth.signOut();
-    return { error };
-  },
-
-  async getSession() {
-    const { data, error } = await supabase.auth.getSession();
-    return { data, error };
-  },
-
-  onAuthStateChange(callback: (event: string, session: unknown) => void) {
-    return supabase.auth.onAuthStateChange(callback);
-  },
-
   // ── Realtime Subscriptions ────────────────────────────────
   subscribeToMessages(channelId: string, callback: (payload: unknown) => void) {
     return supabase
@@ -166,40 +137,6 @@ export const supabaseHelpers = {
         callback,
       )
       .subscribe();
-  },
-};
-
-// ──────────────────────────────────────────────────────────────
-// Auth export (compatible with existing imports)
-// ──────────────────────────────────────────────────────────────
-
-export const supabaseAuth = {
-  async signUp(email: string, password: string, metadata?: Record<string, unknown>) {
-    return supabaseHelpers.signUp(email, password, metadata);
-  },
-
-  async signIn(email: string, password: string) {
-    return supabaseHelpers.signIn(email, password);
-  },
-
-  async signInWithOAuth(provider: "google", options?: { redirectTo?: string }) {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options,
-    });
-    return { data, error };
-  },
-
-  async signOut() {
-    return supabaseHelpers.signOut();
-  },
-
-  async getSession() {
-    return supabaseHelpers.getSession();
-  },
-
-  onAuthStateChange(callback: (event: string, session: unknown) => void) {
-    return supabaseHelpers.onAuthStateChange(callback);
   },
 };
 

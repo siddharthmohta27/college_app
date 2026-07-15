@@ -95,7 +95,7 @@ async function verifyTokenAndGetUserId(token) {
 // ──────────────────────────────────────────────────────────────
 // Helper: Get or create chat user for Firebase user
 // ──────────────────────────────────────────────────────────────
-async function getOrCreateChatUser(firebaseUid, userData = {}) {
+async function getOrCreateChatUser(authUserId, userData = {}) {
   const { username, avatar, role = "Student", color = "bg-primary", email } = userData;
 
   const avatarShort =
@@ -108,26 +108,28 @@ async function getOrCreateChatUser(firebaseUid, userData = {}) {
       .slice(0, 2) ||
     "AN";
 
+  console.log(`🔍 [getOrCreateChatUser] Creating/updating chat user for auth_user_id: ${authUserId}`);
   const res = await pool.query(
-    `INSERT INTO chat_users (username, avatar, role, color, status, college_email, firebase_uid)
+    `INSERT INTO chat_users (username, avatar, role, color, status, college_email, auth_user_id)
      VALUES ($1, $2, $3, $4, 'online', $5, $6)
-     ON CONFLICT (firebase_uid) DO UPDATE SET
+     ON CONFLICT (auth_user_id) DO UPDATE SET
        username = EXCLUDED.username,
        avatar = EXCLUDED.avatar,
        role = EXCLUDED.role,
        color = EXCLUDED.color,
        status = 'online',
        last_seen = NOW()
-     RETURNING id, username, avatar, role, color, status, firebase_uid`,
-    [username || "Anonymous", avatarShort, role, color, email, firebaseUid],
+     RETURNING id, username, avatar, role, color, status, auth_user_id`,
+    [username || "Anonymous", avatarShort, role, color, email, authUserId],
   );
+  console.log(`✅ [getOrCreateChatUser] Chat user ${res.rows[0] ? 'created/updated' : 'FAILED'}:`, res.rows[0]);
   return res.rows[0];
 }
 
 // ──────────────────────────────────────────────────────────────
 // Helper: Get or create dating profile for Firebase user
 // ──────────────────────────────────────────────────────────────
-async function getOrCreateDatingProfile(firebaseUid, profileData = {}) {
+async function getOrCreateDatingProfile(authUserId, profileData = {}) {
   const {
     name,
     age = 20,
@@ -139,10 +141,11 @@ async function getOrCreateDatingProfile(firebaseUid, profileData = {}) {
     verified = false,
   } = profileData;
 
+  console.log(`🔍 [getOrCreateDatingProfile] Creating/updating dating profile for auth_user_id: ${authUserId}`);
   const res = await pool.query(
-    `INSERT INTO dating_profiles (name, age, year, major, bio, interests, emoji, verified, firebase_uid)
+    `INSERT INTO dating_profiles (name, age, year, major, bio, interests, emoji, verified, auth_user_id)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-     ON CONFLICT (firebase_uid) DO UPDATE SET
+     ON CONFLICT (auth_user_id) DO UPDATE SET
        name = EXCLUDED.name,
        age = EXCLUDED.age,
        year = EXCLUDED.year,
@@ -151,9 +154,10 @@ async function getOrCreateDatingProfile(firebaseUid, profileData = {}) {
        interests = EXCLUDED.interests,
        emoji = EXCLUDED.emoji,
        verified = EXCLUDED.verified
-     RETURNING id, name, age, year, major, bio, interests, emoji, verified, firebase_uid`,
-    [name, age, year, major, bio, interests, emoji, verified, firebaseUid],
+     RETURNING id, name, age, year, major, bio, interests, emoji, verified, auth_user_id`,
+    [name, age, year, major, bio, interests, emoji, verified, authUserId],
   );
+  console.log(`✅ [getOrCreateDatingProfile] Dating profile ${res.rows[0] ? 'created/updated' : 'FAILED'}:`, res.rows[0]);
   return res.rows[0];
 }
 

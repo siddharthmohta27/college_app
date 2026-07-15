@@ -7,9 +7,10 @@ const datingRouter = require("./src/routes/dating");
 const chatRouter = require("./src/routes/chat");
 const {
   pool,
-  verifySupabaseToken,
+  verifyFirebaseToken,
   getUserIdFromToken,
   getOrCreateChatUser,
+  getOrCreateDatingProfile,
 } = require("./src/config/db");
 
 const app = express();
@@ -146,8 +147,8 @@ io.use(async (socket, next) => {
       return next(new Error("Authentication required"));
     }
 
-    // Verify JWT
-    const decoded = await verifySupabaseToken(token);
+    // Verify Firebase JWT
+    const decoded = await verifyFirebaseToken(token);
     const userId = getUserIdFromToken(decoded);
 
     if (!userId) {
@@ -186,6 +187,12 @@ io.on("connection", (socket) => {
         avatar,
         role,
         color,
+        email,
+      });
+
+      // Get or create dating profile for the same auth user
+      await getOrCreateDatingProfile(authUserId, {
+        name: name || email?.split("@")[0] || "Student",
         email,
       });
 

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sparkles,
   ShoppingBag,
@@ -15,7 +15,8 @@ import {
   Zap,
   Loader2,
 } from "lucide-react";
-import { supabase, supabaseAuth } from "@/lib/supabase";
+import { firebaseAuth } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import heroBg from "@/assets/hero-bg.jpg";
 
 export const Route = createFileRoute("/")({
@@ -36,6 +37,29 @@ function Landing() {
   const [mode, setMode] = useState<"landing" | "login" | "signup">("landing");
   const navigate = useNavigate();
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!auth) return;
+    const unsub = firebaseAuth.onAuthStateChanged((user) => {
+      if (user) navigate({ to: "/app" });
+    });
+    return unsub;
+  }, [navigate]);
+
+  const friendlyError = (code: string) => {
+    const map: Record<string, string> = {
+      "auth/user-not-found": "No account found with this email.",
+      "auth/wrong-password": "Incorrect password. Please try again.",
+      "auth/email-already-in-use": "An account with this email already exists.",
+      "auth/weak-password": "Password must be at least 6 characters.",
+      "auth/invalid-email": "Please enter a valid email address.",
+      "auth/too-many-requests": "Too many attempts. Please wait a few minutes and try again.",
+      "auth/popup-closed-by-user": "Google sign-in was cancelled.",
+      "auth/network-request-failed": "Network error. Check your internet connection.",
+    };
+    return map[code] ?? "Something went wrong. Please try again.";
+  };
+
   const handleAuthSubmit = async (
     e: React.FormEvent,
     type: "login" | "signup",
@@ -46,32 +70,17 @@ function Landing() {
     setAuthError(null);
 
     try {
-      let result;
-
       if (type === "signup") {
-        result = await supabaseAuth.signUp(formData.email, formData.password, {
-          full_name: formData.name,
-          college: formData.college,
-        });
+        await firebaseAuth.signUp(formData.email, formData.password, formData.name);
       } else {
-        result = await supabaseAuth.signIn(formData.email, formData.password);
+        await firebaseAuth.signIn(formData.email, formData.password);
       }
 
-      if (result.error) {
-        setAuthError(result.error.message);
-        return;
-      }
-
-      // Wait for session to be established
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (session) {
+      if (auth.currentUser) {
         navigate({ to: "/app" });
       }
-    } catch (err) {
-      setAuthError("Something went wrong. Please try again.");
+    } catch (err: any) {
+      setAuthError(friendlyError(err.code || ""));
     } finally {
       setAuthLoading(false);
     }
@@ -82,20 +91,12 @@ function Landing() {
     setAuthError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) {
-        setAuthError(error.message);
-        setAuthLoading(false);
+      await firebaseAuth.signInWithGoogle();
+      if (auth.currentUser) {
+        navigate({ to: "/app" });
       }
-      // OAuth redirects - won't reach here
-    } catch (err) {
-      setAuthError("Google sign-in failed. Please try again.");
+    } catch (err: any) {
+      setAuthError(friendlyError(err.code || ""));
       setAuthLoading(false);
     }
   };

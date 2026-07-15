@@ -34,7 +34,9 @@ try {
   // Only initialize if not already done (prevents re-init on hot reload)
   if (getApps().length === 0) {
     if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-      const serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+      const path = require("path");
+      const resolvedPath = path.resolve(process.cwd(), process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+      const serviceAccount = require(resolvedPath);
       initializeApp({ credential: cert(serviceAccount) });
     } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
       initializeApp({

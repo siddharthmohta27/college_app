@@ -2,40 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../config/db");
 const { requireAuth, optionalAuth } = require("../middleware/auth");
-
-// ──────────────────────────────────────────────────────────────
-// Helpers
-// ──────────────────────────────────────────────────────────────
-
-async function getOrCreateChatUser(userId, profile = {}) {
-  const { name, avatar, role, color, email } = profile;
-
-  // Try to find existing
-  const existing = await pool.query(`SELECT * FROM chat_users WHERE auth_user_id = $1`, [userId]);
-  if (existing.rows.length > 0) {
-    // Update last_seen
-    await pool.query(`UPDATE chat_users SET last_seen = NOW() WHERE auth_user_id = $1`, [userId]);
-    return existing.rows[0];
-  }
-
-  // Create new
-  const avatarShort =
-    avatar ||
-    name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) ||
-    "AN";
-  const res = await pool.query(
-    `INSERT INTO chat_users (username, avatar, role, color, college_email, auth_user_id, status)
-     VALUES ($1, $2, $3, $4, $5, $6, 'online')
-     RETURNING *`,
-    [name || "Anonymous", avatarShort, role || "Student", color || "bg-primary", email, userId],
-  );
-  return res.rows[0];
-}
+const { getOrCreateChatUser, getOrCreateDatingProfile } = require("../config/db");
 
 // ──────────────────────────────────────────────────────────────
 // GET /api/chat/channels - List all channels
@@ -46,14 +13,11 @@ router.get("/channels", optionalAuth, async (req, res) => {
       `SELECT id, name, description, is_voice, created_at FROM channels ORDER BY name`,
     );
 
-    // Add online count for each channel
     const channelsWithCounts = await Promise.all(
       channels.rows.map(async (ch) => {
-        // Get online users in this channel from socket.io (would need socket.io adapter)
-        // For now return basic info
         return {
           ...ch,
-          onlineCount: 0, // Will be populated by socket.io
+          onlineCount: 0,
         };
       }),
     );
@@ -71,7 +35,7 @@ router.get("/channels", optionalAuth, async (req, res) => {
 router.get("/channels/:channelId/messages", requireAuth, async (req, res) => {
   const { channelId } = req.params;
   const limit = Math.min(parseInt(req.query.limit) || 50, 100);
-  const before = req.query.before; // ISO timestamp for pagination
+  const before = req.query.before;
 
   try {
     let query = `
@@ -141,7 +105,7 @@ router.get("/channels/:channelId/messages", requireAuth, async (req, res) => {
 router.post("/channels/:channelId/messages", requireAuth, async (req, res) => {
   const { channelId } = req.params;
   const { text } = req.body;
-  const userId = req.user.id;
+  const firebaseUid = req.user.id;
 
   if (!text || !text.trim()) {
     return res.status(400).json({ error: "Message text required" });
@@ -149,7 +113,7 @@ router.post("/channels/:channelId/messages", requireAuth, async (req, res) => {
 
   try {
     // Ensure user exists in chat_users
-    await getOrCreateChatUser(userId, {
+    await getOrCreateChatUser(firebaseUid, {
       name: req.user.email?.split("@")[0] || "User",
       email: req.user.email,
     });
@@ -159,7 +123,7 @@ router.post("/channels/:channelId/messages", requireAuth, async (req, res) => {
       `INSERT INTO messages (channel_id, sender_id, text)
        VALUES ($1, (SELECT id FROM chat_users WHERE auth_user_id = $2), $3)
        RETURNING id, created_at`,
-      [channelId, userId, text.trim()],
+      [channelId, firebaseUid, text.trim()],
     );
 
     const message = {
@@ -181,7 +145,7 @@ router.post("/channels/:channelId/messages", requireAuth, async (req, res) => {
 router.post("/messages/:messageId/reactions", requireAuth, async (req, res) => {
   const { messageId } = req.params;
   const { emoji } = req.body;
-  const userId = req.user.id;
+  const firebaseUid = req.user.id;
 
   if (!emoji) {
     return res.status(400).json({ error: "Emoji required" });
@@ -189,14 +153,14 @@ router.post("/messages/:messageId/reactions", requireAuth, async (req, res) => {
 
   try {
     // Ensure chat user exists
-    await getOrCreateChatUser(userId, { email: req.user.email });
+    await getOrCreateChatUser(firebaseUid, { email: req.user.email });
 
     // Upsert reaction (one per user per emoji per message)
     await pool.query(
       `INSERT INTO reactions (message_id, user_id, emoji)
        VALUES ($1, (SELECT id FROM chat_users WHERE auth_user_id = $2), $3)
        ON CONFLICT (message_id, user_id, emoji) DO NOTHING`,
-      [messageId, userId, emoji],
+      [messageId, firebaseUid, emoji],
     );
 
     // Get updated reaction counts
@@ -224,8 +188,6 @@ router.post("/messages/:messageId/reactions", requireAuth, async (req, res) => {
 // GET /api/chat/channels/:channelId/members - Get online members
 // ──────────────────────────────────────────────────────────────
 router.get("/channels/:channelId/members", optionalAuth, async (req, res) => {
-  // Note: Real-time member list comes from Socket.io
-  // This endpoint can return static seeded members as fallback
   try {
     const members = await pool.query(
       `SELECT username as name, status, role, color, auth_user_id
@@ -235,33 +197,14 @@ router.get("/channels/:channelId/members", optionalAuth, async (req, res) => {
        LIMIT 50`,
     );
 
-    // Add seeded members
+    // Add seeded members as fallback
     const seededMembers = [
-      {
-        name: "Aisha R.",
-        status: "online",
-        role: "Mod",
-        color: "bg-emerald-500",
-        auth_user_id: null,
-      },
-      {
-        name: "Marcus K.",
-        status: "online",
-        role: "Student",
-        color: "bg-cyan-500",
-        auth_user_id: null,
-      },
+      { name: "Aisha R.", status: "online", role: "Mod", color: "bg-emerald-500", auth_user_id: null },
+      { name: "Marcus K.", status: "online", role: "Student", color: "bg-cyan-500", auth_user_id: null },
       { name: "Priya S.", status: "idle", role: "TA", color: "bg-fuchsia-500", auth_user_id: null },
-      {
-        name: "Leo T.",
-        status: "offline",
-        role: "Student",
-        color: "bg-amber-500",
-        auth_user_id: null,
-      },
+      { name: "Leo T.", status: "offline", role: "Student", color: "bg-amber-500", auth_user_id: null },
     ];
 
-    // Deduplicate
     const allMembers = [...members.rows];
     for (const seeded of seededMembers) {
       if (!allMembers.some((m) => m.name === seeded.name)) {
@@ -281,12 +224,16 @@ router.get("/channels/:channelId/members", optionalAuth, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 router.get("/me", requireAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const firebaseUid = req.user.id;
 
-    // Get or create chat user
-    const chatUser = await getOrCreateChatUser(userId, {
+    const chatUser = await getOrCreateChatUser(firebaseUid, {
       name: req.user.email?.split("@")[0] || "User",
       email: req.user.email,
+    });
+
+    // Also ensure dating profile exists
+    await getOrCreateDatingProfile(firebaseUid, {
+      name: req.user.email?.split("@")[0] || "Student",
     });
 
     res.json({ user: chatUser });

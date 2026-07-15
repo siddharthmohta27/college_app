@@ -12,7 +12,7 @@ import {
   RefreshCw,
   CheckCircle2,
 } from "lucide-react";
-import { supabase, supabaseHelpers } from "@/lib/supabase";
+import { firebaseAuth } from "@/lib/firebase";
 
 export const Route = createFileRoute("/app/dating")({
   head: () => ({
@@ -58,38 +58,43 @@ function CampusDating() {
   const [swiping, setSwiping] = useState(false);
   const [dbStatus, setDbStatus] = useState<"database" | "fallback" | null>(null);
   const [checkingUpdates, setCheckingUpdates] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    uid: string;
+    email: string | null;
+    displayName: string | null;
+  } | null>(null);
 
-  // Get current user from Supabase auth
+  // Get current user from Firebase auth
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const unsub = firebaseAuth.onAuthStateChanged((user) => {
       if (user) {
-        setCurrentUserId(user.id);
-      }
-    };
-    getUser();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setCurrentUserId(session.user.id);
+        setCurrentUser({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+        });
       } else {
-        setCurrentUserId(null);
+        setCurrentUser(null);
       }
     });
-
-    return () => subscription.unsubscribe();
+    return unsub;
   }, []);
 
+  // Get Firebase ID token for authenticated requests
+  const getAuthHeaders = async () => {
+    const token = await firebaseAuth.getIdToken();
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+  };
+
   const fetchProfiles = async () => {
-    if (!currentUserId) return;
+    if (!currentUser) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API}/profiles?userId=${currentUserId}`);
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API}/profiles`, { headers });
       const data = await res.json();
       setProfiles(data.profiles || []);
       setDbStatus(data.source);
@@ -101,10 +106,11 @@ function CampusDating() {
   };
 
   const checkForNewProfiles = async () => {
-    if (!currentUserId) return;
+    if (!currentUser) return;
     setCheckingUpdates(true);
     try {
-      const res = await fetch(`${API}/profiles?userId=${currentUserId}`);
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API}/profiles`, { headers });
       const data = await res.json();
       const newProfiles = data.profiles || [];
       setProfiles(newProfiles);
@@ -120,29 +126,33 @@ function CampusDating() {
   // Fetch profiles from backend on mount
   useEffect(() => {
     fetchProfiles();
-  }, [currentUserId]);
+  }, [currentUser]);
 
   // Fetch matches from backend on mount
   useEffect(() => {
-    if (!currentUserId) return;
-    fetch(`${API}/matches/${currentUserId}`)
-      .then((r) => r.json())
-      .then((data) => setMatches(data.matches || []))
+    if (!currentUser) return;
+    getAuthHeaders()
+      .then((headers) =>
+        fetch(`${API}/matches/${currentUser.uid}`, { headers })
+          .then((r) => r.json())
+          .then((data) => setMatches(data.matches || []))
+          .catch(() => setMatches([]))
+      )
       .catch(() => setMatches([]));
-  }, [currentUserId, showMatchModal]);
+  }, [currentUser, showMatchModal]);
 
   const activeProfile = profiles[profileIndex];
 
   const handleAction = async (like: boolean) => {
-    if (!activeProfile || swiping || !currentUserId) return;
+    if (!activeProfile || swiping || !currentUser) return;
     setSwiping(true);
 
     try {
+      const headers = await getAuthHeaders();
       const res = await fetch(`${API}/swipe`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
-          swiperId: currentUserId,
           swipedId: activeProfile.id,
           action: like ? "like" : "pass",
         }),

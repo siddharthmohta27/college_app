@@ -20,7 +20,7 @@ import {
   Video,
 } from "lucide-react";
 import { io, Socket } from "socket.io-client";
-import { supabase, supabaseAuth } from "@/lib/supabase";
+import { firebaseAuth } from "@/lib/firebase";
 
 export const Route = createFileRoute("/app/chat")({
   head: () => ({
@@ -107,7 +107,6 @@ function ChatApp() {
 
   // Get current user from Firebase auth
   useEffect(() => {
-    const { firebaseAuth } = require("@/lib/firebase");
     const unsub = firebaseAuth.onAuthStateChanged((user: { uid: string; email: string | null; displayName: string | null } | null) => {
       if (user) {
         setCurrentUser({
@@ -122,15 +121,16 @@ function ChatApp() {
     return unsub;
   }, []);
 
-  // Connect to Socket.io server with JWT auth
+  // Connect to Socket.io server with Firebase JWT auth
   useEffect(() => {
     if (!currentUser) return;
 
     const getToken = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      return session?.access_token;
+      const user = firebaseAuth.currentUser;
+      if (user) {
+        return user.getIdToken();
+      }
+      return null;
     };
 
     getToken().then((token) => {

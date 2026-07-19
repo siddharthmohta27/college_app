@@ -4,6 +4,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const datingRouter = require("./src/routes/dating");
+const datingV3Router = require("./src/routes/dating-v3");
 const chatRouter = require("./src/routes/chat");
 const {
   pool,
@@ -19,6 +20,7 @@ app.use(express.json());
 
 // ─── REST Routes ──────────────────────────────────────────────────
 app.use("/api/dating", datingRouter);
+app.use("/api/dating", datingV3Router);
 app.use("/api/chat", chatRouter);
 
 const server = http.createServer(app);

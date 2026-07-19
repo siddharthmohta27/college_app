@@ -8,6 +8,7 @@ import { firebaseAuth } from "@/lib/firebase";
 import { useMyProfile, useUpdateProfile, useUploadPhoto, useDeletePhoto, useReorderPhotos, useUpsertPrompt, useDeletePrompt, usePrompts, useMyPrompts } from "@/hooks/use-dating-api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { uploadDatingPhoto } from "@/lib/supabase-upload";
 
 export const Route = createFileRoute("/app/dating/profile")({
   head: () => ({
@@ -183,16 +184,13 @@ function ProfileEditor() {
     try {
       for (let i = 0; i < photos.length; i++) {
         const file = photos[i];
-        // In real app, upload to Supabase Storage first
-        // For now, simulate with a placeholder URL
-        const formData_ = new FormData();
-        formData_.append("file", file);
         
-        // Simulate upload - replace with actual Supabase upload
-        const mockUrl = `https://images.unsplash.com/photo-${Date.now()}-${i}`;
+        // Upload to Supabase Storage
+        const { url, path } = await uploadDatingPhoto(currentUser?.uid || "", file);
+        
         await uploadPhoto.mutateAsync({
-          url: mockUrl,
-          storage_path: `dating-photos/${currentUser?.uid}/${file.name}`,
+          url,
+          storage_path: path,
           is_main: i === 0 && !(myProfile?.photos?.length || 0),
           width: 800,
           height: 1000,
@@ -205,6 +203,7 @@ function ProfileEditor() {
       setPhotoPreviews([]);
       refetchProfile();
     } catch (error) {
+      console.error("Upload error:", error);
       toast.error("Failed to upload photos");
     } finally {
       setIsSaving(false);

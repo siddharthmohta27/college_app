@@ -22,12 +22,18 @@ import { Route as AppClubsRouteImport } from './routes/app/clubs'
 import { Route as AppChatRouteImport } from './routes/app/chat'
 import { Route as AppCanteenRouteImport } from './routes/app/canteen'
 import { Route as AppAttendanceRouteImport } from './routes/app/attendance'
+import { Route as AppDatingStudyBuddiesRouteImport } from './routes/app/dating/study-buddies'
+import { Route as AppDatingStartupRouteImport } from './routes/app/dating/startup'
+import { Route as AppDatingSearchRouteImport } from './routes/app/dating/search'
 import { Route as AppDatingProfileViewRouteImport } from './routes/app/dating/profile-view'
 import { Route as AppDatingProfileRouteImport } from './routes/app/dating/profile'
 import { Route as AppDatingNotificationsRouteImport } from './routes/app/dating/notifications'
 import { Route as AppDatingMatchesRouteImport } from './routes/app/dating/matches'
 import { Route as AppDatingFriendsRouteImport } from './routes/app/dating/friends'
+import { Route as AppDatingEventsRouteImport } from './routes/app/dating/events'
+import { Route as AppDatingDailyPicksRouteImport } from './routes/app/dating/daily-picks'
 import { Route as AppDatingChatRouteImport } from './routes/app/dating/chat'
+import { Route as AppAdminDatingRouteImport } from './routes/app/admin/dating'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -94,6 +100,21 @@ const AppAttendanceRoute = AppAttendanceRouteImport.update({
   path: '/attendance',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDatingStudyBuddiesRoute = AppDatingStudyBuddiesRouteImport.update({
+  id: '/study-buddies',
+  path: '/study-buddies',
+  getParentRoute: () => AppDatingRoute,
+} as any)
+const AppDatingStartupRoute = AppDatingStartupRouteImport.update({
+  id: '/startup',
+  path: '/startup',
+  getParentRoute: () => AppDatingRoute,
+} as any)
+const AppDatingSearchRoute = AppDatingSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AppDatingRoute,
+} as any)
 const AppDatingProfileViewRoute = AppDatingProfileViewRouteImport.update({
   id: '/profile-view',
   path: '/profile-view',
@@ -119,10 +140,25 @@ const AppDatingFriendsRoute = AppDatingFriendsRouteImport.update({
   path: '/friends',
   getParentRoute: () => AppDatingRoute,
 } as any)
+const AppDatingEventsRoute = AppDatingEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AppDatingRoute,
+} as any)
+const AppDatingDailyPicksRoute = AppDatingDailyPicksRouteImport.update({
+  id: '/daily-picks',
+  path: '/daily-picks',
+  getParentRoute: () => AppDatingRoute,
+} as any)
 const AppDatingChatRoute = AppDatingChatRouteImport.update({
   id: '/chat',
   path: '/chat',
   getParentRoute: () => AppDatingRoute,
+} as any)
+const AppAdminDatingRoute = AppAdminDatingRouteImport.update({
+  id: '/admin/dating',
+  path: '/admin/dating',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -139,12 +175,18 @@ export interface FileRoutesByFullPath {
   '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
   '/app/': typeof AppIndexRoute
+  '/app/admin/dating': typeof AppAdminDatingRoute
   '/app/dating/chat': typeof AppDatingChatRoute
+  '/app/dating/daily-picks': typeof AppDatingDailyPicksRoute
+  '/app/dating/events': typeof AppDatingEventsRoute
   '/app/dating/friends': typeof AppDatingFriendsRoute
   '/app/dating/matches': typeof AppDatingMatchesRoute
   '/app/dating/notifications': typeof AppDatingNotificationsRoute
   '/app/dating/profile': typeof AppDatingProfileRoute
   '/app/dating/profile-view': typeof AppDatingProfileViewRoute
+  '/app/dating/search': typeof AppDatingSearchRoute
+  '/app/dating/startup': typeof AppDatingStartupRoute
+  '/app/dating/study-buddies': typeof AppDatingStudyBuddiesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -159,12 +201,18 @@ export interface FileRoutesByTo {
   '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
   '/app': typeof AppIndexRoute
+  '/app/admin/dating': typeof AppAdminDatingRoute
   '/app/dating/chat': typeof AppDatingChatRoute
+  '/app/dating/daily-picks': typeof AppDatingDailyPicksRoute
+  '/app/dating/events': typeof AppDatingEventsRoute
   '/app/dating/friends': typeof AppDatingFriendsRoute
   '/app/dating/matches': typeof AppDatingMatchesRoute
   '/app/dating/notifications': typeof AppDatingNotificationsRoute
   '/app/dating/profile': typeof AppDatingProfileRoute
   '/app/dating/profile-view': typeof AppDatingProfileViewRoute
+  '/app/dating/search': typeof AppDatingSearchRoute
+  '/app/dating/startup': typeof AppDatingStartupRoute
+  '/app/dating/study-buddies': typeof AppDatingStudyBuddiesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -181,12 +229,18 @@ export interface FileRoutesById {
   '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
   '/app/': typeof AppIndexRoute
+  '/app/admin/dating': typeof AppAdminDatingRoute
   '/app/dating/chat': typeof AppDatingChatRoute
+  '/app/dating/daily-picks': typeof AppDatingDailyPicksRoute
+  '/app/dating/events': typeof AppDatingEventsRoute
   '/app/dating/friends': typeof AppDatingFriendsRoute
   '/app/dating/matches': typeof AppDatingMatchesRoute
   '/app/dating/notifications': typeof AppDatingNotificationsRoute
   '/app/dating/profile': typeof AppDatingProfileRoute
   '/app/dating/profile-view': typeof AppDatingProfileViewRoute
+  '/app/dating/search': typeof AppDatingSearchRoute
+  '/app/dating/startup': typeof AppDatingStartupRoute
+  '/app/dating/study-buddies': typeof AppDatingStudyBuddiesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -204,12 +258,18 @@ export interface FileRouteTypes {
     | '/app/resources'
     | '/app/study'
     | '/app/'
+    | '/app/admin/dating'
     | '/app/dating/chat'
+    | '/app/dating/daily-picks'
+    | '/app/dating/events'
     | '/app/dating/friends'
     | '/app/dating/matches'
     | '/app/dating/notifications'
     | '/app/dating/profile'
     | '/app/dating/profile-view'
+    | '/app/dating/search'
+    | '/app/dating/startup'
+    | '/app/dating/study-buddies'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -224,12 +284,18 @@ export interface FileRouteTypes {
     | '/app/resources'
     | '/app/study'
     | '/app'
+    | '/app/admin/dating'
     | '/app/dating/chat'
+    | '/app/dating/daily-picks'
+    | '/app/dating/events'
     | '/app/dating/friends'
     | '/app/dating/matches'
     | '/app/dating/notifications'
     | '/app/dating/profile'
     | '/app/dating/profile-view'
+    | '/app/dating/search'
+    | '/app/dating/startup'
+    | '/app/dating/study-buddies'
   id:
     | '__root__'
     | '/'
@@ -245,12 +311,18 @@ export interface FileRouteTypes {
     | '/app/resources'
     | '/app/study'
     | '/app/'
+    | '/app/admin/dating'
     | '/app/dating/chat'
+    | '/app/dating/daily-picks'
+    | '/app/dating/events'
     | '/app/dating/friends'
     | '/app/dating/matches'
     | '/app/dating/notifications'
     | '/app/dating/profile'
     | '/app/dating/profile-view'
+    | '/app/dating/search'
+    | '/app/dating/startup'
+    | '/app/dating/study-buddies'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -353,6 +425,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAttendanceRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/dating/study-buddies': {
+      id: '/app/dating/study-buddies'
+      path: '/study-buddies'
+      fullPath: '/app/dating/study-buddies'
+      preLoaderRoute: typeof AppDatingStudyBuddiesRouteImport
+      parentRoute: typeof AppDatingRoute
+    }
+    '/app/dating/startup': {
+      id: '/app/dating/startup'
+      path: '/startup'
+      fullPath: '/app/dating/startup'
+      preLoaderRoute: typeof AppDatingStartupRouteImport
+      parentRoute: typeof AppDatingRoute
+    }
+    '/app/dating/search': {
+      id: '/app/dating/search'
+      path: '/search'
+      fullPath: '/app/dating/search'
+      preLoaderRoute: typeof AppDatingSearchRouteImport
+      parentRoute: typeof AppDatingRoute
+    }
     '/app/dating/profile-view': {
       id: '/app/dating/profile-view'
       path: '/profile-view'
@@ -388,6 +481,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDatingFriendsRouteImport
       parentRoute: typeof AppDatingRoute
     }
+    '/app/dating/events': {
+      id: '/app/dating/events'
+      path: '/events'
+      fullPath: '/app/dating/events'
+      preLoaderRoute: typeof AppDatingEventsRouteImport
+      parentRoute: typeof AppDatingRoute
+    }
+    '/app/dating/daily-picks': {
+      id: '/app/dating/daily-picks'
+      path: '/daily-picks'
+      fullPath: '/app/dating/daily-picks'
+      preLoaderRoute: typeof AppDatingDailyPicksRouteImport
+      parentRoute: typeof AppDatingRoute
+    }
     '/app/dating/chat': {
       id: '/app/dating/chat'
       path: '/chat'
@@ -395,25 +502,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDatingChatRouteImport
       parentRoute: typeof AppDatingRoute
     }
+    '/app/admin/dating': {
+      id: '/app/admin/dating'
+      path: '/admin/dating'
+      fullPath: '/app/admin/dating'
+      preLoaderRoute: typeof AppAdminDatingRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppDatingRouteChildren {
   AppDatingChatRoute: typeof AppDatingChatRoute
+  AppDatingDailyPicksRoute: typeof AppDatingDailyPicksRoute
+  AppDatingEventsRoute: typeof AppDatingEventsRoute
   AppDatingFriendsRoute: typeof AppDatingFriendsRoute
   AppDatingMatchesRoute: typeof AppDatingMatchesRoute
   AppDatingNotificationsRoute: typeof AppDatingNotificationsRoute
   AppDatingProfileRoute: typeof AppDatingProfileRoute
   AppDatingProfileViewRoute: typeof AppDatingProfileViewRoute
+  AppDatingSearchRoute: typeof AppDatingSearchRoute
+  AppDatingStartupRoute: typeof AppDatingStartupRoute
+  AppDatingStudyBuddiesRoute: typeof AppDatingStudyBuddiesRoute
 }
 
 const AppDatingRouteChildren: AppDatingRouteChildren = {
   AppDatingChatRoute: AppDatingChatRoute,
+  AppDatingDailyPicksRoute: AppDatingDailyPicksRoute,
+  AppDatingEventsRoute: AppDatingEventsRoute,
   AppDatingFriendsRoute: AppDatingFriendsRoute,
   AppDatingMatchesRoute: AppDatingMatchesRoute,
   AppDatingNotificationsRoute: AppDatingNotificationsRoute,
   AppDatingProfileRoute: AppDatingProfileRoute,
   AppDatingProfileViewRoute: AppDatingProfileViewRoute,
+  AppDatingSearchRoute: AppDatingSearchRoute,
+  AppDatingStartupRoute: AppDatingStartupRoute,
+  AppDatingStudyBuddiesRoute: AppDatingStudyBuddiesRoute,
 }
 
 const AppDatingRouteWithChildren = AppDatingRoute._addFileChildren(
@@ -430,6 +554,7 @@ interface AppRouteChildren {
   AppResourcesRoute: typeof AppResourcesRoute
   AppStudyRoute: typeof AppStudyRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppAdminDatingRoute: typeof AppAdminDatingRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -442,6 +567,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppResourcesRoute: AppResourcesRoute,
   AppStudyRoute: AppStudyRoute,
   AppIndexRoute: AppIndexRoute,
+  AppAdminDatingRoute: AppAdminDatingRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

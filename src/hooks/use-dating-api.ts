@@ -21,6 +21,7 @@ import {
   startupMatchApi,
   chatRedirectApi,
   adminApi,
+  matchesApi,
 } from "@/lib/dating-api";
 import type {
   DatingProfile,
@@ -559,6 +560,62 @@ export function useRecommendedProfiles(limit = 10) {
     queryFn: () => discoveryApi.getRecommended(limit).then((r) => r.profiles),
     enabled: !!getCurrentUserId(),
     staleTime: 60 * 1000,
+  });
+}
+
+export function useDiscoverProfiles(limit = 20, offset = 0) {
+  return useQuery({
+    queryKey: ["discovery", "discover", limit, offset],
+    queryFn: () => discoveryApi.getDiscover(limit, offset).then((r) => r.profiles),
+    enabled: !!getCurrentUserId(),
+    staleTime: 30 * 1000,
+    placeholderData: (previous) => previous,
+  });
+}
+
+export function useLikeProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (targetProfileId: number) => discoveryApi.likeProfile(targetProfileId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["discovery"] });
+      queryClient.invalidateQueries({ queryKey: ["matches"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+export function usePassProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (targetProfileId: number) => discoveryApi.passProfile(targetProfileId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["discovery"] });
+    },
+  });
+}
+
+export function useUndoSwipe() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => discoveryApi.undoLastSwipe(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["discovery"] });
+    },
+  });
+}
+
+// ──────────────────────────────────────────────────────────────
+// Matches Hooks
+// ──────────────────────────────────────────────────────────────
+
+export function useMatches() {
+  return useQuery({
+    queryKey: ["matches"],
+    queryFn: () => matchesApi.getMatches().then((r) => r.matches),
+    enabled: !!getCurrentUserId(),
+    staleTime: 30 * 1000,
+    refetchInterval: 30 * 1000,
   });
 }
 

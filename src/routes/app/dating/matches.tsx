@@ -5,7 +5,7 @@ import {
   Heart, MessageSquare, Loader2, X, ChevronLeft, Sparkles, Clock, Coffee, Zap, Users, BookOpen, Rocket, Briefcase,
 } from "lucide-react";
 import { useConversationStarters } from "@/hooks/use-dating-api";
-import { useFriends } from "@/hooks/use-dating-api";
+import { useMatches } from "@/hooks/use-dating-api";
 import { useChatRedirectInfo } from "@/hooks/use-dating-api";
 import { firebaseAuth } from "@/lib/firebase";
 import { toast } from "sonner";
@@ -24,8 +24,7 @@ function MatchesPage() {
   const [showStarters, setShowStarters] = useState<string | null>(null);
   const [starters, setStarters] = useState<string[]>([]);
 
-  const { data: matchesData, isLoading, refetch } = useFriends();
-  const matches = (matchesData as any)?.friends || [];
+  const { data: matches = [], isLoading, refetch } = useMatches();
 
   useEffect(() => {
     const unsub = firebaseAuth.onAuthStateChanged((user) => {
@@ -43,7 +42,7 @@ function MatchesPage() {
     // Get chat redirect info
     // For now, navigate directly to chat with the match's profile ID
     // The chat page will handle DM creation
-    navigate({ to: `/app/dating/chat/${match.id}` });
+    navigate({ to: `/app/dating/chat/${match.other_id || match.id}` });
   };
 
   const handleShowStarters = async (matchId: string) => {

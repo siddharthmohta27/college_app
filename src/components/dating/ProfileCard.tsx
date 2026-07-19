@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from "react";
-import { Image } from "react";
 import { ChevronLeft, ChevronRight, Heart, X, Star, Shield, Loader2, MapPin, Briefcase, BookOpen, Music, Coffee, Globe, Linkedin, Github, Instagram, MoreHorizontal, Flag, MessageSquare, Share2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { DatingProfile, ProfilePhoto, ProfilePrompt, CompatibilityReason, ProfileBadge } from "@/lib/dating-types";
@@ -14,6 +13,7 @@ interface ProfileCardProps {
   onShare?: (profileId: number) => void;
   onReport?: (profileId: number) => void;
   onChat?: (profileId: number) => void;
+  onProfileClick?: (profileId: number) => void;
   isSaved?: boolean;
   showCompatibility?: boolean;
   compatibilityScore?: number;
@@ -77,14 +77,10 @@ export function ProfileCard({
       <div className="relative aspect-[3/4] overflow-hidden">
         {photos.length > 0 ? (
           <>
-            <Image
+            <img
               src={currentPhoto?.url || "/placeholder-profile.jpg"}
               alt={`${profile.name}'s photo ${photoIndex + 1} of ${photos.length}`}
-              fill
-              className="object-cover transition-opacity duration-300"
-              sizes="100vw"
-              placeholder="blur"
-              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+              className="w-full h-full object-cover transition-opacity duration-300"
             />
             
             {/* Photo Navigation */}

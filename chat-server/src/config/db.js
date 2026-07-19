@@ -1091,9 +1091,9 @@ async function searchProfiles(query, filters = {}, limit = 20, offset = 0, curre
       dp.bio ILIKE $${paramIndex} OR
       dp.branch ILIKE $${paramIndex} OR
       dp.major ILIKE $${paramIndex} OR
-      dp.interests @> ARRAY[$${paramIndex}] OR
-      dp.clubs @> ARRAY[$${paramIndex}] OR
-      dp.skills @> ARRAY[$${paramIndex}]
+      dp.interests @> ARRAY[$${paramIndex}]::varchar[] OR
+      dp.clubs @> ARRAY[$${paramIndex}]::varchar[] OR
+      dp.skills @> ARRAY[$${paramIndex}]::varchar[]
     )`;
     params.push(`%${query.trim()}%`);
     paramIndex++;
@@ -1113,25 +1113,25 @@ async function searchProfiles(query, filters = {}, limit = 20, offset = 0, curre
   }
 
   if (filters.interests && filters.interests.length > 0) {
-    sql += ` AND dp.interests && $${paramIndex}`;
+    sql += ` AND dp.interests && $${paramIndex}::varchar[]`;
     params.push(filters.interests);
     paramIndex++;
   }
 
   if (filters.clubs && filters.clubs.length > 0) {
-    sql += ` AND dp.clubs && $${paramIndex}`;
+    sql += ` AND dp.clubs && $${paramIndex}::varchar[]`;
     params.push(filters.clubs);
     paramIndex++;
   }
 
   if (filters.skills && filters.skills.length > 0) {
-    sql += ` AND dp.skills && $${paramIndex}`;
+    sql += ` AND dp.skills && $${paramIndex}::varchar[]`;
     params.push(filters.skills);
     paramIndex++;
   }
 
   if (filters.relationship_preference && filters.relationship_preference.length > 0) {
-    sql += ` AND dp.relationship_preference && $${paramIndex}`;
+    sql += ` AND dp.relationship_preference && $${paramIndex}::varchar[]`;
     params.push(filters.relationship_preference);
     paramIndex++;
   }
@@ -1187,16 +1187,16 @@ async function getDiscoveryProfiles(currentProfileId, tab = 'recommended', filte
   switch (tab) {
     case 'friends':
       // Show profiles with 'friends' in relationship_preference
-      baseQuery += ` AND dp.relationship_preference @> ARRAY['friends']`;
+      baseQuery += ` AND dp.relationship_preference @> ARRAY['friends']::varchar[]`;
       break;
     case 'dating':
-      baseQuery += ` AND dp.relationship_preference @> ARRAY['dating']`;
+      baseQuery += ` AND dp.relationship_preference @> ARRAY['dating']::varchar[]`;
       break;
     case 'study_buddy':
-      baseQuery += ` AND dp.relationship_preference @> ARRAY['study_buddy']`;
+      baseQuery += ` AND dp.relationship_preference @> ARRAY['study_buddy']::varchar[]`;
       break;
     case 'networking':
-      baseQuery += ` AND dp.relationship_preference @> ARRAY['networking']`;
+      baseQuery += ` AND dp.relationship_preference @> ARRAY['networking']::varchar[]`;
       break;
     case 'startup_partner':
       baseQuery += ` AND dp.startup_looking_for = true`;
@@ -1240,8 +1240,18 @@ async function getDiscoveryProfiles(currentProfileId, tab = 'recommended', filte
     paramIndex++;
   }
   if (filters.interests && filters.interests.length > 0) {
-    baseQuery += ` AND dp.interests && $${paramIndex}`;
+    baseQuery += ` AND dp.interests && $${paramIndex}::varchar[]`;
     params.push(filters.interests);
+    paramIndex++;
+  }
+  if (filters.clubs && filters.clubs.length > 0) {
+    baseQuery += ` AND dp.clubs && $${paramIndex}::varchar[]`;
+    params.push(filters.clubs);
+    paramIndex++;
+  }
+  if (filters.skills && filters.skills.length > 0) {
+    baseQuery += ` AND dp.skills && $${paramIndex}::varchar[]`;
+    params.push(filters.skills);
     paramIndex++;
   }
 
@@ -1289,7 +1299,7 @@ async function getStudyBuddyMatches(currentProfileId, filters = {}, limit = 20) 
      WHERE dp.is_incognito = false
        AND dp.id != $1
        AND dp.relationship_preference @> ARRAY['study_buddy']
-       AND dp.study_subjects && $2
+       AND dp.study_subjects && $2::varchar[]
        AND dp.id NOT IN (SELECT swiped_id FROM swipes WHERE swiper_id = $1)
        AND dp.id NOT IN (
          SELECT blocked_profile_id FROM blocks WHERE blocker_profile_id = $1
@@ -1297,7 +1307,7 @@ async function getStudyBuddyMatches(currentProfileId, filters = {}, limit = 20) 
          SELECT blocker_profile_id FROM blocks WHERE blocked_profile_id = $1
        )
      ORDER BY 
-       (SELECT COUNT(*) FROM unnest(dp.study_subjects) s WHERE s = ANY($2)) DESC,
+       (SELECT COUNT(*) FROM unnest(dp.study_subjects) s WHERE s = ANY($2::varchar[])) DESC,
        dp.created_at DESC
      LIMIT $3`,
     [currentProfileId, filters.subjects || [], limit],
@@ -1572,4 +1582,5 @@ module.exports = {
   suspendUser,
   unsuspendUser,
   verifyUser,
+  isBlocked,
 };

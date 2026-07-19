@@ -619,6 +619,27 @@ export const discoveryApi = {
   
   getRecommended: (limit = 10): Promise<{ profiles: DatingProfile[] }> =>
     fetchApi(`/discover/recommended?limit=${limit}`),
+
+  getDiscover: (limit = 20, offset = 0): Promise<{ profiles: DatingProfile[] }> =>
+    fetchApi(`/discover?limit=${limit}&offset=${offset}`),
+  
+  likeProfile: (targetProfileId: number): Promise<{ isMatch: boolean; matchId?: number }> =>
+    fetchApi("/like", { method: "POST", body: JSON.stringify({ targetProfileId }) }),
+  
+  passProfile: (targetProfileId: number): Promise<{ success: boolean }> =>
+    fetchApi("/pass", { method: "POST", body: JSON.stringify({ targetProfileId }) }),
+  
+  undoLastSwipe: (): Promise<{ success: boolean }> =>
+    fetchApi("/undo", { method: "POST" }),
+};
+
+// ──────────────────────────────────────────────────────────────
+// Matches API
+// ──────────────────────────────────────────────────────────────
+
+export const matchesApi = {
+  getMatches: (): Promise<{ matches: Match[] }> =>
+    fetchApi("/matches"),
 };
 
 // ──────────────────────────────────────────────────────────────

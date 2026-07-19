@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Heart, Sparkles, Users, GraduationCap, Briefcase, Rocket, MapPin, TrendingUp, Loader2, RefreshCw, Settings, User, MessageSquare, Star, Bell, ChevronLeft } from "lucide-react";
+import { Heart, Sparkles, Users, GraduationCap, Briefcase, Rocket, MapPin, TrendingUp, Loader2, RefreshCw, Settings, User, MessageSquare, Star, Bell, ChevronLeft, X, RotateCcw } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { firebaseAuth } from "@/lib/firebase";
 import { DiscoveryTabs } from "@/components/dating/DiscoveryTabs";
-import { useMyProfile, useRecommendedProfiles } from "@/hooks/use-dating-api";
+import { useMyProfile, useDiscoverProfiles, useLikeProfile, usePassProfile, useUndoSwipe, useSaveProfile } from "@/hooks/use-dating-api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/dating")({
   head: () => ({
@@ -30,6 +31,14 @@ function CampusMatch() {
   const [currentUser, setCurrentUser] = useState<{ uid: string; email: string | null; displayName: string | null } | null>(null);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState<{ id: number; name: string; emoji?: string } | null>(null);
+  const [lastSwiped, setLastSwiped] = useState<{ profileId: number; action: 'like' | 'pass' } | null>(null);
+
+  const { data: myProfile, isLoading: profileLoading } = useMyProfile();
+  const { data: profiles = [], isLoading: discoverLoading, refetch } = useDiscoverProfiles(20, 0);
+  const likeProfile = useLikeProfile();
+  const passProfile = usePassProfile();
+  const undoSwipe = useUndoSwipe();
+  const saveProfile = useSaveProfile();
 
   useEffect(() => {
     const unsub = firebaseAuth.onAuthStateChanged((user) => {
@@ -43,27 +52,41 @@ function CampusMatch() {
     return unsub;
   }, [navigate]);
 
-  const { data: myProfile, isLoading: profileLoading } = useMyProfile();
-
-  const handleLike = async (profileId: number, type: "profile" | "photo" | "prompt") => {
-    // This would call the swipe/like API
-    // For now, simulate a match occasionally
-    if (Math.random() < 0.1) {
-      setMatchedProfile({ id: profileId, name: "Match!", emoji: "🎉" });
-      setShowMatchModal(true);
-    }
+  const handleLike = async (profileId: number) => {
+    likeProfile.mutate(profileId, {
+      onSuccess: (data) => {
+        if (data.isMatch) {
+          const match = profiles.find(p => p.id === profileId);
+          setMatchedProfile({ id: profileId, name: match?.name || "Match!", emoji: match?.emoji });
+          setShowMatchModal(true);
+          toast.success("It's a match! 🎉");
+        }
+      },
+    });
+    setLastSwiped({ profileId, action: 'like' });
   };
 
   const handlePass = (profileId: number) => {
-    // Call pass API
+    passProfile.mutate(profileId);
+    setLastSwiped({ profileId, action: 'pass' });
   };
 
   const handleSave = (profileId: number) => {
-    // Call save API
+    saveProfile.mutate(profileId);
+    toast.success("Profile saved");
   };
 
   const handleSuperLike = (profileId: number) => {
-    // Call super like API
+    // TODO: Implement super like
+    handleLike(profileId);
+  };
+
+  const handleUndo = () => {
+    if (lastSwiped) {
+      undoSwipe.mutate();
+      setLastSwiped(null);
+      toast.success("Last swipe undone");
+    }
   };
 
   const handleChat = (profileId: number) => {
@@ -150,6 +173,22 @@ function CampusMatch() {
           </button>
         </div>
       </div>
+
+      {/* Undo Bar */}
+      {lastSwiped && (
+        <div className="animate-fade-up flex items-center justify-between p-4 rounded-xl border border-border bg-surface">
+          <span className="text-sm text-muted-foreground">
+            {lastSwiped.action === 'like' ? 'Liked' : 'Passed'} a profile
+          </span>
+          <button
+            onClick={handleUndo}
+            className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium transition hover:bg-surface-elevated"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Undo
+          </button>
+        </div>
+      )}
 
       {/* Discovery Tabs */}
       <DiscoveryTabs

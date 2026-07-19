@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { requireAuth, optionalAuth } = require("../middleware/auth");
+const { pool } = require("../config/db");
 const {
   // Profile
   getDatingProfileByAuthId,
@@ -1026,6 +1027,172 @@ router.get("/chat/:profileId", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("Error getting chat redirect info:", err.message);
     res.status(500).json({ error: "Failed to get chat redirect info" });
+  }
+});
+
+// ──────────────────────────────────────────────────────────────
+// SWIPE / LIKE / MATCH
+// ──────────────────────────────────────────────────────────────
+
+// GET /api/dating/discover - Get profiles for swiping (exclude already swiped)
+router.get("/discover", requireAuth, async (req, res) => {
+  try {
+    const currentProfile = await getDatingProfileByAuthId(req.user.id);
+    if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
+
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = parseInt(req.query.offset) || 0;
+
+    const profiles = await pool.query(`
+      SELECT dp.*, pp.url as main_photo_url
+      FROM dating_profiles dp
+      LEFT JOIN profile_photos pp ON pp.profile_id = dp.id AND pp.is_main = true
+      WHERE dp.is_incognito = false
+        AND dp.id != $1
+        AND dp.id NOT IN (SELECT swiped_id FROM swipes WHERE swiper_id = $1)
+        AND dp.id NOT IN (
+          SELECT blocked_profile_id FROM blocks WHERE blocker_profile_id = $1
+          UNION
+          SELECT blocker_profile_id FROM blocks WHERE blocked_profile_id = $1
+        )
+      ORDER BY dp.created_at DESC
+      LIMIT $2 OFFSET $3
+    `, [currentProfile.id, limit, offset]);
+
+    res.json({ profiles: profiles.rows });
+  } catch (err) {
+    console.error("Error fetching discover profiles:", err.message);
+    res.status(500).json({ error: "Failed to fetch profiles" });
+  }
+});
+
+// POST /api/dating/like - Like a profile (check for mutual match)
+router.post("/like", requireAuth, async (req, res) => {
+  try {
+    const { targetProfileId } = req.body;
+    const currentProfile = await getDatingProfileByAuthId(req.user.id);
+    if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
+    if (currentProfile.id === targetProfileId) return res.status(400).json({ error: "Cannot like yourself" });
+
+    const isBlocked = await isBlocked(currentProfile.id, targetProfileId);
+    if (isBlocked) return res.status(403).json({ error: "Cannot like this profile" });
+
+    // Record the like (swipe)
+    await pool.query(`
+      INSERT INTO swipes (swiper_id, swiped_id, action)
+      VALUES ($1, $2, 'like')
+      ON CONFLICT (swiper_id, swiped_id) DO UPDATE SET action = 'like'
+    `, [currentProfile.id, targetProfileId]);
+
+    // Check for mutual like (match)
+    const mutual = await pool.query(`
+      SELECT 1 FROM swipes WHERE swiper_id = $1 AND swiped_id = $2 AND action = 'like'
+    `, [targetProfileId, currentProfile.id]);
+
+    let isMatch = false;
+    let matchId = null;
+
+    if (mutual.rows.length > 0) {
+      // Create match
+      const [u1, u2] = [Math.min(currentProfile.id, targetProfileId), Math.max(currentProfile.id, targetProfileId)];
+      const matchRes = await pool.query(`
+        INSERT INTO matches (user1_id, user2_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING id
+      `, [u1, u2]);
+      
+      if (matchRes.rows.length > 0) {
+        isMatch = true;
+        matchId = matchRes.rows[0].id;
+        
+        // Create campus graph edges
+        await pool.query(`SELECT create_match_edge($1, $2)`, [currentProfile.id, targetProfileId]);
+        
+        // Create notifications for both users
+        await createNotification(targetProfileId, 'match', 'It\'s a Match!', 
+          `${currentProfile.name} liked you back`, { matchId, otherProfileId: currentProfile.id });
+        await createNotification(currentProfile.id, 'match', 'It\'s a Match!',
+          `You and ${(await getDatingProfileById(targetProfileId))?.name || 'someone'} liked each other`, { matchId, otherProfileId: targetProfileId });
+      }
+    } else {
+      // Notify target of like
+      const targetProfile = await getDatingProfileById(targetProfileId);
+      if (targetProfile) {
+        await createNotification(targetProfileId, 'like', 'New Like',
+          `${currentProfile.name} liked your profile`, { likerProfileId: currentProfile.id });
+      }
+    }
+
+    res.json({ isMatch, matchId });
+  } catch (err) {
+    console.error("Error liking profile:", err.message);
+    res.status(500).json({ error: "Failed to like profile" });
+  }
+});
+
+// POST /api/dating/pass - Pass on a profile
+router.post("/pass", requireAuth, async (req, res) => {
+  try {
+    const { targetProfileId } = req.body;
+    const currentProfile = await getDatingProfileByAuthId(req.user.id);
+    if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
+
+    await pool.query(`
+      INSERT INTO swipes (swiper_id, swiped_id, action)
+      VALUES ($1, $2, 'pass')
+      ON CONFLICT (swiper_id, swiped_id) DO UPDATE SET action = 'pass'
+    `, [currentProfile.id, targetProfileId]);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error passing profile:", err.message);
+    res.status(500).json({ error: "Failed to pass profile" });
+  }
+});
+
+// GET /api/dating/matches - Get mutual matches
+router.get("/matches", requireAuth, async (req, res) => {
+  try {
+    const currentProfile = await getDatingProfileByAuthId(req.user.id);
+    if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
+
+    const matches = await pool.query(`
+      SELECT m.id, m.matched_at, m.user1_id, m.user2_id,
+             dp.id as other_id, dp.name, dp.profile_photo_url, dp.emoji, dp.branch, dp.year, dp.major,
+             cs.score as compatibility_score
+      FROM matches m
+      JOIN dating_profiles dp ON (m.user1_id = dp.id OR m.user2_id = dp.id) AND dp.id != $1
+      LEFT JOIN compatibility_scores cs ON 
+        (cs.profile1_id = $1 AND cs.profile2_id = dp.id) OR
+        (cs.profile2_id = $1 AND cs.profile1_id = dp.id)
+      WHERE m.user1_id = $1 OR m.user2_id = $1
+      ORDER BY m.matched_at DESC
+    `, [currentProfile.id]);
+
+    res.json({ matches: matches.rows });
+  } catch (err) {
+    console.error("Error fetching matches:", err.message);
+    res.status(500).json({ error: "Failed to fetch matches" });
+  }
+});
+
+// POST /api/dating/undo - Undo last swipe
+router.post("/undo", requireAuth, async (req, res) => {
+  try {
+    const currentProfile = await getDatingProfileByAuthId(req.user.id);
+    if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
+
+    // Delete last swipe
+    await pool.query(`
+      DELETE FROM swipes WHERE swiper_id = $1
+      ORDER BY created_at DESC LIMIT 1
+    `, [currentProfile.id]);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error undoing swipe:", err.message);
+    res.status(500).json({ error: "Failed to undo" });
   }
 });
 

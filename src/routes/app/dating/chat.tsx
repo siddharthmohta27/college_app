@@ -7,7 +7,7 @@ import { useChatRedirectInfo } from "@/hooks/use-dating-api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/app/dating/chat/$profileId")({
+export const Route = createFileRoute("/app/dating/chat")({
   head: () => ({
     meta: [{ title: "Opening Chat — Campus Match" }],
   }),

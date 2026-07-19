@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  Camera, Image, X, Loader2, Save, ArrowLeft, Heart, Users, GraduationCap, Briefcase, Rocket, MapPin, Music, Coffee, Globe, Linkedin, Github, Instagram, Shield, Check, AlertCircle, Hash, Trash2, Edit2, ChevronDown, ChevronUp,
+  Camera, Image, X, Loader2, Save, ArrowLeft, Heart, Users, GraduationCap, Briefcase, Rocket, MapPin, Music, Coffee, Globe, Linkedin, Github, Instagram, Shield, Check, AlertCircle, Hash, Trash2, Edit2, ChevronDown, ChevronUp, BookOpen, User,
 } from "lucide-react";
 import { firebaseAuth } from "@/lib/firebase";
 import { useMyProfile, useUpdateProfile, useUploadPhoto, useDeletePhoto, useReorderPhotos, useUpsertPrompt, useDeletePrompt, usePrompts, useMyPrompts } from "@/hooks/use-dating-api";
@@ -358,6 +358,10 @@ function ProfileEditor() {
                 onSavePhotos={handleSavePhotos}
                 onRemovePhoto={handleRemovePhoto}
                 onReorderPhotos={handleReorderPhotos}
+                onRemovePreview={(index: number) => {
+                  setPhotoPreviews(prev => prev.filter((_, i) => i !== index));
+                  setPhotos(prev => prev.filter((_, i) => i !== index));
+                }}
                 isSaving={isSaving}
               />
             )}
@@ -526,6 +530,7 @@ function PhotosSection({
   onSavePhotos, 
   onRemovePhoto, 
   onReorderPhotos,
+  onRemovePreview,
   isSaving 
 }: any) {
   const existingPhotos = myProfile?.photos?.filter(p => p.url).sort((a, b) => a.display_order - b.display_order) || [];
@@ -602,10 +607,7 @@ function PhotosSection({
               </div>
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button
-                  onClick={() => {
-                    setPhotoPreviews(prev => prev.filter((_, i) => i !== index));
-                    setPhotos(prev => prev.filter((_, i) => i !== index));
-                  }}
+                    onClick={() => onRemovePreview(index)}
                   className="p-2 rounded-full bg-red-500/90 text-white hover:bg-red-500 transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -689,7 +691,7 @@ function PromptsSection({ myPrompts, availablePrompts, onPromptSubmit, onPromptD
             <p className="text-sm text-muted-foreground mb-3">Add a prompt to show more personality</p>
             <div className="grid gap-3 sm:grid-cols-2">
               {availablePrompts.slice(0, 6).map((prompt: any) => (
-                <PromptCard key={prompt.id} prompt={prompt} onAdd={onPromptSubmit} />
+                <PromptCard key={prompt.id} prompt={prompt} onAdd={onPromptSubmit} currentCount={myPrompts.length} />
               ))}
             </div>
             {availablePrompts.length > 6 && (
@@ -710,7 +712,7 @@ function PromptsSection({ myPrompts, availablePrompts, onPromptSubmit, onPromptD
   );
 }
 
-function PromptCard({ prompt, onAdd }: { prompt: any; onAdd: (promptId: number, answer: string, displayOrder: number) => void }) {
+function PromptCard({ prompt, onAdd, currentCount }: { prompt: any; onAdd: (promptId: number, answer: string, displayOrder: number) => void; currentCount: number }) {
   const [showInput, setShowInput] = useState(false);
   const [answer, setAnswer] = useState("");
 
@@ -749,7 +751,7 @@ function PromptCard({ prompt, onAdd }: { prompt: any; onAdd: (promptId: number, 
           Cancel
         </button>
         <button
-          onClick={() => { onAdd(prompt.id, answer, myPrompts.length); setShowInput(false); setAnswer(""); }}
+          onClick={() => { onAdd(prompt.id, answer, currentCount); setShowInput(false); setAnswer(""); }}
           disabled={!answer.trim()}
           className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
         >
@@ -1074,10 +1076,3 @@ function PrivacySection({ formData, onChange }: any) {
     </div>
   );
 }
-
-// Import missing icons
-import { User } from "lucide-react";
-const YEAR_OPTIONS = ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year", "Grad Student", "PhD", "Alumni"];
-const BRANCH_OPTIONS = ["Computer Science", "Electronics", "Mechanical", "Civil", "Electrical", "Chemical", "Biotechnology", "Information Technology", "AI & ML", "Data Science", "Mathematics", "Physics", "Chemistry", "Economics", "Management", "Design", "Architecture"];
-const HOSTEL_OPTIONS = ["Hostel A", "Hostel B", "Hostel C", "Hostel D", "Hostel E", "Hostel F", "Off Campus", "Day Scholar"];
-const STUDY_SUBJECTS = ["DSA", "DBMS", "OS", "CN", "ML", "AI", "CG", "Compiler Design", "Software Engineering", "Computer Architecture", "Digital Logic", "Theory of Computation"];

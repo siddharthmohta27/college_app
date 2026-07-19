@@ -180,7 +180,7 @@ async function getOrCreateDatingProfile(authUserId, profileData = {}) {
       startup_looking_for, startup_role, startup_skills,
       auth_user_id
     )
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34)
      ON CONFLICT (auth_user_id) DO UPDATE SET
        name = EXCLUDED.name,
        age = EXCLUDED.age,

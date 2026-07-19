@@ -68,7 +68,7 @@ function NotificationsPage() {
   const handleNotificationClick = (notification: any) => {
     // Mark as read
     if (!notification.is_read) {
-      markRead.mutate(notification.id);
+      markRead.mutate(String(notification.id));
     }
     
     // Navigate based on type
@@ -182,7 +182,7 @@ function NotificationsPage() {
               icon={getNotificationIcon(notification.type)}
               color={getNotificationColor(notification.type)}
               onClick={() => handleNotificationClick(notification)}
-              onMarkRead={() => markRead.mutate(notification.id)}
+              onMarkRead={() => markRead.mutate(String(notification.id))}
             />
           ))
         )}

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
   ChevronLeft, ChevronRight, Heart, X, Star, MessageSquare, Share2, Flag, Shield, MapPin, Briefcase, BookOpen, Music, Coffee, Globe, Linkedin, Github, Instagram, MoreHorizontal, Loader2, Users, GraduationCap, Briefcase as BriefcaseIcon, Rocket, Sparkles, MapPin as MapPinIcon, TrendingUp, Clock, Zap,
 } from "lucide-react";
@@ -10,7 +10,7 @@ import { ProfileCard } from "@/components/dating/ProfileCard";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/app/dating/profile/$profileId")({
+export const Route = createFileRoute("/app/dating/profile-view")({
   head: () => ({
     meta: [{ title: "Profile — Campus Match" }],
   }),
@@ -19,7 +19,9 @@ export const Route = createFileRoute("/app/dating/profile/$profileId")({
 
 function ProfileView() {
   const navigate = useNavigate();
-  const { profileId } = useParams({ from: "/app/dating/profile/$profileId", strict: false });
+  // profileId comes as a search param since this is a flat route (no dynamic segment)
+  const search = useSearch({ strict: false });
+  const profileId = (search as any).profileId as string | undefined;
   const [photoIndex, setPhotoIndex] = useState(0);
   const [showPromptAnswers, setShowPromptAnswers] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
@@ -27,11 +29,12 @@ function ProfileView() {
 
   const { data: profileData, isLoading, error } = useProfile(profileId || "");
 
-  const profile = profileData?.profile;
-  const photos = profile?.photos?.filter(p => p.url).sort((a, b) => a.display_order - b.display_order) ?? [];
-  const mainPhoto = photos.find(p => p.is_main) || photos[0];
+  // useProfile queryFn resolves r.profile, so data IS the profile
+  const profile = profileData as any;
+  const photos = profile?.photos?.filter((p: any) => p.url).sort((a: any, b: any) => a.display_order - b.display_order) ?? [];
+  const mainPhoto = photos.find((p: any) => p.is_main) || photos[0];
   const currentPhoto = photos[photoIndex] || mainPhoto;
-  const prompts = profile?.prompts?.sort((a, b) => a.display_order - b.display_order) ?? [];
+  const prompts = profile?.prompts?.sort((a: any, b: any) => a.display_order - b.display_order) ?? [];
 
   const nextPhoto = () => {
     if (photos.length > 1) {

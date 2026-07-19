@@ -4,7 +4,8 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   Heart, MessageSquare, Loader2, X, ChevronLeft, Sparkles, Clock, Coffee, Zap, Users, BookOpen, Rocket, Briefcase,
 } from "lucide-react";
-import { useMatches, useConversationStarters } from "@/hooks/use-dating-api";
+import { useConversationStarters } from "@/hooks/use-dating-api";
+import { useFriends } from "@/hooks/use-dating-api";
 import { useChatRedirectInfo } from "@/hooks/use-dating-api";
 import { firebaseAuth } from "@/lib/firebase";
 import { toast } from "sonner";
@@ -23,8 +24,8 @@ function MatchesPage() {
   const [showStarters, setShowStarters] = useState<string | null>(null);
   const [starters, setStarters] = useState<string[]>([]);
 
-  const { data: matchesData, isLoading, refetch } = useMatches();
-  const matches = matchesData?.matches || [];
+  const { data: matchesData, isLoading, refetch } = useFriends();
+  const matches = (matchesData as any)?.friends || [];
 
   useEffect(() => {
     const unsub = firebaseAuth.onAuthStateChanged((user) => {
@@ -119,7 +120,7 @@ function MatchesPage() {
             </button>
           </div>
         ) : (
-          matches.map((match) => (
+          matches.map((match: any) => (
             <MatchCard
               key={match.id}
               match={match}

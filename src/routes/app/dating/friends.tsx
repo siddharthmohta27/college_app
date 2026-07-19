@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  ChevronLeft, Users, UserPlus, UserCheck, UserX, Heart, MessageSquare, Search, Loader2, X, CheckCircle2,
+  ChevronLeft, Users, UserPlus, UserCheck, UserX, Heart, MessageSquare, Search, Loader2, X, CheckCircle2, Clock,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { firebaseAuth } from "@/lib/firebase";
@@ -123,7 +123,7 @@ function FriendsPage() {
           <p className="mt-0.5 text-sm text-muted-foreground">Manage your connections</p>
         </div>
         <button
-          onClick={() => navigate({ to: "/app/dating/search" })}
+          onClick={() => navigate({ to: "/app/dating" })}
           className="flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium transition hover:bg-surface-elevated"
         >
           <Search className="h-4 w-4" />
@@ -175,7 +175,7 @@ function FriendsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">When someone sends you a request, it'll appear here</p>
               </div>
             ) : (
-              requestsData?.requests?.map((request) => (
+              requestsData?.requests?.map((request: any) => (
                 <FriendRequestCard
                   key={request.id}
                   request={request}
@@ -198,7 +198,7 @@ function FriendsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">Your sent friend requests will appear here</p>
               </div>
             ) : (
-              sentData?.requests?.map((request) => (
+              sentData?.requests?.map((request: any) => (
                 <SentRequestCard key={request.id} request={request} />
               ))
             )}
@@ -215,7 +215,7 @@ function FriendsPage() {
                 <h3 className="text-lg font-bold">No friends yet</h3>
                 <p className="mt-1 text-sm text-muted-foreground">Accept friend requests or send new ones to build your network</p>
                 <button
-                  onClick={() => navigate({ to: "/app/dating/search" })}
+                  onClick={() => navigate({ to: "/app/dating" })}
                   className="mt-4 inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/20"
                 >
                   <UserPlus className="h-4 w-4" />
@@ -223,7 +223,7 @@ function FriendsPage() {
                 </button>
               </div>
             ) : (
-              friendsData?.friends?.map((friend) => (
+              friendsData?.friends?.map((friend: any) => (
                 <FriendCard
                   key={friend.id}
                   friend={friend}

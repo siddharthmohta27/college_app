@@ -7,7 +7,9 @@
 -- ────────────────────────────────────────────────────────────
 --  EXTEND EXISTING: dating_profiles (add new columns)
 -- ────────────────────────────────────────────────────────────
-ALTER TABLE dating_profiles ADD COLUMN IF NOT EXISTS auth_user_id UUID UNIQUE;
+ALTER TABLE dating_profiles ADD COLUMN IF NOT EXISTS auth_user_id TEXT UNIQUE;
+ALTER TABLE chat_users ADD COLUMN IF NOT EXISTS auth_user_id TEXT UNIQUE;
+CREATE INDEX IF NOT EXISTS idx_chat_users_auth_user ON chat_users(auth_user_id);
 ALTER TABLE dating_profiles ADD COLUMN IF NOT EXISTS first_name VARCHAR(50);
 ALTER TABLE dating_profiles ADD COLUMN IF NOT EXISTS last_name VARCHAR(50);
 ALTER TABLE dating_profiles ADD COLUMN IF NOT EXISTS college_email VARCHAR(200);
@@ -364,7 +366,7 @@ CREATE INDEX IF NOT EXISTS idx_campus_graph_type ON campus_graph_edges(edge_type
 --  UPDATE EXISTING TABLES: Add missing columns
 -- ────────────────────────────────────────────────────────────
 -- Add auth_user_id to swipes if not exists
-ALTER TABLE swipes ADD COLUMN IF NOT EXISTS auth_user_id UUID;
+ALTER TABLE swipes ADD COLUMN IF NOT EXISTS auth_user_id TEXT;
 
 -- Add matched_at to matches
 ALTER TABLE matches ADD COLUMN IF NOT EXISTS matched_at TIMESTAMP DEFAULT NOW();

@@ -6,6 +6,7 @@ const cors = require("cors");
 const datingRouter = require("./src/routes/dating");
 const datingV3Router = require("./src/routes/dating-v3");
 const chatRouter = require("./src/routes/chat");
+const marketplaceRouter = require("./src/routes/marketplace");
 const {
   pool,
   verifyFirebaseToken,
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use("/api/dating", datingRouter);
 app.use("/api/dating", datingV3Router);
 app.use("/api/chat", chatRouter);
+app.use("/api/marketplace", marketplaceRouter);
 
 const server = http.createServer(app);
 const io = new Server(server, {

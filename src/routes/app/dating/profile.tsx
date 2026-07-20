@@ -2,10 +2,47 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  Camera, Image, X, Loader2, Save, ArrowLeft, Heart, Users, GraduationCap, Briefcase, Rocket, MapPin, Music, Coffee, Globe, Linkedin, Github, Instagram, Shield, Check, AlertCircle, Hash, Trash2, Edit2, ChevronDown, ChevronUp, BookOpen, User,
+  Camera,
+  Image,
+  X,
+  Loader2,
+  Save,
+  ArrowLeft,
+  Heart,
+  Users,
+  GraduationCap,
+  Briefcase,
+  Rocket,
+  MapPin,
+  Music,
+  Coffee,
+  Globe,
+  Linkedin,
+  Github,
+  Instagram,
+  Shield,
+  Check,
+  AlertCircle,
+  Hash,
+  Trash2,
+  Edit2,
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
+  User,
 } from "lucide-react";
 import { firebaseAuth } from "@/lib/firebase";
-import { useMyProfile, useUpdateProfile, useUploadPhoto, useDeletePhoto, useReorderPhotos, useUpsertPrompt, useDeletePrompt, usePrompts, useMyPrompts } from "@/hooks/use-dating-api";
+import {
+  useMyProfile,
+  useUpdateProfile,
+  useUploadPhoto,
+  useDeletePhoto,
+  useReorderPhotos,
+  useUpsertPrompt,
+  useDeletePrompt,
+  usePrompts,
+  useMyPrompts,
+} from "@/hooks/use-dating-api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { uploadDatingPhoto } from "@/lib/supabase-upload";
@@ -25,23 +62,75 @@ const RELATIONSHIP_OPTIONS = [
   { value: "startup_partner", label: "Startup Partner", icon: Rocket },
 ];
 
-const YEAR_OPTIONS = ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year", "Grad Student", "PhD", "Alumni"];
-
-const BRANCH_OPTIONS = [
-  "Computer Science", "Electronics", "Mechanical", "Civil", "Electrical", 
-  "Chemical", "Biotechnology", "Information Technology", "AI & ML", "Data Science",
-  "Mathematics", "Physics", "Chemistry", "Economics", "Management", "Design", "Architecture",
+const YEAR_OPTIONS = [
+  "1st Year",
+  "2nd Year",
+  "3rd Year",
+  "4th Year",
+  "5th Year",
+  "Grad Student",
+  "PhD",
+  "Alumni",
 ];
 
-const HOSTEL_OPTIONS = ["Hostel A", "Hostel B", "Hostel C", "Hostel D", "Hostel E", "Hostel F", "Off Campus", "Day Scholar"];
+const BRANCH_OPTIONS = [
+  "Computer Science",
+  "Electronics",
+  "Mechanical",
+  "Civil",
+  "Electrical",
+  "Chemical",
+  "Biotechnology",
+  "Information Technology",
+  "AI & ML",
+  "Data Science",
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Economics",
+  "Management",
+  "Design",
+  "Architecture",
+];
 
-const STUDY_SUBJECTS = ["DSA", "DBMS", "OS", "CN", "ML", "AI", "CG", "Compiler Design", "Software Engineering", "Computer Architecture", "Digital Logic", "Theory of Computation"];
+const HOSTEL_OPTIONS = [
+  "Hostel A",
+  "Hostel B",
+  "Hostel C",
+  "Hostel D",
+  "Hostel E",
+  "Hostel F",
+  "Off Campus",
+  "Day Scholar",
+];
+
+const STUDY_SUBJECTS = [
+  "DSA",
+  "DBMS",
+  "OS",
+  "CN",
+  "ML",
+  "AI",
+  "CG",
+  "Compiler Design",
+  "Software Engineering",
+  "Computer Architecture",
+  "Digital Logic",
+  "Theory of Computation",
+];
 
 function ProfileEditor() {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<{ uid: string; email: string | null; displayName: string | null; photoURL: string | null } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    uid: string;
+    email: string | null;
+    displayName: string | null;
+    photoURL: string | null;
+  } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeSection, setActiveSection] = useState<"basics" | "photos" | "prompts" | "preferences" | "social" | "privacy">("basics");
+  const [activeSection, setActiveSection] = useState<
+    "basics" | "photos" | "prompts" | "preferences" | "social" | "privacy"
+  >("basics");
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
@@ -59,7 +148,12 @@ function ProfileEditor() {
   useEffect(() => {
     const unsub = firebaseAuth.onAuthStateChanged((user) => {
       if (user) {
-        setCurrentUser({ uid: user.uid, email: user.email, displayName: user.displayName, photoURL: user.photoURL });
+        setCurrentUser({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        });
       } else {
         setCurrentUser(null);
         navigate({ to: "/login" });
@@ -141,27 +235,30 @@ function ProfileEditor() {
   }, [myProfile]);
 
   const handleChange = (field: string, value: unknown) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleArrayChange = (field: string, item: string, checked: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: checked
         ? [...(prev[field as keyof typeof prev] as string[]), item]
-        : (prev[field as keyof typeof prev] as string[]).filter(i => i !== item),
+        : (prev[field as keyof typeof prev] as string[]).filter((i) => i !== item),
     }));
   };
 
   const handleTagInput = (field: string, value: string) => {
-    const tags = value.split(",").map(t => t.trim()).filter(Boolean);
-    setFormData(prev => ({ ...prev, [field]: tags }));
+    const tags = value
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    setFormData((prev) => ({ ...prev, [field]: tags }));
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const remainingSlots = 3 - (myProfile?.photos?.length || 0);
-    
+
     if (files.length > remainingSlots) {
       toast.error(`Maximum ${remainingSlots} more photos allowed`);
       return;
@@ -169,25 +266,25 @@ function ProfileEditor() {
 
     for (const file of files) {
       if (!file.type.startsWith("image/")) continue;
-      
+
       // Create preview
       const preview = URL.createObjectURL(file);
-      setPhotoPreviews(prev => [...prev, preview]);
-      setPhotos(prev => [...prev, file]);
+      setPhotoPreviews((prev) => [...prev, preview]);
+      setPhotos((prev) => [...prev, file]);
     }
   };
 
   const handleSavePhotos = async () => {
     if (photos.length === 0) return;
-    
+
     setIsSaving(true);
     try {
       for (let i = 0; i < photos.length; i++) {
         const file = photos[i];
-        
+
         // Upload to Supabase Storage
         const { url, path } = await uploadDatingPhoto(currentUser?.uid || "", file);
-        
+
         await uploadPhoto.mutateAsync({
           url,
           storage_path: path,
@@ -264,7 +361,8 @@ function ProfileEditor() {
     }
   };
 
-  const availablePrompts = allPrompts?.filter(p => !myPrompts.some(mp => mp.prompt_id === p.id)) || [];
+  const availablePrompts =
+    allPrompts?.filter((p) => !myPrompts.some((mp) => mp.prompt_id === p.id)) || [];
 
   if (profileLoading) {
     return (
@@ -300,7 +398,7 @@ function ProfileEditor() {
                 "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
                 activeSection === id
                   ? "bg-primary/15 text-foreground font-medium"
-                  : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
+                  : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground",
               )}
             >
               <Icon className={cn("h-4 w-4 shrink-0", activeSection === id && "text-primary")} />
@@ -347,7 +445,9 @@ function ProfileEditor() {
 
         <main className="flex-1 overflow-y-auto p-6">
           <div className="mx-auto max-w-3xl space-y-6">
-            {activeSection === "basics" && <BasicsSection formData={formData} onChange={handleChange} />}
+            {activeSection === "basics" && (
+              <BasicsSection formData={formData} onChange={handleChange} />
+            )}
             {activeSection === "photos" && (
               <PhotosSection
                 myProfile={myProfile}
@@ -358,8 +458,8 @@ function ProfileEditor() {
                 onRemovePhoto={handleRemovePhoto}
                 onReorderPhotos={handleReorderPhotos}
                 onRemovePreview={(index: number) => {
-                  setPhotoPreviews(prev => prev.filter((_, i) => i !== index));
-                  setPhotos(prev => prev.filter((_, i) => i !== index));
+                  setPhotoPreviews((prev) => prev.filter((_, i) => i !== index));
+                  setPhotos((prev) => prev.filter((_, i) => i !== index));
                 }}
                 isSaving={isSaving}
               />
@@ -373,7 +473,12 @@ function ProfileEditor() {
               />
             )}
             {activeSection === "preferences" && (
-              <PreferencesSection formData={formData} onChange={handleChange} onArrayChange={handleArrayChange} handleTagInput={handleTagInput} />
+              <PreferencesSection
+                formData={formData}
+                onChange={handleChange}
+                onArrayChange={handleArrayChange}
+                handleTagInput={handleTagInput}
+              />
             )}
             {activeSection === "social" && (
               <SocialSection formData={formData} onChange={handleChange} />
@@ -389,7 +494,13 @@ function ProfileEditor() {
 }
 
 // Section Components
-function BasicsSection({ formData, onChange }: { formData: any; onChange: (field: string, value: any) => void }) {
+function BasicsSection({
+  formData,
+  onChange,
+}: {
+  formData: any;
+  onChange: (field: string, value: any) => void;
+}) {
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-border glass p-6">
@@ -399,19 +510,23 @@ function BasicsSection({ formData, onChange }: { formData: any; onChange: (field
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">First Name</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              First Name
+            </label>
             <input
               value={formData.first_name}
-              onChange={e => onChange("first_name", e.target.value)}
+              onChange={(e) => onChange("first_name", e.target.value)}
               placeholder="Siddharth"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Last Name</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Last Name
+            </label>
             <input
               value={formData.last_name}
-              onChange={e => onChange("last_name", e.target.value)}
+              onChange={(e) => onChange("last_name", e.target.value)}
               placeholder="Mohta"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
@@ -423,15 +538,17 @@ function BasicsSection({ formData, onChange }: { formData: any; onChange: (field
               min="17"
               max="35"
               value={formData.age}
-              onChange={e => onChange("age", parseInt(e.target.value) || 0)}
+              onChange={(e) => onChange("age", parseInt(e.target.value) || 0)}
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Gender</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Gender
+            </label>
             <select
               value={formData.gender}
-              onChange={e => onChange("gender", e.target.value)}
+              onChange={(e) => onChange("gender", e.target.value)}
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             >
               <option value="">Select gender</option>
@@ -442,10 +559,12 @@ function BasicsSection({ formData, onChange }: { formData: any; onChange: (field
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Pronouns</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Pronouns
+            </label>
             <input
               value={formData.pronouns}
-              onChange={e => onChange("pronouns", e.target.value)}
+              onChange={(e) => onChange("pronouns", e.target.value)}
               placeholder="He/Him, She/Her, They/Them"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
@@ -454,10 +573,14 @@ function BasicsSection({ formData, onChange }: { formData: any; onChange: (field
             <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Year</label>
             <select
               value={formData.year}
-              onChange={e => onChange("year", e.target.value)}
+              onChange={(e) => onChange("year", e.target.value)}
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             >
-              {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
+              {YEAR_OPTIONS.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -470,34 +593,48 @@ function BasicsSection({ formData, onChange }: { formData: any; onChange: (field
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Branch</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Branch
+            </label>
             <select
               value={formData.branch}
-              onChange={e => onChange("branch", e.target.value)}
+              onChange={(e) => onChange("branch", e.target.value)}
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             >
               <option value="">Select branch</option>
-              {BRANCH_OPTIONS.map(b => <option key={b} value={b}>{b}</option>)}
+              {BRANCH_OPTIONS.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Major / Specialization</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Major / Specialization
+            </label>
             <input
               value={formData.major}
-              onChange={e => onChange("major", e.target.value)}
+              onChange={(e) => onChange("major", e.target.value)}
               placeholder="Computer Science"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Hostel</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Hostel
+            </label>
             <select
               value={formData.hostel}
-              onChange={e => onChange("hostel", e.target.value)}
+              onChange={(e) => onChange("hostel", e.target.value)}
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             >
               <option value="">Select hostel</option>
-              {HOSTEL_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
+              {HOSTEL_OPTIONS.map((h) => (
+                <option key={h} value={h}>
+                  {h}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -510,7 +647,7 @@ function BasicsSection({ formData, onChange }: { formData: any; onChange: (field
         </h2>
         <textarea
           value={formData.bio}
-          onChange={e => onChange("bio", e.target.value)}
+          onChange={(e) => onChange("bio", e.target.value)}
           placeholder="Tell others about yourself..."
           rows={4}
           className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary resize-none"
@@ -521,18 +658,21 @@ function BasicsSection({ formData, onChange }: { formData: any; onChange: (field
   );
 }
 
-function PhotosSection({ 
-  myProfile, 
-  photoPreviews, 
-  photos, 
-  onPhotoUpload, 
-  onSavePhotos, 
-  onRemovePhoto, 
+function PhotosSection({
+  myProfile,
+  photoPreviews,
+  photos,
+  onPhotoUpload,
+  onSavePhotos,
+  onRemovePhoto,
   onReorderPhotos,
   onRemovePreview,
-  isSaving 
+  isSaving,
 }: any) {
-  const existingPhotos = myProfile?.photos?.filter(p => p.url).sort((a, b) => a.display_order - b.display_order) || [];
+  const existingPhotos =
+    myProfile?.photos
+      ?.filter((p: any) => p.url)
+      .sort((a: any, b: any) => a.display_order - b.display_order) || [];
   const totalPhotos = existingPhotos.length + photoPreviews.length;
 
   return (
@@ -557,7 +697,7 @@ function PhotosSection({
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Existing Photos */}
-          {existingPhotos.map((photo, index) => (
+          {existingPhotos.map((photo: any, index: number) => (
             <div key={photo.id} className="relative group">
               <div className="aspect-[3/4] rounded-xl overflow-hidden">
                 <img
@@ -595,7 +735,7 @@ function PhotosSection({
           ))}
 
           {/* New Photo Previews */}
-          {photoPreviews.map((preview, index) => (
+          {photoPreviews.map((preview: any, index: number) => (
             <div key={index} className="relative group">
               <div className="aspect-[3/4] rounded-xl overflow-hidden">
                 <img
@@ -606,7 +746,7 @@ function PhotosSection({
               </div>
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button
-                    onClick={() => onRemovePreview(index)}
+                  onClick={() => onRemovePreview(index)}
                   className="p-2 rounded-full bg-red-500/90 text-white hover:bg-red-500 transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -667,7 +807,9 @@ function PromptsSection({ myPrompts, availablePrompts, onPromptSubmit, onPromptD
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setExpandedPrompt(expandedPrompt === prompt.id ? null : prompt.id)}
+                      onClick={() =>
+                        setExpandedPrompt(expandedPrompt === prompt.id ? null : prompt.id)
+                      }
                       className="p-2 rounded-full bg-surface hover:bg-border transition"
                     >
                       <Edit2 className="h-4 w-4" />
@@ -687,10 +829,17 @@ function PromptsSection({ myPrompts, availablePrompts, onPromptSubmit, onPromptD
 
         {myPrompts.length < 3 && (
           <div>
-            <p className="text-sm text-muted-foreground mb-3">Add a prompt to show more personality</p>
+            <p className="text-sm text-muted-foreground mb-3">
+              Add a prompt to show more personality
+            </p>
             <div className="grid gap-3 sm:grid-cols-2">
               {availablePrompts.slice(0, 6).map((prompt: any) => (
-                <PromptCard key={prompt.id} prompt={prompt} onAdd={onPromptSubmit} currentCount={myPrompts.length} />
+                <PromptCard
+                  key={prompt.id}
+                  prompt={prompt}
+                  onAdd={onPromptSubmit}
+                  currentCount={myPrompts.length}
+                />
               ))}
             </div>
             {availablePrompts.length > 6 && (
@@ -711,7 +860,15 @@ function PromptsSection({ myPrompts, availablePrompts, onPromptSubmit, onPromptD
   );
 }
 
-function PromptCard({ prompt, onAdd, currentCount }: { prompt: any; onAdd: (promptId: number, answer: string, displayOrder: number) => void; currentCount: number }) {
+function PromptCard({
+  prompt,
+  onAdd,
+  currentCount,
+}: {
+  prompt: any;
+  onAdd: (promptId: number, answer: string, displayOrder: number) => void;
+  currentCount: number;
+}) {
   const [showInput, setShowInput] = useState(false);
   const [answer, setAnswer] = useState("");
 
@@ -737,20 +894,27 @@ function PromptCard({ prompt, onAdd, currentCount }: { prompt: any; onAdd: (prom
       <p className="text-sm font-medium text-foreground mb-3">{prompt.text}</p>
       <textarea
         value={answer}
-        onChange={e => setAnswer(e.target.value)}
+        onChange={(e) => setAnswer(e.target.value)}
         placeholder="Your answer..."
         rows={3}
         className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary resize-none mb-3"
       />
       <div className="flex justify-end gap-2">
         <button
-          onClick={() => { setShowInput(false); setAnswer(""); }}
+          onClick={() => {
+            setShowInput(false);
+            setAnswer("");
+          }}
           className="rounded-xl border border-border px-4 py-2 text-sm transition hover:bg-surface-elevated"
         >
           Cancel
         </button>
         <button
-          onClick={() => { onAdd(prompt.id, answer, currentCount); setShowInput(false); setAnswer(""); }}
+          onClick={() => {
+            onAdd(prompt.id, answer, currentCount);
+            setShowInput(false);
+            setAnswer("");
+          }}
           disabled={!answer.trim()}
           className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
         >
@@ -771,11 +935,14 @@ function PreferencesSection({ formData, onChange, onArrayChange, handleTagInput 
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {RELATIONSHIP_OPTIONS.map(({ value, label, icon: Icon }) => (
-            <label key={value} className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition hover:border-primary hover:bg-surface-elevated">
+            <label
+              key={value}
+              className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition hover:border-primary hover:bg-surface-elevated"
+            >
               <input
                 type="checkbox"
                 checked={formData.relationship_preference.includes(value)}
-                onChange={e => onArrayChange("relationship_preference", value, e.target.checked)}
+                onChange={(e) => onArrayChange("relationship_preference", value, e.target.checked)}
                 className="h-4 w-4 text-primary rounded border-border focus:ring-primary"
               />
               <Icon className="h-5 w-5 text-primary" />
@@ -792,37 +959,45 @@ function PreferencesSection({ formData, onChange, onArrayChange, handleTagInput 
         </h2>
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Interests (comma separated)</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Interests (comma separated)
+            </label>
             <input
               value={formData.interests.join(", ")}
-              onChange={e => handleTagInput("interests", e.target.value)}
+              onChange={(e) => handleTagInput("interests", e.target.value)}
               placeholder="Coding, Hackathons, Coffee, Anime"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Languages (comma separated)</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Languages (comma separated)
+            </label>
             <input
               value={formData.languages.join(", ")}
-              onChange={e => handleTagInput("languages", e.target.value)}
+              onChange={(e) => handleTagInput("languages", e.target.value)}
               placeholder="English, Hindi, Spanish"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Clubs (comma separated)</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Clubs (comma separated)
+            </label>
             <input
               value={formData.clubs.join(", ")}
-              onChange={e => handleTagInput("clubs", e.target.value)}
+              onChange={(e) => handleTagInput("clubs", e.target.value)}
               placeholder="ACM, IEEE, Dance Club, Debate Society"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Skills (comma separated)</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Skills (comma separated)
+            </label>
             <input
               value={formData.skills.join(", ")}
-              onChange={e => handleTagInput("skills", e.target.value)}
+              onChange={(e) => handleTagInput("skills", e.target.value)}
               placeholder="React, Python, Figma, Public Speaking"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
@@ -837,19 +1012,23 @@ function PreferencesSection({ formData, onChange, onArrayChange, handleTagInput 
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Favorite Cafe</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Favorite Cafe
+            </label>
             <input
               value={formData.favorite_cafe}
-              onChange={e => onChange("favorite_cafe", e.target.value)}
+              onChange={(e) => onChange("favorite_cafe", e.target.value)}
               placeholder="Campus Coffee House"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Favorite Sport</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Favorite Sport
+            </label>
             <input
               value={formData.favorite_sport}
-              onChange={e => onChange("favorite_sport", e.target.value)}
+              onChange={(e) => onChange("favorite_sport", e.target.value)}
               placeholder="Badminton"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
@@ -864,38 +1043,46 @@ function PreferencesSection({ formData, onChange, onArrayChange, handleTagInput 
         </h2>
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Study Subjects (comma separated)</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Study Subjects (comma separated)
+            </label>
             <input
               value={formData.study_subjects.join(", ")}
-              onChange={e => handleTagInput("study_subjects", e.target.value)}
+              onChange={(e) => handleTagInput("study_subjects", e.target.value)}
               placeholder="DSA, DBMS, ML, OS"
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">CGPA Goal</label>
+              <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                CGPA Goal
+              </label>
               <input
                 value={formData.study_cgpa_goal}
-                onChange={e => onChange("study_cgpa_goal", e.target.value)}
+                onChange={(e) => onChange("study_cgpa_goal", e.target.value)}
                 placeholder="9.0"
                 className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Preferred Time</label>
+              <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                Preferred Time
+              </label>
               <input
                 value={formData.study_preferred_time}
-                onChange={e => onChange("study_preferred_time", e.target.value)}
+                onChange={(e) => onChange("study_preferred_time", e.target.value)}
                 placeholder="Evenings, Late Night"
                 className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Preferred Location</label>
+              <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                Preferred Location
+              </label>
               <input
                 value={formData.study_preferred_location}
-                onChange={e => onChange("study_preferred_location", e.target.value)}
+                onChange={(e) => onChange("study_preferred_location", e.target.value)}
                 placeholder="Library, Hostel Room"
                 className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
               />
@@ -914,7 +1101,7 @@ function PreferencesSection({ formData, onChange, onArrayChange, handleTagInput 
             <input
               type="checkbox"
               checked={formData.startup_looking_for}
-              onChange={e => onChange("startup_looking_for", e.target.checked)}
+              onChange={(e) => onChange("startup_looking_for", e.target.checked)}
               className="h-4 w-4 text-primary rounded border-border focus:ring-primary"
             />
             <span className="font-medium">I'm looking for a startup team</span>
@@ -922,10 +1109,12 @@ function PreferencesSection({ formData, onChange, onArrayChange, handleTagInput 
           {formData.startup_looking_for && (
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Role Seeking</label>
+                <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                  Role Seeking
+                </label>
                 <select
                   value={formData.startup_role}
-                  onChange={e => onChange("startup_role", e.target.value)}
+                  onChange={(e) => onChange("startup_role", e.target.value)}
                   className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
                 >
                   <option value="">Select role</option>
@@ -938,10 +1127,12 @@ function PreferencesSection({ formData, onChange, onArrayChange, handleTagInput 
                 </select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Skills I Offer (comma separated)</label>
+                <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                  Skills I Offer (comma separated)
+                </label>
                 <input
                   value={formData.startup_skills.join(", ")}
-                  onChange={e => handleTagInput("startup_skills", e.target.value)}
+                  onChange={(e) => handleTagInput("startup_skills", e.target.value)}
                   placeholder="React, Node.js, UI/UX, Fundraising"
                   className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
                 />
@@ -967,7 +1158,7 @@ function SocialSection({ formData, onChange }: any) {
             <Instagram className="h-5 w-5 text-pink-400 shrink-0" />
             <input
               value={formData.instagram_url}
-              onChange={e => onChange("instagram_url", e.target.value)}
+              onChange={(e) => onChange("instagram_url", e.target.value)}
               placeholder="https://instagram.com/username"
               className="flex-1 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
@@ -976,7 +1167,7 @@ function SocialSection({ formData, onChange }: any) {
             <Linkedin className="h-5 w-5 text-blue-400 shrink-0" />
             <input
               value={formData.linkedin_url}
-              onChange={e => onChange("linkedin_url", e.target.value)}
+              onChange={(e) => onChange("linkedin_url", e.target.value)}
               placeholder="https://linkedin.com/in/username"
               className="flex-1 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
@@ -985,13 +1176,15 @@ function SocialSection({ formData, onChange }: any) {
             <Github className="h-5 w-5 text-gray-400 shrink-0" />
             <input
               value={formData.github_url}
-              onChange={e => onChange("github_url", e.target.value)}
+              onChange={(e) => onChange("github_url", e.target.value)}
               placeholder="https://github.com/username"
               className="flex-1 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             />
           </div>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">These will be visible on your public profile</p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          These will be visible on your public profile
+        </p>
       </section>
     </div>
   );
@@ -1010,26 +1203,32 @@ function PrivacySection({ formData, onChange }: any) {
             <input
               type="checkbox"
               checked={formData.is_incognito}
-              onChange={e => onChange("is_incognito", e.target.checked)}
+              onChange={(e) => onChange("is_incognito", e.target.checked)}
               className="h-4 w-4 text-primary rounded border-border focus:ring-primary"
             />
             <div>
               <p className="font-medium">Incognito Mode</p>
-              <p className="text-xs text-muted-foreground">Hide my profile from discovery. Only my matches and friends can see me.</p>
+              <p className="text-xs text-muted-foreground">
+                Hide my profile from discovery. Only my matches and friends can see me.
+              </p>
             </div>
           </label>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Show my profile to</label>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              Show my profile to
+            </label>
             <select
               value={formData.show_only}
-              onChange={e => onChange("show_only", e.target.value)}
+              onChange={(e) => onChange("show_only", e.target.value)}
               className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-primary"
             >
               <option value="all">Everyone</option>
               <option value="friends">Friends Only</option>
               <option value="dating">Dating Only</option>
             </select>
-            <p className="mt-1 text-xs text-muted-foreground">Controls who can see your profile in discovery</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Controls who can see your profile in discovery
+            </p>
           </div>
         </div>
       </section>
@@ -1048,10 +1247,14 @@ function PrivacySection({ formData, onChange }: any) {
                 <p className="text-xs text-muted-foreground">Verified with college email</p>
               </div>
             </div>
-            <span className={cn(
-              "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
-              formData.is_verified ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
-            )}>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
+                formData.is_verified
+                  ? "bg-emerald-500/20 text-emerald-400"
+                  : "bg-amber-500/20 text-amber-400",
+              )}
+            >
               {formData.is_verified ? "✓ Verified" : "Pending"}
             </span>
           </div>
@@ -1063,10 +1266,14 @@ function PrivacySection({ formData, onChange }: any) {
                 <p className="text-xs text-muted-foreground">Selfie verification completed</p>
               </div>
             </div>
-            <span className={cn(
-              "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
-              formData.photo_verified ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
-            )}>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
+                formData.photo_verified
+                  ? "bg-emerald-500/20 text-emerald-400"
+                  : "bg-amber-500/20 text-amber-400",
+              )}
+            >
               {formData.photo_verified ? "✓ Verified" : "Not verified"}
             </span>
           </div>

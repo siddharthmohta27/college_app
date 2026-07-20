@@ -57,7 +57,8 @@ const NAV_ITEMS = [
 function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const loaderData = Route.useLoaderData() as { userId: string | null; email: string | null; displayName: string | null } | undefined;
+  const loaderData = Route.useLoaderData() as
+    { userId: string | null; email: string | null; displayName: string | null } | undefined;
   const [displayName, setDisplayName] = useState<string | null>(loaderData?.displayName ?? null);
   const [email, setEmail] = useState<string | null>(loaderData?.email ?? null);
 
@@ -71,7 +72,12 @@ function AppShell() {
   }, []);
 
   const initials =
-    displayName?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) ||
+    displayName
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) ||
     email?.split("@")[0]?.substring(0, 2).toUpperCase() ||
     "SM";
 

@@ -2,7 +2,25 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  ChevronLeft, Loader2, Rocket, Briefcase, Coffee, Users, Heart, GraduationCap, MapPin, TrendingUp, Sparkles, Search, Filter, X, Code, Palette, BarChart, Megaphone, Lightbulb,
+  ChevronLeft,
+  Loader2,
+  Rocket,
+  Briefcase,
+  Coffee,
+  Users,
+  Heart,
+  GraduationCap,
+  MapPin,
+  TrendingUp,
+  Sparkles,
+  Search,
+  Filter,
+  X,
+  Code,
+  Palette,
+  BarChart,
+  Megaphone,
+  Lightbulb,
 } from "lucide-react";
 import { firebaseAuth } from "@/lib/firebase";
 import { useStartupMatches } from "@/hooks/use-dating-api";
@@ -46,16 +64,15 @@ function StartupMatchPage() {
   }, [navigate]);
 
   const handleRoleToggle = (role: string) => {
-    setSelectedRoles(prev =>
-      prev.includes(role)
-        ? prev.filter(r => r !== role)
-        : [...prev, role]
+    setSelectedRoles((prev) =>
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role],
     );
   };
 
-  const filteredProfiles = selectedRoles.length > 0
-    ? profiles.filter(p => p.startup_role && selectedRoles.includes(p.startup_role))
-    : profiles;
+  const filteredProfiles =
+    selectedRoles.length > 0
+      ? profiles.filter((p) => p.startup_role && selectedRoles.includes(p.startup_role))
+      : profiles;
 
   const handleLike = (profileId: number) => {
     toast.success("Liked!");
@@ -96,7 +113,10 @@ function StartupMatchPage() {
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-border glass min-h-[460px] animate-pulse">
+            <div
+              key={i}
+              className="rounded-2xl border border-border glass min-h-[460px] animate-pulse"
+            >
               <div className="aspect-[3/4] skeleton" />
               <div className="p-4 space-y-3">
                 <div className="h-4 w-3/4 skeleton rounded" />
@@ -135,7 +155,12 @@ function StartupMatchPage() {
             }`}
           >
             <Filter className="h-4 w-4" />
-            Filters {hasActiveFilters && <span className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/20 text-primary text-[10px] font-bold">*</span>}
+            Filters{" "}
+            {hasActiveFilters && (
+              <span className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                *
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -144,7 +169,9 @@ function StartupMatchPage() {
       {showFilters && (
         <div className="rounded-xl border border-border bg-surface/50 p-4 animate-fade-up">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Filter by Role Seeking</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Filter by Role Seeking
+            </h3>
             {hasActiveFilters && (
               <button
                 type="button"
@@ -217,7 +244,9 @@ function StartupMatchPage() {
 
       {/* Role Badges */}
       <div className="rounded-xl border border-border bg-surface/50 p-4 animate-fade-up">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Roles in Startup Match</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          Roles in Startup Match
+        </h3>
         <div className="flex flex-wrap gap-2">
           {STARTUP_ROLES.map(({ value, label, icon: Icon }) => (
             <span

@@ -132,7 +132,8 @@ export function useDeletePhoto() {
 export function useReorderPhotos() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (photoOrders: Array<{ id: number; display_order: number }>) => photosApi.reorder(photoOrders),
+    mutationFn: (photoOrders: Array<{ id: number; display_order: number }>) =>
+      photosApi.reorder(photoOrders),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dating-photos", "me"] });
       queryClient.invalidateQueries({ queryKey: ["dating-profile", "me"] });
@@ -543,7 +544,7 @@ export function useDiscoveryTab(
   tab: string,
   filters?: { branch?: string; year?: string; interests?: string[] },
   limit = 20,
-  offset = 0
+  offset = 0,
 ) {
   return useQuery({
     queryKey: ["discovery", tab, filters, limit, offset],

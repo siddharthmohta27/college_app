@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 export async function uploadDatingPhoto(
   userId: string,
   file: File,
-  folder: "dating-photos" | "avatars" = "dating-photos"
+  folder: "dating-photos" | "avatars" = "dating-photos",
 ): Promise<{ url: string; path: string }> {
   const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
@@ -28,7 +28,7 @@ export async function deleteDatingPhoto(path: string) {
 export async function uploadMultipleDatingPhotos(
   userId: string,
   files: File[],
-  folder: "dating-photos" | "avatars" = "dating-photos"
+  folder: "dating-photos" | "avatars" = "dating-photos",
 ): Promise<Array<{ url: string; path: string }>> {
   const results = [];
   for (const file of files) {

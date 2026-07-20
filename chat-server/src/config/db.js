@@ -37,7 +37,11 @@ try {
       const resolvedPath = path.resolve(process.cwd(), process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
       const serviceAccount = require(resolvedPath);
       initializeApp({ credential: cert(serviceAccount) });
-    } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+    } else if (
+      process.env.FIREBASE_PROJECT_ID &&
+      process.env.FIREBASE_CLIENT_EMAIL &&
+      process.env.FIREBASE_PRIVATE_KEY
+    ) {
       initializeApp({
         credential: cert({
           projectId: process.env.FIREBASE_PROJECT_ID,
@@ -46,7 +50,9 @@ try {
         }),
       });
     } else {
-      console.warn("⚠️  Firebase Admin credentials not found. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY in .env");
+      console.warn(
+        "⚠️  Firebase Admin credentials not found. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY in .env",
+      );
     }
   }
   firebaseAuth = getAuth();
@@ -107,7 +113,9 @@ async function getOrCreateChatUser(authUserId, userData = {}) {
       .slice(0, 2) ||
     "AN";
 
-  console.log(`🔍 [getOrCreateChatUser] Creating/updating chat user for auth_user_id: ${authUserId}`);
+  console.log(
+    `🔍 [getOrCreateChatUser] Creating/updating chat user for auth_user_id: ${authUserId}`,
+  );
   const res = await pool.query(
     `INSERT INTO chat_users (username, avatar, role, color, status, college_email, auth_user_id)
      VALUES ($1, $2, $3, $4, 'online', $5, $6)
@@ -121,7 +129,10 @@ async function getOrCreateChatUser(authUserId, userData = {}) {
      RETURNING id, username, avatar, role, color, status, auth_user_id`,
     [username || "Anonymous", avatarShort, role, color, email, authUserId],
   );
-  console.log(`✅ [getOrCreateChatUser] Chat user ${res.rows[0] ? 'created/updated' : 'FAILED'}:`, res.rows[0]);
+  console.log(
+    `✅ [getOrCreateChatUser] Chat user ${res.rows[0] ? "created/updated" : "FAILED"}:`,
+    res.rows[0],
+  );
   return res.rows[0];
 }
 
@@ -166,9 +177,15 @@ async function getOrCreateDatingProfile(authUserId, profileData = {}) {
   } = profileData;
 
   // Build full name from first/last if not provided
-  const fullName = name || (first_name && last_name ? `${first_name} ${last_name}` : first_name) || college_email?.split("@")[0] || "Student";
+  const fullName =
+    name ||
+    (first_name && last_name ? `${first_name} ${last_name}` : first_name) ||
+    college_email?.split("@")[0] ||
+    "Student";
 
-  console.log(`🔍 [getOrCreateDatingProfile] Creating/updating dating profile for auth_user_id: ${authUserId}`);
+  console.log(
+    `🔍 [getOrCreateDatingProfile] Creating/updating dating profile for auth_user_id: ${authUserId}`,
+  );
   const res = await pool.query(
     `INSERT INTO dating_profiles (
       name, age, year, major, bio, interests, emoji, verified,
@@ -223,17 +240,46 @@ async function getOrCreateDatingProfile(authUserId, profileData = {}) {
        study_subjects, study_cgpa_goal, study_preferred_time, study_preferred_location,
        startup_looking_for, startup_role, startup_skills`,
     [
-      fullName, age, year, major, bio, interests, emoji, verified,
-      first_name, last_name, college_email, profile_photo_url,
-      gender, pronouns, relationship_preference, branch, hostel,
-      languages, clubs, societies, skills, favorite_cafe, favorite_sport,
-      instagram_url, linkedin_url, github_url,
-      study_subjects, study_cgpa_goal, study_preferred_time, study_preferred_location,
-      startup_looking_for, startup_role, startup_skills,
+      fullName,
+      age,
+      year,
+      major,
+      bio,
+      interests,
+      emoji,
+      verified,
+      first_name,
+      last_name,
+      college_email,
+      profile_photo_url,
+      gender,
+      pronouns,
+      relationship_preference,
+      branch,
+      hostel,
+      languages,
+      clubs,
+      societies,
+      skills,
+      favorite_cafe,
+      favorite_sport,
+      instagram_url,
+      linkedin_url,
+      github_url,
+      study_subjects,
+      study_cgpa_goal,
+      study_preferred_time,
+      study_preferred_location,
+      startup_looking_for,
+      startup_role,
+      startup_skills,
       authUserId,
     ],
   );
-  console.log(`✅ [getOrCreateDatingProfile] Dating profile ${res.rows[0] ? 'created/updated' : 'FAILED'}:`, res.rows[0]);
+  console.log(
+    `✅ [getOrCreateDatingProfile] Dating profile ${res.rows[0] ? "created/updated" : "FAILED"}:`,
+    res.rows[0],
+  );
   return res.rows[0];
 }
 
@@ -241,10 +287,9 @@ async function getOrCreateDatingProfile(authUserId, profileData = {}) {
 // V3 Helper: Get dating profile by auth_user_id
 // ──────────────────────────────────────────────────────────────
 async function getDatingProfileByAuthId(authUserId) {
-  const res = await pool.query(
-    `SELECT * FROM dating_profiles WHERE auth_user_id = $1`,
-    [authUserId],
-  );
+  const res = await pool.query(`SELECT * FROM dating_profiles WHERE auth_user_id = $1`, [
+    authUserId,
+  ]);
   return res.rows[0];
 }
 
@@ -252,10 +297,7 @@ async function getDatingProfileByAuthId(authUserId) {
 // V3 Helper: Get dating profile by numeric ID
 // ──────────────────────────────────────────────────────────────
 async function getDatingProfileById(profileId) {
-  const res = await pool.query(
-    `SELECT * FROM dating_profiles WHERE id = $1`,
-    [profileId],
-  );
+  const res = await pool.query(`SELECT * FROM dating_profiles WHERE id = $1`, [profileId]);
   return res.rows[0];
 }
 
@@ -264,14 +306,43 @@ async function getDatingProfileById(profileId) {
 // ──────────────────────────────────────────────────────────────
 async function updateDatingProfile(profileId, updates) {
   const allowedFields = [
-    'name', 'age', 'year', 'major', 'bio', 'interests', 'emoji', 'verified',
-    'first_name', 'last_name', 'college_email', 'profile_photo_url',
-    'gender', 'pronouns', 'relationship_preference', 'branch', 'hostel',
-    'languages', 'clubs', 'societies', 'skills', 'favorite_cafe', 'favorite_sport',
-    'instagram_url', 'linkedin_url', 'github_url',
-    'study_subjects', 'study_cgpa_goal', 'study_preferred_time', 'study_preferred_location',
-    'startup_looking_for', 'startup_role', 'startup_skills',
-    'is_incognito', 'show_only', 'is_verified', 'photo_verified',
+    "name",
+    "age",
+    "year",
+    "major",
+    "bio",
+    "interests",
+    "emoji",
+    "verified",
+    "first_name",
+    "last_name",
+    "college_email",
+    "profile_photo_url",
+    "gender",
+    "pronouns",
+    "relationship_preference",
+    "branch",
+    "hostel",
+    "languages",
+    "clubs",
+    "societies",
+    "skills",
+    "favorite_cafe",
+    "favorite_sport",
+    "instagram_url",
+    "linkedin_url",
+    "github_url",
+    "study_subjects",
+    "study_cgpa_goal",
+    "study_preferred_time",
+    "study_preferred_location",
+    "startup_looking_for",
+    "startup_role",
+    "startup_skills",
+    "is_incognito",
+    "show_only",
+    "is_verified",
+    "photo_verified",
   ];
 
   const setClause = [];
@@ -295,7 +366,7 @@ async function updateDatingProfile(profileId, updates) {
 
   const query = `
     UPDATE dating_profiles
-    SET ${setClause.join(', ')}
+    SET ${setClause.join(", ")}
     WHERE id = $${paramIndex}
     RETURNING *
   `;
@@ -308,14 +379,22 @@ async function updateDatingProfile(profileId, updates) {
 // V3 Helper: Profile Photos
 // ──────────────────────────────────────────────────────────────
 async function addProfilePhoto(profileId, photoData) {
-  const { url, storage_path, is_main = false, display_order = 0, width, height, file_size, mime_type } = photoData;
+  const {
+    url,
+    storage_path,
+    is_main = false,
+    display_order = 0,
+    width,
+    height,
+    file_size,
+    mime_type,
+  } = photoData;
 
   // If this is main, unset other main photos
   if (is_main) {
-    await pool.query(
-      `UPDATE profile_photos SET is_main = false WHERE profile_id = $1`,
-      [profileId],
-    );
+    await pool.query(`UPDATE profile_photos SET is_main = false WHERE profile_id = $1`, [
+      profileId,
+    ]);
   }
 
   const res = await pool.query(
@@ -336,7 +415,7 @@ async function getProfilePhotos(profileId) {
 }
 
 async function updateProfilePhoto(photoId, updates) {
-  const allowedFields = ['url', 'is_main', 'display_order', 'width', 'height'];
+  const allowedFields = ["url", "is_main", "display_order", "width", "height"];
   const setClause = [];
   const values = [];
   let paramIndex = 1;
@@ -353,7 +432,9 @@ async function updateProfilePhoto(photoId, updates) {
 
   // If setting as main, unset others
   if (updates.is_main === true) {
-    const photoRes = await pool.query(`SELECT profile_id FROM profile_photos WHERE id = $1`, [photoId]);
+    const photoRes = await pool.query(`SELECT profile_id FROM profile_photos WHERE id = $1`, [
+      photoId,
+    ]);
     if (photoRes.rows[0]) {
       await pool.query(
         `UPDATE profile_photos SET is_main = false WHERE profile_id = $1 AND id != $2`,
@@ -363,7 +444,7 @@ async function updateProfilePhoto(photoId, updates) {
   }
 
   values.push(photoId);
-  const query = `UPDATE profile_photos SET ${setClause.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+  const query = `UPDATE profile_photos SET ${setClause.join(", ")} WHERE id = $${paramIndex} RETURNING *`;
   const res = await pool.query(query, values);
   return res.rows[0];
 }
@@ -377,17 +458,17 @@ async function reorderProfilePhotos(profileId, photoOrders) {
   // photoOrders: array of { id, display_order }
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    await client.query("BEGIN");
     for (const { id, display_order } of photoOrders) {
       await client.query(
         `UPDATE profile_photos SET display_order = $1 WHERE id = $2 AND profile_id = $3`,
         [display_order, id, profileId],
       );
     }
-    await client.query('COMMIT');
+    await client.query("COMMIT");
     return getProfilePhotos(profileId);
   } catch (e) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw e;
   } finally {
     client.release();
@@ -398,13 +479,15 @@ async function reorderProfilePhotos(profileId, photoOrders) {
 // V3 Helper: Prompts
 // ──────────────────────────────────────────────────────────────
 async function getActivePrompts() {
-  const res = await pool.query(`SELECT * FROM prompts WHERE is_active = true ORDER BY display_order`);
+  const res = await pool.query(
+    `SELECT * FROM prompts WHERE is_active = true ORDER BY display_order`,
+  );
   return res.rows;
 }
 
 async function getProfilePrompts(profileId) {
   const res = await pool.query(
-    `SELECT pp.*, p.text as prompt_text, p.category
+    `SELECT pp.*, p.text as prompt_text, p.category as prompt_category, p.category
      FROM profile_prompts pp
      JOIN prompts p ON p.id = pp.prompt_id
      WHERE pp.profile_id = $1
@@ -525,17 +608,17 @@ async function respondToFriendRequest(requestId, receiverProfileId, action) {
   // action: 'accept' or 'reject'
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    await client.query("BEGIN");
 
     const reqRes = await client.query(
       `SELECT * FROM friend_requests WHERE id = $1 AND receiver_profile_id = $2 AND status = 'pending'`,
       [requestId, receiverProfileId],
     );
-    if (!reqRes.rows[0]) throw new Error('Friend request not found');
+    if (!reqRes.rows[0]) throw new Error("Friend request not found");
 
     const request = reqRes.rows[0];
 
-    if (action === 'accept') {
+    if (action === "accept") {
       // Update request status
       await client.query(
         `UPDATE friend_requests SET status = 'accepted', updated_at = NOW() WHERE id = $1`,
@@ -543,20 +626,29 @@ async function respondToFriendRequest(requestId, receiverProfileId, action) {
       );
 
       // Create friendship (smaller id first)
-      const [p1, p2] = [request.sender_profile_id, request.receiver_profile_id].sort((a, b) => a - b);
+      const [p1, p2] = [request.sender_profile_id, request.receiver_profile_id].sort(
+        (a, b) => a - b,
+      );
       await client.query(
         `INSERT INTO friends (profile1_id, profile2_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
         [p1, p2],
       );
 
       // Create campus graph edges
-      await client.query(`SELECT create_friendship_edge($1, $2)`, [request.sender_profile_id, request.receiver_profile_id]);
+      await client.query(`SELECT create_friendship_edge($1, $2)`, [
+        request.sender_profile_id,
+        request.receiver_profile_id,
+      ]);
 
       // Create notification
       await client.query(
         `INSERT INTO notifications (profile_id, type, title, body, data)
          VALUES ($1, 'friend_accepted', 'Friend Request Accepted', $2, $3)`,
-        [request.sender_profile_id, `${request.receiver_profile_id} accepted your friend request`, JSON.stringify({ friend_id: request.receiver_profile_id })],
+        [
+          request.sender_profile_id,
+          `${request.receiver_profile_id} accepted your friend request`,
+          JSON.stringify({ friend_id: request.receiver_profile_id }),
+        ],
       );
     } else {
       await client.query(
@@ -565,10 +657,10 @@ async function respondToFriendRequest(requestId, receiverProfileId, action) {
       );
     }
 
-    await client.query('COMMIT');
+    await client.query("COMMIT");
     return { success: true, action };
   } catch (e) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw e;
   } finally {
     client.release();
@@ -615,7 +707,7 @@ async function getFriends(profileId) {
 async function removeFriend(profileId, friendProfileId) {
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    await client.query("BEGIN");
     await client.query(
       `DELETE FROM friends WHERE (profile1_id = $1 AND profile2_id = $2) OR (profile1_id = $2 AND profile2_id = $1)`,
       [profileId, friendProfileId],
@@ -624,10 +716,10 @@ async function removeFriend(profileId, friendProfileId) {
       `DELETE FROM campus_graph_edges WHERE (source_profile_id = $1 AND target_profile_id = $2 AND edge_type = 'friend') OR (source_profile_id = $2 AND target_profile_id = $1 AND edge_type = 'friend')`,
       [profileId, friendProfileId],
     );
-    await client.query('COMMIT');
+    await client.query("COMMIT");
     return { success: true };
   } catch (e) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw e;
   } finally {
     client.release();
@@ -689,7 +781,7 @@ async function createReport(reporterProfileId, reportedProfileId, reason, descri
   return res.rows[0];
 }
 
-async function getReports(status = 'pending') {
+async function getReports(status = "pending") {
   const res = await pool.query(
     `SELECT r.*, 
             rp.name as reporter_name, rp.email as reporter_email,
@@ -728,11 +820,11 @@ async function createNotification(profileId, type, title, body, data = {}) {
 async function getNotifications(profileId, limit = 50, unreadOnly = false) {
   let query = `SELECT * FROM notifications WHERE profile_id = $1`;
   const params = [profileId];
-  
+
   if (unreadOnly) {
     query += ` AND is_read = false`;
   }
-  
+
   query += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
   params.push(limit);
 
@@ -829,7 +921,7 @@ async function getEvents(type = null, upcomingOnly = true) {
   return res.rows;
 }
 
-async function rsvpToEvent(profileId, eventId, status = 'going') {
+async function rsvpToEvent(profileId, eventId, status = "going") {
   const res = await pool.query(
     `INSERT INTO event_rsvps (event_id, profile_id, status)
      VALUES ($1, $2, $3)
@@ -911,7 +1003,7 @@ async function isProfileSaved(saverProfileId, savedProfileId) {
 // V3 Helper: Daily Picks
 // ──────────────────────────────────────────────────────────────
 async function getDailyPicks(date = null) {
-  const targetDate = date || new Date().toISOString().split('T')[0];
+  const targetDate = date || new Date().toISOString().split("T")[0];
   const res = await pool.query(
     `SELECT dp.*, dpp.name, dpp.profile_photo_url, dpp.emoji, dpp.branch, dpp.year, dpp.major
      FROM daily_picks dp
@@ -924,10 +1016,10 @@ async function getDailyPicks(date = null) {
 }
 
 async function setDailyPicks(profiles, date = null) {
-  const targetDate = date || new Date().toISOString().split('T')[0];
+  const targetDate = date || new Date().toISOString().split("T")[0];
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    await client.query("BEGIN");
     await client.query(`DELETE FROM daily_picks WHERE pick_date = $1`, [targetDate]);
     for (let i = 0; i < profiles.length; i++) {
       await client.query(
@@ -935,10 +1027,10 @@ async function setDailyPicks(profiles, date = null) {
         [profiles[i], targetDate, i + 1],
       );
     }
-    await client.query('COMMIT');
+    await client.query("COMMIT");
     return getDailyPicks(targetDate);
   } catch (e) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw e;
   } finally {
     client.release();
@@ -951,7 +1043,7 @@ async function setDailyPicks(profiles, date = null) {
 async function createConversationStarters(matchId, starters) {
   const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    await client.query("BEGIN");
     const created = [];
     for (const starter of starters) {
       const res = await client.query(
@@ -962,10 +1054,10 @@ async function createConversationStarters(matchId, starters) {
       );
       created.push(res.rows[0]);
     }
-    await client.query('COMMIT');
+    await client.query("COMMIT");
     return created;
   } catch (e) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw e;
   } finally {
     client.release();
@@ -1006,13 +1098,33 @@ async function getProfileBadges(profileId) {
 
 async function getAllBadgeTypes() {
   return [
-    { type: 'verified_student', label: 'Verified Student', icon: '🎓', description: 'Verified college email' },
-    { type: 'club_lead', label: 'Club Lead', icon: '👑', description: 'Leads a campus club' },
-    { type: 'hackathon_winner', label: 'Hackathon Winner', icon: '🏆', description: 'Won a hackathon' },
-    { type: 'startup_founder', label: 'Startup Founder', icon: '🚀', description: 'Building a startup' },
-    { type: 'placement_coordinator', label: 'Placement Coordinator', icon: '💼', description: 'Helps with placements' },
-    { type: 'athlete', label: 'Athlete', icon: '🏃', description: 'Active in sports' },
-    { type: 'alumni_mentor', label: 'Alumni Mentor', icon: '🧑‍🏫', description: 'Mentors students' },
+    {
+      type: "verified_student",
+      label: "Verified Student",
+      icon: "🎓",
+      description: "Verified college email",
+    },
+    { type: "club_lead", label: "Club Lead", icon: "👑", description: "Leads a campus club" },
+    {
+      type: "hackathon_winner",
+      label: "Hackathon Winner",
+      icon: "🏆",
+      description: "Won a hackathon",
+    },
+    {
+      type: "startup_founder",
+      label: "Startup Founder",
+      icon: "🚀",
+      description: "Building a startup",
+    },
+    {
+      type: "placement_coordinator",
+      label: "Placement Coordinator",
+      icon: "💼",
+      description: "Helps with placements",
+    },
+    { type: "athlete", label: "Athlete", icon: "🏃", description: "Active in sports" },
+    { type: "alumni_mentor", label: "Alumni Mentor", icon: "🧑‍🏫", description: "Mentors students" },
   ];
 }
 
@@ -1056,7 +1168,13 @@ async function getMutualConnections(profileId1, profileId2) {
 // ──────────────────────────────────────────────────────────────
 // V3 Helper: Search
 // ──────────────────────────────────────────────────────────────
-async function searchProfiles(query, filters = {}, limit = 20, offset = 0, currentProfileId = null) {
+async function searchProfiles(
+  query,
+  filters = {},
+  limit = 20,
+  offset = 0,
+  currentProfileId = null,
+) {
   let sql = `
     SELECT dp.*, 
            pp.url as main_photo_url
@@ -1156,7 +1274,13 @@ async function searchProfiles(query, filters = {}, limit = 20, offset = 0, curre
 // ──────────────────────────────────────────────────────────────
 // V3 Helper: Discovery/Recommendations
 // ──────────────────────────────────────────────────────────────
-async function getDiscoveryProfiles(currentProfileId, tab = 'recommended', filters = {}, limit = 20, offset = 0) {
+async function getDiscoveryProfiles(
+  currentProfileId,
+  tab = "recommended",
+  filters = {},
+  limit = 20,
+  offset = 0,
+) {
   let baseQuery = `
     SELECT dp.*, 
            pp.url as main_photo_url,
@@ -1185,29 +1309,29 @@ async function getDiscoveryProfiles(currentProfileId, tab = 'recommended', filte
   baseQuery += ` AND dp.id NOT IN (SELECT swiped_id FROM swipes WHERE swiper_id = $1)`;
 
   switch (tab) {
-    case 'friends':
+    case "friends":
       // Show profiles with 'friends' in relationship_preference
       baseQuery += ` AND dp.relationship_preference @> ARRAY['friends']::varchar[]`;
       break;
-    case 'dating':
+    case "dating":
       baseQuery += ` AND dp.relationship_preference @> ARRAY['dating']::varchar[]`;
       break;
-    case 'study_buddy':
+    case "study_buddy":
       baseQuery += ` AND dp.relationship_preference @> ARRAY['study_buddy']::varchar[]`;
       break;
-    case 'networking':
+    case "networking":
       baseQuery += ` AND dp.relationship_preference @> ARRAY['networking']::varchar[]`;
       break;
-    case 'startup_partner':
+    case "startup_partner":
       baseQuery += ` AND dp.startup_looking_for = true`;
       break;
-    case 'new_students':
+    case "new_students":
       baseQuery += ` AND dp.created_at > NOW() - INTERVAL '30 days'`;
       break;
-    case 'nearby':
+    case "nearby":
       // Could add location-based filtering here
       break;
-    case 'trending':
+    case "trending":
       // Most liked/matched recently
       baseQuery += ` AND dp.id IN (
         SELECT target_profile_id FROM prompt_likes WHERE created_at > NOW() - INTERVAL '7 days'
@@ -1217,7 +1341,7 @@ async function getDiscoveryProfiles(currentProfileId, tab = 'recommended', filte
         SELECT swiped_id FROM swipes WHERE action = 'like' AND created_at > NOW() - INTERVAL '7 days'
       )`;
       break;
-    case 'recommended':
+    case "recommended":
     default:
       // Smart recommendations - prioritize compatibility
       baseQuery += ` AND EXISTS (
@@ -1344,16 +1468,14 @@ async function getStartupMatches(currentProfileId, filters = {}, limit = 20) {
 // ──────────────────────────────────────────────────────────────
 async function getChatRedirectInfo(currentAuthUserId, targetProfileId) {
   // Get current user's chat_user id
-  const currentChatUser = await pool.query(
-    `SELECT id FROM chat_users WHERE auth_user_id = $1`,
-    [currentAuthUserId],
-  );
+  const currentChatUser = await pool.query(`SELECT id FROM chat_users WHERE auth_user_id = $1`, [
+    currentAuthUserId,
+  ]);
 
   // Get target user's auth_user_id via dating_profiles
-  const targetProfile = await pool.query(
-    `SELECT auth_user_id FROM dating_profiles WHERE id = $1`,
-    [targetProfileId],
-  );
+  const targetProfile = await pool.query(`SELECT auth_user_id FROM dating_profiles WHERE id = $1`, [
+    targetProfileId,
+  ]);
 
   if (!currentChatUser.rows[0] || !targetProfile.rows[0]) {
     return null;
@@ -1363,10 +1485,9 @@ async function getChatRedirectInfo(currentAuthUserId, targetProfileId) {
   const targetAuthUserId = targetProfile.rows[0].auth_user_id;
 
   // Get or create target chat user
-  const targetChatUser = await pool.query(
-    `SELECT id FROM chat_users WHERE auth_user_id = $1`,
-    [targetAuthUserId],
-  );
+  const targetChatUser = await pool.query(`SELECT id FROM chat_users WHERE auth_user_id = $1`, [
+    targetAuthUserId,
+  ]);
 
   let targetChatUserId;
   if (targetChatUser.rows[0]) {
@@ -1381,10 +1502,7 @@ async function getChatRedirectInfo(currentAuthUserId, targetProfileId) {
   let conversationId = null;
   if (targetChatUserId) {
     const dmChannelId = `dm_${Math.min(currentChatUserId, targetChatUserId)}_${Math.max(currentChatUserId, targetChatUserId)}`;
-    const channelRes = await pool.query(
-      `SELECT id FROM channels WHERE id = $1`,
-      [dmChannelId],
-    );
+    const channelRes = await pool.query(`SELECT id FROM channels WHERE id = $1`, [dmChannelId]);
     if (channelRes.rows[0]) {
       conversationId = channelRes.rows[0].id;
     }
@@ -1400,15 +1518,15 @@ async function getChatRedirectInfo(currentAuthUserId, targetProfileId) {
 
 async function createOrGetDMChannel(user1ChatId, user2ChatId) {
   const dmChannelId = `dm_${Math.min(user1ChatId, user2ChatId)}_${Math.max(user1ChatId, user2ChatId)}`;
-  
+
   const res = await pool.query(
     `INSERT INTO channels (id, name, description, is_voice)
      VALUES ($1, $2, $3, false)
      ON CONFLICT (id) DO NOTHING
      RETURNING id`,
-    [dmChannelId, 'Direct Message', 'Direct message between users'],
+    [dmChannelId, "Direct Message", "Direct message between users"],
   );
-  
+
   return res.rows[0] ? res.rows[0].id : dmChannelId;
 }
 
@@ -1422,7 +1540,9 @@ async function getAdminStats() {
     pool.query(`SELECT COUNT(*) FROM friend_requests WHERE status = 'pending'`),
     pool.query(`SELECT COUNT(*) FROM reports WHERE status = 'pending'`),
     pool.query(`SELECT COUNT(*) FROM chat_users WHERE status = 'online'`),
-    pool.query(`SELECT COUNT(*) FROM dating_profiles WHERE created_at > NOW() - INTERVAL '24 hours'`),
+    pool.query(
+      `SELECT COUNT(*) FROM dating_profiles WHERE created_at > NOW() - INTERVAL '24 hours'`,
+    ),
     pool.query(`SELECT COUNT(*) FROM dating_profiles WHERE is_verified = true`),
   ]);
 
@@ -1437,7 +1557,7 @@ async function getAdminStats() {
   };
 }
 
-async function getAllUsersForAdmin(page = 1, limit = 50, search = '') {
+async function getAllUsersForAdmin(page = 1, limit = 50, search = "") {
   const offset = (page - 1) * limit;
   let query = `
     SELECT dp.id, dp.name, dp.college_email, dp.branch, dp.year, dp.is_verified, dp.is_incognito, dp.created_at,

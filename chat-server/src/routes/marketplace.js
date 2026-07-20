@@ -34,7 +34,8 @@ router.get("/listings", async (req, res) => {
       } catch (_) {}
     }
 
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT
         l.*,
         CASE WHEN s.id IS NOT NULL THEN true ELSE false END AS saved
@@ -43,7 +44,9 @@ router.get("/listings", async (req, res) => {
         ON s.listing_id = l.id AND s.saver_auth_id = $1
       WHERE l.is_sold = false
       ORDER BY l.created_at DESC
-    `, [uid || ""]);
+    `,
+      [uid || ""],
+    );
 
     res.json({ listings: result.rows });
   } catch (err) {
@@ -58,7 +61,7 @@ router.get("/listings/my", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT * FROM marketplace_listings WHERE seller_auth_id = $1 ORDER BY created_at DESC`,
-      [req.firebaseUid]
+      [req.firebaseUid],
     );
     res.json({ listings: result.rows });
   } catch (err) {
@@ -79,9 +82,10 @@ router.post("/listings", requireAuth, async (req, res) => {
   // Build seller initials and a gradient color from UID
   const name = req.firebaseName;
   const parts = name.split(" ");
-  const initials = parts.length >= 2
-    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-    : name.slice(0, 2).toUpperCase();
+  const initials =
+    parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : name.slice(0, 2).toUpperCase();
 
   const COLORS = [
     "from-fuchsia-500 to-violet-600",
@@ -116,7 +120,7 @@ router.post("/listings", requireAuth, async (req, res) => {
         initials,
         sellerColor,
         req.firebaseEmail,
-      ]
+      ],
     );
     res.status(201).json({ listing: result.rows[0] });
   } catch (err) {
@@ -132,7 +136,7 @@ router.delete("/listings/:id", requireAuth, async (req, res) => {
   try {
     const check = await pool.query(
       `SELECT seller_auth_id FROM marketplace_listings WHERE id = $1`,
-      [id]
+      [id],
     );
     if (!check.rows.length) {
       return res.status(404).json({ error: "Listing not found" });
@@ -155,18 +159,18 @@ router.post("/listings/:id/save", requireAuth, async (req, res) => {
   try {
     const existing = await pool.query(
       `SELECT id FROM marketplace_saves WHERE listing_id = $1 AND saver_auth_id = $2`,
-      [id, req.firebaseUid]
+      [id, req.firebaseUid],
     );
     if (existing.rows.length > 0) {
       await pool.query(
         `DELETE FROM marketplace_saves WHERE listing_id = $1 AND saver_auth_id = $2`,
-        [id, req.firebaseUid]
+        [id, req.firebaseUid],
       );
       res.json({ saved: false });
     } else {
       await pool.query(
         `INSERT INTO marketplace_saves (listing_id, saver_auth_id) VALUES ($1, $2)`,
-        [id, req.firebaseUid]
+        [id, req.firebaseUid],
       );
       res.json({ saved: true });
     }
@@ -183,7 +187,7 @@ router.patch("/listings/:id/sold", requireAuth, async (req, res) => {
   try {
     const check = await pool.query(
       `SELECT seller_auth_id FROM marketplace_listings WHERE id = $1`,
-      [id]
+      [id],
     );
     if (!check.rows.length) return res.status(404).json({ error: "Listing not found" });
     if (check.rows[0].seller_auth_id !== req.firebaseUid) {

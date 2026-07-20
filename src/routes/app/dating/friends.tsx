@@ -1,12 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  ChevronLeft, Users, UserPlus, UserCheck, UserX, Heart, MessageSquare, Search, Loader2, X, CheckCircle2, Clock,
+  ChevronLeft,
+  Users,
+  UserPlus,
+  UserCheck,
+  UserX,
+  Heart,
+  MessageSquare,
+  Search,
+  Loader2,
+  X,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { firebaseAuth } from "@/lib/firebase";
-import { useFriendRequests, useSentFriendRequests, useFriends, useSendFriendRequest, useRespondToFriendRequest, useRemoveFriend } from "@/hooks/use-dating-api";
+import {
+  useFriendRequests,
+  useSentFriendRequests,
+  useFriends,
+  useSendFriendRequest,
+  useRespondToFriendRequest,
+  useRemoveFriend,
+} from "@/hooks/use-dating-api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -26,9 +44,13 @@ const TABS = [
 function FriendsPage() {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<{ uid: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<TABS[number]["id"]>("requests");
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]["id"]>("requests");
 
-  const { data: requestsData, isLoading: requestsLoading, refetch: refetchRequests } = useFriendRequests();
+  const {
+    data: requestsData,
+    isLoading: requestsLoading,
+    refetch: refetchRequests,
+  } = useFriendRequests();
   const { data: sentData, isLoading: sentLoading, refetch: refetchSent } = useSentFriendRequests();
   const { data: friendsData, isLoading: friendsLoading, refetch: refetchFriends } = useFriends();
 
@@ -36,12 +58,14 @@ function FriendsPage() {
   const respondRequest = useRespondToFriendRequest();
   const removeFriend = useRemoveFriend();
 
-  // Update tab counts
-  const tabs = TABS.map(tab => ({
+  const tabs = TABS.map((tab) => ({
     ...tab,
-    count: tab.id === "requests" ? requestsData?.requests?.length || 0 :
-           tab.id === "sent" ? sentData?.requests?.length || 0 :
-           friendsData?.friends?.length || 0
+    count:
+      tab.id === "requests"
+        ? requestsData?.length || 0
+        : tab.id === "sent"
+          ? sentData?.length || 0
+          : friendsData?.length || 0,
   }));
 
   useEffect(() => {
@@ -144,16 +168,20 @@ function FriendsPage() {
                 "flex-1 flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Icon className={cn("h-4 w-4", isActive && "text-primary-foreground")} />
               <span>{tab.label}</span>
               {tab.count > 0 && (
-                <span className={cn(
-                  "h-5 min-w-5 flex items-center justify-center rounded-full text-[10px] font-bold",
-                  isActive ? "bg-primary/20 text-primary-foreground" : "bg-surface text-muted-foreground"
-                )}>
+                <span
+                  className={cn(
+                    "h-5 min-w-5 flex items-center justify-center rounded-full text-[10px] font-bold",
+                    isActive
+                      ? "bg-primary/20 text-primary-foreground"
+                      : "bg-surface text-muted-foreground",
+                  )}
+                >
                   {tab.count}
                 </span>
               )}
@@ -166,16 +194,18 @@ function FriendsPage() {
       <div className="space-y-3">
         {activeTab === "requests" && (
           <>
-            {requestsData?.requests?.length === 0 ? (
+            {!requestsData || requestsData.length === 0 ? (
               <div className="rounded-2xl border border-border glass p-12 text-center animate-fade-up">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/10">
                   <UserPlus className="h-8 w-8 text-blue-400" />
                 </div>
                 <h3 className="text-lg font-bold">No friend requests</h3>
-                <p className="mt-1 text-sm text-muted-foreground">When someone sends you a request, it'll appear here</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  When someone sends you a request, it'll appear here
+                </p>
               </div>
             ) : (
-              requestsData?.requests?.map((request: any) => (
+              requestsData?.map((request: any) => (
                 <FriendRequestCard
                   key={request.id}
                   request={request}
@@ -189,16 +219,18 @@ function FriendsPage() {
 
         {activeTab === "sent" && (
           <>
-            {sentData?.requests?.length === 0 ? (
+            {!sentData || sentData.length === 0 ? (
               <div className="rounded-2xl border border-border glass p-12 text-center animate-fade-up">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/10">
                   <UserPlus className="h-8 w-8 text-amber-400" />
                 </div>
                 <h3 className="text-lg font-bold">No sent requests</h3>
-                <p className="mt-1 text-sm text-muted-foreground">Your sent friend requests will appear here</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Your sent friend requests will appear here
+                </p>
               </div>
             ) : (
-              sentData?.requests?.map((request: any) => (
+              sentData?.map((request: any) => (
                 <SentRequestCard key={request.id} request={request} />
               ))
             )}
@@ -207,13 +239,15 @@ function FriendsPage() {
 
         {activeTab === "friends" && (
           <>
-            {friendsData?.friends?.length === 0 ? (
+            {!friendsData || friendsData.length === 0 ? (
               <div className="rounded-2xl border border-border glass p-12 text-center animate-fade-up">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
                   <Users className="h-8 w-8 text-emerald-400" />
                 </div>
                 <h3 className="text-lg font-bold">No friends yet</h3>
-                <p className="mt-1 text-sm text-muted-foreground">Accept friend requests or send new ones to build your network</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Accept friend requests or send new ones to build your network
+                </p>
                 <button
                   onClick={() => navigate({ to: "/app/dating" })}
                   className="mt-4 inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/20"
@@ -223,7 +257,7 @@ function FriendsPage() {
                 </button>
               </div>
             ) : (
-              friendsData?.friends?.map((friend: any) => (
+              friendsData?.map((friend: any) => (
                 <FriendCard
                   key={friend.id}
                   friend={friend}

@@ -3,7 +3,7 @@
 
 import { firebaseAuth } from "@/lib/firebase";
 
-const API_BASE = 
+const API_BASE =
   typeof window !== "undefined"
     ? `http://${window.location.hostname}:3001/api/dating`
     : "http://localhost:3001/api/dating";
@@ -22,12 +22,12 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
     ...options,
     headers: { ...headers, ...options.headers },
   });
-  
+
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: "Request failed" }));
     throw new Error(error.error || `HTTP ${res.status}`);
   }
-  
+
   return res.json();
 }
 
@@ -312,14 +312,12 @@ export interface Report {
 // ──────────────────────────────────────────────────────────────
 
 export const profileApi = {
-  getMe: (): Promise<{ profile: DatingProfile }> => 
-    fetchApi("/profile/me"),
-  
+  getMe: (): Promise<{ profile: DatingProfile }> => fetchApi("/profile/me"),
+
   updateMe: (data: Partial<DatingProfile>): Promise<{ profile: DatingProfile }> =>
     fetchApi("/profile/me", { method: "PUT", body: JSON.stringify(data) }),
-  
-  getById: (id: string): Promise<{ profile: DatingProfile }> =>
-    fetchApi(`/profile/${id}`),
+
+  getById: (id: string): Promise<{ profile: DatingProfile }> => fetchApi(`/profile/${id}`),
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -327,9 +325,8 @@ export const profileApi = {
 // ──────────────────────────────────────────────────────────────
 
 export const photosApi = {
-  getMine: (): Promise<{ photos: ProfilePhoto[] }> =>
-    fetchApi("/photos"),
-  
+  getMine: (): Promise<{ photos: ProfilePhoto[] }> => fetchApi("/photos"),
+
   upload: (data: {
     url: string;
     storage_path: string;
@@ -340,14 +337,19 @@ export const photosApi = {
     mime_type?: string;
   }): Promise<{ photo: ProfilePhoto }> =>
     fetchApi("/photos", { method: "POST", body: JSON.stringify(data) }),
-  
-  update: (id: string, data: { is_main?: boolean; display_order?: number }): Promise<{ photo: ProfilePhoto }> =>
+
+  update: (
+    id: string,
+    data: { is_main?: boolean; display_order?: number },
+  ): Promise<{ photo: ProfilePhoto }> =>
     fetchApi(`/photos/${id}`, { method: "PUT", body: JSON.stringify(data) }),
-  
+
   delete: (id: string): Promise<{ success: boolean }> =>
     fetchApi(`/photos/${id}`, { method: "DELETE" }),
-  
-  reorder: (photoOrders: Array<{ id: number; display_order: number }>): Promise<{ photos: ProfilePhoto[] }> =>
+
+  reorder: (
+    photoOrders: Array<{ id: number; display_order: number }>,
+  ): Promise<{ photos: ProfilePhoto[] }> =>
     fetchApi("/photos/reorder", { method: "PUT", body: JSON.stringify({ photoOrders }) }),
 };
 
@@ -356,15 +358,17 @@ export const photosApi = {
 // ──────────────────────────────────────────────────────────────
 
 export const promptsApi = {
-  getAll: (): Promise<{ prompts: Prompt[] }> =>
-    fetchApi("/prompts"),
-  
-  getMine: (): Promise<{ prompts: ProfilePrompt[] }> =>
-    fetchApi("/prompts/me"),
-  
-  upsert: (data: { prompt_id: number; answer: string; display_order?: number }): Promise<{ prompt: ProfilePrompt }> =>
+  getAll: (): Promise<{ prompts: Prompt[] }> => fetchApi("/prompts"),
+
+  getMine: (): Promise<{ prompts: ProfilePrompt[] }> => fetchApi("/prompts/me"),
+
+  upsert: (data: {
+    prompt_id: number;
+    answer: string;
+    display_order?: number;
+  }): Promise<{ prompt: ProfilePrompt }> =>
     fetchApi("/prompts/me", { method: "POST", body: JSON.stringify(data) }),
-  
+
   delete: (promptId: string): Promise<{ success: boolean }> =>
     fetchApi(`/prompts/me/${promptId}`, { method: "DELETE" }),
 };
@@ -375,17 +379,17 @@ export const promptsApi = {
 
 export const promptLikesApi = {
   like: (promptId: string, targetProfileId: number): Promise<{ like: PromptLike }> =>
-    fetchApi(`/prompts/${promptId}/like`, { 
-      method: "POST", 
-      body: JSON.stringify({ targetProfileId }) 
+    fetchApi(`/prompts/${promptId}/like`, {
+      method: "POST",
+      body: JSON.stringify({ targetProfileId }),
     }),
-  
+
   unlike: (promptId: string, targetProfileId: number): Promise<{ success: boolean }> =>
-    fetchApi(`/prompts/${promptId}/like`, { 
-      method: "DELETE", 
-      body: JSON.stringify({ targetProfileId }) 
+    fetchApi(`/prompts/${promptId}/like`, {
+      method: "DELETE",
+      body: JSON.stringify({ targetProfileId }),
     }),
-  
+
   getForProfile: (targetProfileId: number): Promise<{ likes: PromptLike[] }> =>
     fetchApi(`/prompts/likes/${targetProfileId}`),
 };
@@ -396,17 +400,17 @@ export const promptLikesApi = {
 
 export const photoLikesApi = {
   like: (photoId: string, targetProfileId: number): Promise<{ like: PhotoLike }> =>
-    fetchApi(`/photos/${photoId}/like`, { 
-      method: "POST", 
-      body: JSON.stringify({ targetProfileId }) 
+    fetchApi(`/photos/${photoId}/like`, {
+      method: "POST",
+      body: JSON.stringify({ targetProfileId }),
     }),
-  
+
   unlike: (photoId: string, targetProfileId: number): Promise<{ success: boolean }> =>
-    fetchApi(`/photos/${photoId}/like`, { 
-      method: "DELETE", 
-      body: JSON.stringify({ targetProfileId }) 
+    fetchApi(`/photos/${photoId}/like`, {
+      method: "DELETE",
+      body: JSON.stringify({ targetProfileId }),
     }),
-  
+
   getForProfile: (targetProfileId: number): Promise<{ likes: PhotoLike[] }> =>
     fetchApi(`/photos/likes/${targetProfileId}`),
 };
@@ -417,26 +421,26 @@ export const photoLikesApi = {
 
 export const friendsApi = {
   sendRequest: (receiverProfileId: number): Promise<{ request: FriendRequest }> =>
-    fetchApi("/friends/request", { 
-      method: "POST", 
-      body: JSON.stringify({ receiverProfileId }) 
+    fetchApi("/friends/request", {
+      method: "POST",
+      body: JSON.stringify({ receiverProfileId }),
     }),
-  
-  respond: (requestId: string, action: "accept" | "reject"): Promise<{ success: boolean; action: string }> =>
-    fetchApi(`/friends/request/${requestId}`, { 
-      method: "PUT", 
-      body: JSON.stringify({ action }) 
+
+  respond: (
+    requestId: string,
+    action: "accept" | "reject",
+  ): Promise<{ success: boolean; action: string }> =>
+    fetchApi(`/friends/request/${requestId}`, {
+      method: "PUT",
+      body: JSON.stringify({ action }),
     }),
-  
-  getRequests: (): Promise<{ requests: FriendRequest[] }> =>
-    fetchApi("/friends/requests"),
-  
-  getSentRequests: (): Promise<{ requests: FriendRequest[] }> =>
-    fetchApi("/friends/requests/sent"),
-  
-  getFriends: (): Promise<{ friends: Friend[] }> =>
-    fetchApi("/friends"),
-  
+
+  getRequests: (): Promise<{ requests: FriendRequest[] }> => fetchApi("/friends/requests"),
+
+  getSentRequests: (): Promise<{ requests: FriendRequest[] }> => fetchApi("/friends/requests/sent"),
+
+  getFriends: (): Promise<{ friends: Friend[] }> => fetchApi("/friends"),
+
   remove: (friendId: string): Promise<{ success: boolean }> =>
     fetchApi(`/friends/${friendId}`, { method: "DELETE" }),
 };
@@ -447,16 +451,17 @@ export const friendsApi = {
 
 export const blocksApi = {
   block: (blockedProfileId: number, reason?: string): Promise<{ block: unknown }> =>
-    fetchApi("/blocks", { 
-      method: "POST", 
-      body: JSON.stringify({ blockedProfileId, reason }) 
+    fetchApi("/blocks", {
+      method: "POST",
+      body: JSON.stringify({ blockedProfileId, reason }),
     }),
-  
+
   unblock: (blockedProfileId: string): Promise<{ success: boolean }> =>
     fetchApi(`/blocks/${blockedProfileId}`, { method: "DELETE" }),
-  
-  getBlocked: (): Promise<{ blocked: Array<{ id: number; name: string; profile_photo_url?: string; emoji: string }> }> =>
-    fetchApi("/blocks"),
+
+  getBlocked: (): Promise<{
+    blocked: Array<{ id: number; name: string; profile_photo_url?: string; emoji: string }>;
+  }> => fetchApi("/blocks"),
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -464,7 +469,11 @@ export const blocksApi = {
 // ──────────────────────────────────────────────────────────────
 
 export const reportsApi = {
-  create: (data: { reportedProfileId: number; reason: string; description?: string }): Promise<{ report: Report }> =>
+  create: (data: {
+    reportedProfileId: number;
+    reason: string;
+    description?: string;
+  }): Promise<{ report: Report }> =>
     fetchApi("/reports", { method: "POST", body: JSON.stringify(data) }),
 };
 
@@ -473,17 +482,19 @@ export const reportsApi = {
 // ──────────────────────────────────────────────────────────────
 
 export const notificationsApi = {
-  get: (limit = 50, unreadOnly = false): Promise<{ notifications: Notification[]; unreadCount: number }> =>
+  get: (
+    limit = 50,
+    unreadOnly = false,
+  ): Promise<{ notifications: Notification[]; unreadCount: number }> =>
     fetchApi(`/notifications?limit=${limit}&unread=${unreadOnly}`),
-  
+
   markRead: (id: string): Promise<{ notification: Notification }> =>
     fetchApi(`/notifications/${id}/read`, { method: "PUT" }),
-  
+
   markAllRead: (): Promise<{ success: boolean }> =>
     fetchApi("/notifications/read-all", { method: "PUT" }),
-  
-  getUnreadCount: (): Promise<{ count: number }> =>
-    fetchApi("/notifications/unread-count"),
+
+  getUnreadCount: (): Promise<{ count: number }> => fetchApi("/notifications/unread-count"),
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -493,7 +504,7 @@ export const notificationsApi = {
 export const compatibilityApi = {
   getWithProfile: (profileId: string): Promise<{ score: CompatibilityScore | null }> =>
     fetchApi(`/compatibility/${profileId}`),
-  
+
   getTop: (limit = 20): Promise<{ scores: CompatibilityScore[] }> =>
     fetchApi(`/compatibility/top?limit=${limit}`),
 };
@@ -509,15 +520,34 @@ export const eventsApi = {
     if (!upcomingOnly) params.set("upcoming", "false");
     return fetchApi(`/events?${params.toString()}`);
   },
-  
+
   rsvp: (eventId: string, status = "going"): Promise<{ rsvp: unknown }> =>
     fetchApi(`/events/${eventId}/rsvp`, { method: "POST", body: JSON.stringify({ status }) }),
-  
-  getRsvps: (eventId: string): Promise<{ rsvps: Array<{ id: number; name: string; profile_photo_url?: string; emoji: string; branch?: string; year?: string }> }> =>
-    fetchApi(`/events/${eventId}/rsvps`),
-  
-  getMyRsvps: (): Promise<{ rsvps: Array<{ id: number; status: string; title: string; start_time: string; end_time?: string; location?: string; event_type: string }> }> =>
-    fetchApi("/events/rsvps/me"),
+
+  getRsvps: (
+    eventId: string,
+  ): Promise<{
+    rsvps: Array<{
+      id: number;
+      name: string;
+      profile_photo_url?: string;
+      emoji: string;
+      branch?: string;
+      year?: string;
+    }>;
+  }> => fetchApi(`/events/${eventId}/rsvps`),
+
+  getMyRsvps: (): Promise<{
+    rsvps: Array<{
+      id: number;
+      status: string;
+      title: string;
+      start_time: string;
+      end_time?: string;
+      location?: string;
+      event_type: string;
+    }>;
+  }> => fetchApi("/events/rsvps/me"),
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -527,13 +557,12 @@ export const eventsApi = {
 export const savedProfilesApi = {
   save: (savedProfileId: number): Promise<{ saved: SavedProfile }> =>
     fetchApi("/saved", { method: "POST", body: JSON.stringify({ savedProfileId }) }),
-  
+
   unsave: (savedProfileId: string): Promise<{ success: boolean }> =>
     fetchApi(`/saved/${savedProfileId}`, { method: "DELETE" }),
-  
-  getSaved: (): Promise<{ saved: SavedProfile[] }> =>
-    fetchApi("/saved"),
-  
+
+  getSaved: (): Promise<{ saved: SavedProfile[] }> => fetchApi("/saved"),
+
   check: (savedProfileId: string): Promise<{ isSaved: boolean }> =>
     fetchApi(`/saved/check/${savedProfileId}`),
 };
@@ -563,11 +592,11 @@ export const conversationStartersApi = {
 // ──────────────────────────────────────────────────────────────
 
 export const badgesApi = {
-  getAll: (): Promise<{ badges: Array<{ type: string; label: string; icon: string; description: string }> }> =>
-    fetchApi("/badges"),
-  
-  getMine: (): Promise<{ badges: ProfileBadge[] }> =>
-    fetchApi("/badges/me"),
+  getAll: (): Promise<{
+    badges: Array<{ type: string; label: string; icon: string; description: string }>;
+  }> => fetchApi("/badges"),
+
+  getMine: (): Promise<{ badges: ProfileBadge[] }> => fetchApi("/badges/me"),
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -592,7 +621,7 @@ export const searchApi = {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
         if (Array.isArray(value)) {
-          value.forEach(v => searchParams.append(key, v));
+          value.forEach((v) => searchParams.append(key, v));
         } else {
           searchParams.set(key, String(value));
         }
@@ -607,30 +636,34 @@ export const searchApi = {
 // ──────────────────────────────────────────────────────────────
 
 export const discoveryApi = {
-  getTab: (tab: string, filters?: { branch?: string; year?: string; interests?: string[] }, limit = 20, offset = 0): Promise<{ profiles: DatingProfile[]; tab: string }> => {
+  getTab: (
+    tab: string,
+    filters?: { branch?: string; year?: string; interests?: string[] },
+    limit = 20,
+    offset = 0,
+  ): Promise<{ profiles: DatingProfile[]; tab: string }> => {
     const params = new URLSearchParams({ tab });
     if (filters?.branch) params.set("branch", filters.branch);
     if (filters?.year) params.set("year", filters.year);
-    if (filters?.interests?.length) filters.interests.forEach(i => params.append("interests", i));
+    if (filters?.interests?.length) filters.interests.forEach((i) => params.append("interests", i));
     params.set("limit", String(limit));
     params.set("offset", String(offset));
     return fetchApi(`/discover/${params.get("tab")}?${params.toString()}`);
   },
-  
+
   getRecommended: (limit = 10): Promise<{ profiles: DatingProfile[] }> =>
     fetchApi(`/discover/recommended?limit=${limit}`),
 
   getDiscover: (limit = 20, offset = 0): Promise<{ profiles: DatingProfile[] }> =>
     fetchApi(`/discover?limit=${limit}&offset=${offset}`),
-  
+
   likeProfile: (targetProfileId: number): Promise<{ isMatch: boolean; matchId?: number }> =>
     fetchApi("/like", { method: "POST", body: JSON.stringify({ targetProfileId }) }),
-  
+
   passProfile: (targetProfileId: number): Promise<{ success: boolean }> =>
     fetchApi("/pass", { method: "POST", body: JSON.stringify({ targetProfileId }) }),
-  
-  undoLastSwipe: (): Promise<{ success: boolean }> =>
-    fetchApi("/undo", { method: "POST" }),
+
+  undoLastSwipe: (): Promise<{ success: boolean }> => fetchApi("/undo", { method: "POST" }),
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -638,8 +671,7 @@ export const discoveryApi = {
 // ──────────────────────────────────────────────────────────────
 
 export const matchesApi = {
-  getMatches: (): Promise<{ matches: Match[] }> =>
-    fetchApi("/matches"),
+  getMatches: (): Promise<{ matches: Match[] }> => fetchApi("/matches"),
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -649,7 +681,7 @@ export const matchesApi = {
 export const studyBuddyApi = {
   getMatches: (subjects?: string[], limit = 20): Promise<{ profiles: DatingProfile[] }> => {
     const params = new URLSearchParams();
-    if (subjects?.length) subjects.forEach(s => params.append("subjects", s));
+    if (subjects?.length) subjects.forEach((s) => params.append("subjects", s));
     params.set("limit", String(limit));
     return fetchApi(`/study-buddies?${params.toString()}`);
   },
@@ -669,8 +701,7 @@ export const startupMatchApi = {
 // ──────────────────────────────────────────────────────────────
 
 export const chatRedirectApi = {
-  getInfo: (profileId: string): Promise<ChatRedirectInfo> =>
-    fetchApi(`/chat/${profileId}`),
+  getInfo: (profileId: string): Promise<ChatRedirectInfo> => fetchApi(`/chat/${profileId}`),
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -678,27 +709,29 @@ export const chatRedirectApi = {
 // ──────────────────────────────────────────────────────────────
 
 export const adminApi = {
-  getStats: (): Promise<{ stats: AdminStats }> =>
-    fetchApi("/admin/stats"),
-  
+  getStats: (): Promise<{ stats: AdminStats }> => fetchApi("/admin/stats"),
+
   getUsers: (page = 1, limit = 50, search = ""): Promise<{ users: AdminUser[] }> => {
     const params = new URLSearchParams({ page: String(page), limit: String(limit) });
     if (search) params.set("search", search);
     return fetchApi(`/admin/users?${params.toString()}`);
   },
-  
+
   getReports: (status = "pending"): Promise<{ reports: Report[] }> =>
     fetchApi(`/admin/reports?status=${status}`),
-  
+
   updateReport: (id: string, status: string, adminNotes?: string): Promise<{ report: Report }> =>
-    fetchApi(`/admin/reports/${id}`, { method: "PUT", body: JSON.stringify({ status, adminNotes }) }),
-  
+    fetchApi(`/admin/reports/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ status, adminNotes }),
+    }),
+
   suspendUser: (id: string, reason: string): Promise<{ user: AdminUser }> =>
     fetchApi(`/admin/users/${id}/suspend`, { method: "PUT", body: JSON.stringify({ reason }) }),
-  
+
   unsuspendUser: (id: string): Promise<{ user: AdminUser }> =>
     fetchApi(`/admin/users/${id}/unsuspend`, { method: "PUT" }),
-  
+
   verifyUser: (id: string): Promise<{ user: AdminUser }> =>
     fetchApi(`/admin/users/${id}/verify`, { method: "PUT" }),
 };

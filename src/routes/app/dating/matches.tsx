@@ -2,7 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  Heart, MessageSquare, Loader2, X, ChevronLeft, Sparkles, Clock, Coffee, Zap, Users, BookOpen, Rocket, Briefcase,
+  Heart,
+  MessageSquare,
+  Loader2,
+  X,
+  ChevronLeft,
+  Sparkles,
+  Clock,
+  Coffee,
+  Zap,
+  Users,
+  BookOpen,
+  Rocket,
+  Briefcase,
 } from "lucide-react";
 import { useConversationStarters } from "@/hooks/use-dating-api";
 import { useMatches } from "@/hooks/use-dating-api";
@@ -108,7 +120,8 @@ function MatchesPage() {
             </div>
             <h3 className="text-xl font-bold">No matches yet</h3>
             <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">
-              Start swiping on profiles to find your match! When you both like each other, you'll appear here.
+              Start swiping on profiles to find your match! When you both like each other, you'll
+              appear here.
             </p>
             <button
               onClick={() => navigate({ to: "/app/dating" })}
@@ -140,7 +153,10 @@ function MatchesPage() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold">Conversation Starters</h3>
               <button
-                onClick={() => { setShowStarters(null); setStarters([]); }}
+                onClick={() => {
+                  setShowStarters(null);
+                  setStarters([]);
+                }}
                 className="p-1 rounded-lg hover:bg-surface transition"
               >
                 <X className="h-5 w-5" />
@@ -171,7 +187,10 @@ function MatchesPage() {
               ))}
             </div>
             <button
-              onClick={() => { setShowStarters(null); setStarters([]); }}
+              onClick={() => {
+                setShowStarters(null);
+                setStarters([]);
+              }}
               className="mt-4 w-full rounded-xl border border-border py-2.5 text-sm text-muted-foreground transition hover:text-foreground"
             >
               Close
@@ -192,8 +211,17 @@ interface MatchCardProps {
   onCloseStarters: () => void;
 }
 
-function MatchCard({ match, onChat, onStarters, showStarters, starters, onCloseStarters }: MatchCardProps) {
-  const timeAgo = match.matched_at ? formatDistanceToNow(new Date(match.matched_at), { addSuffix: true }) : "Recently";
+function MatchCard({
+  match,
+  onChat,
+  onStarters,
+  showStarters,
+  starters,
+  onCloseStarters,
+}: MatchCardProps) {
+  const timeAgo = match.matched_at
+    ? formatDistanceToNow(new Date(match.matched_at), { addSuffix: true })
+    : "Recently";
 
   return (
     <div className="rounded-2xl border border-border glass p-4 animate-fade-up transition hover:border-primary/30 hover:shadow-lg">

@@ -2,7 +2,27 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  ChevronLeft, Loader2, Calendar, MapPin, Users, Heart, GraduationCap, Briefcase, Rocket, MapPin as MapPinIcon, TrendingUp, Sparkles, Clock, Coffee, X, Filter, Check, MoreHorizontal, Code,
+  ChevronLeft,
+  Loader2,
+  Calendar,
+  MapPin,
+  Users,
+  Heart,
+  GraduationCap,
+  Briefcase,
+  Rocket,
+  MapPin as MapPinIcon,
+  TrendingUp,
+  Sparkles,
+  Clock,
+  Coffee,
+  X,
+  Filter,
+  Check,
+  MoreHorizontal,
+  Code,
+  Zap,
+  BookOpen,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { firebaseAuth } from "@/lib/firebase";
@@ -17,13 +37,49 @@ export const Route = createFileRoute("/app/dating/events")({
 });
 
 const EVENT_TYPES = [
-  { value: "hackathon", label: "Hackathon", icon: Code, color: "text-purple-400", bg: "bg-purple-500/10" },
+  {
+    value: "hackathon",
+    label: "Hackathon",
+    icon: Code,
+    color: "text-purple-400",
+    bg: "bg-purple-500/10",
+  },
   { value: "sports", label: "Sports", icon: Zap, color: "text-green-400", bg: "bg-green-500/10" },
-  { value: "pec_fest", label: "PEC Fest", icon: Sparkles, color: "text-pink-400", bg: "bg-pink-500/10" },
-  { value: "startup_fair", label: "Startup Fair", icon: Rocket, color: "text-yellow-400", bg: "bg-yellow-500/10" },
-  { value: "coding_contest", label: "Coding Contest", icon: Coffee, color: "text-orange-400", bg: "bg-orange-500/10" },
-  { value: "seminar", label: "Seminar", icon: BookOpen, color: "text-blue-400", bg: "bg-blue-500/10" },
-  { value: "workshop", label: "Workshop", icon: Users, color: "text-indigo-400", bg: "bg-indigo-500/10" },
+  {
+    value: "pec_fest",
+    label: "PEC Fest",
+    icon: Sparkles,
+    color: "text-pink-400",
+    bg: "bg-pink-500/10",
+  },
+  {
+    value: "startup_fair",
+    label: "Startup Fair",
+    icon: Rocket,
+    color: "text-yellow-400",
+    bg: "bg-yellow-500/10",
+  },
+  {
+    value: "coding_contest",
+    label: "Coding Contest",
+    icon: Coffee,
+    color: "text-orange-400",
+    bg: "bg-orange-500/10",
+  },
+  {
+    value: "seminar",
+    label: "Seminar",
+    icon: BookOpen,
+    color: "text-blue-400",
+    bg: "bg-blue-500/10",
+  },
+  {
+    value: "workshop",
+    label: "Workshop",
+    icon: Users,
+    color: "text-indigo-400",
+    bg: "bg-indigo-500/10",
+  },
   { value: "other", label: "Other", icon: Calendar, color: "text-gray-400", bg: "bg-gray-500/10" },
 ];
 
@@ -50,44 +106,43 @@ function EventsPage() {
     return unsub;
   }, [navigate]);
 
-  const filteredEvents = selectedTypes.length > 0
-    ? events.filter(e => selectedTypes.includes(e.event_type))
-    : events;
+  const filteredEvents =
+    selectedTypes.length > 0 ? events.filter((e) => selectedTypes.includes(e.event_type)) : events;
 
   const handleTypeToggle = (type: string) => {
-    setSelectedTypes(prev =>
-      prev.includes(type)
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
     );
   };
 
   const handleRsvp = async (eventId: number, status: "going" | "interested" | "not_going") => {
     try {
-      await rsvpEvent.mutateAsync({ eventId, status });
-      toast.success(status === "going" ? "Going!" : status === "interested" ? "Interested" : "Not going");
+      await rsvpEvent.mutateAsync({ eventId: eventId.toString(), status });
+      toast.success(
+        status === "going" ? "Going!" : status === "interested" ? "Interested" : "Not going",
+      );
     } catch {
       toast.error("Failed to RSVP");
     }
   };
 
   const getMyRsvpStatus = (eventId: number) => {
-    const rsvp = myRsvps.find(r => r.event_id === eventId);
+    const rsvp = myRsvps.find((r) => r.id === eventId);
     return rsvp?.status || "none";
   };
 
   const getEventTypeConfig = (type: string) => {
-    return EVENT_TYPES.find(t => t.value === type) || EVENT_TYPES[7];
+    return EVENT_TYPES.find((t) => t.value === type) || EVENT_TYPES[7];
   };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
   };
 
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
   };
 
   if (isLoading) {
@@ -96,7 +151,9 @@ function EventsPage() {
         <div className="animate-fade-up flex items-start justify-between flex-wrap gap-3">
           <div>
             <h2 className="text-xl font-bold">Events</h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">Discover and RSVP to campus events</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Discover and RSVP to campus events
+            </p>
           </div>
         </div>
         <div className="space-y-4">
@@ -135,7 +192,12 @@ function EventsPage() {
             }`}
           >
             <Filter className="h-4 w-4" />
-            Filters {selectedTypes.length > 0 && <span className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/20 text-primary text-[10px] font-bold">{selectedTypes.length}</span>}
+            Filters{" "}
+            {selectedTypes.length > 0 && (
+              <span className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                {selectedTypes.length}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -170,7 +232,9 @@ function EventsPage() {
       {showFilters && (
         <div className="rounded-xl border border-border bg-surface/50 p-4 animate-fade-up">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Filter by Event Type</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Filter by Event Type
+            </h3>
             {selectedTypes.length > 0 && (
               <button
                 type="button"
@@ -229,7 +293,9 @@ function EventsPage() {
                 className="rounded-2xl border border-border glass p-4 animate-fade-up transition hover:border-primary/30 hover:shadow-lg"
               >
                 <div className="flex items-start gap-4">
-                  <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${config.bg}`}>
+                  <div
+                    className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${config.bg}`}
+                  >
                     <Icon className={`h-7 w-7 ${config.color}`} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -266,7 +332,9 @@ function EventsPage() {
                     </div>
 
                     {event.description && (
-                      <p className="mt-2 text-sm text-foreground/80 line-clamp-2">{event.description}</p>
+                      <p className="mt-2 text-sm text-foreground/80 line-clamp-2">
+                        {event.description}
+                      </p>
                     )}
 
                     {/* RSVP Actions */}

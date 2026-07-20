@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { Loader2, MessageSquare, ArrowLeft, Heart, X, CheckCircle2 } from "lucide-react";
 import { firebaseAuth } from "@/lib/firebase";
@@ -16,7 +16,8 @@ export const Route = createFileRoute("/app/dating/chat")({
 
 function ChatRedirect() {
   const navigate = useNavigate();
-  const { profileId } = useParams({ from: "/app/dating/chat/$profileId", strict: false });
+  const params = useParams({ strict: false }) as { profileId?: string };
+  const profileId = params.profileId;
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Preparing chat...");
 
@@ -31,19 +32,21 @@ function ChatRedirect() {
   const handleRedirect = (info: any) => {
     if (!info.targetChatUserId) {
       setStatus("error");
-      setMessage("This user hasn't joined Campus Chat yet. They'll receive a notification when they do.");
+      setMessage(
+        "This user hasn't joined Campus Chat yet. They'll receive a notification when they do.",
+      );
       return;
     }
 
     // Navigate to chat with DM parameter
     // The chat page will handle opening the DM
     const dmChannelId = `dm_${Math.min(info.currentChatUserId, info.targetChatUserId)}_${Math.max(info.currentChatUserId, info.targetChatUserId)}`;
-    
-    navigate({ 
-      to: "/app/chat", 
-      search: { dm: info.targetChatUserId.toString(), channel: dmChannelId } 
+
+    navigate({
+      to: "/app/chat",
+      search: { dm: info.targetChatUserId.toString(), channel: dmChannelId },
     });
-    
+
     setStatus("success");
     setMessage("Opening chat...");
   };

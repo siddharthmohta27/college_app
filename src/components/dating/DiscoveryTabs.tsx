@@ -1,5 +1,16 @@
 import { useState, useCallback } from "react";
-import { Heart, Users, GraduationCap, Briefcase, Rocket, Sparkles, MapPin, TrendingUp, Loader2, RefreshCw } from "lucide-react";
+import {
+  Heart,
+  Users,
+  GraduationCap,
+  Briefcase,
+  Rocket,
+  Sparkles,
+  MapPin,
+  TrendingUp,
+  Loader2,
+  RefreshCw,
+} from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDiscoveryTab, useRecommendedProfiles } from "@/hooks/use-dating-api";
 import type { DatingProfile } from "@/lib/dating-types";
@@ -17,13 +28,33 @@ interface DiscoveryTabsProps {
 }
 
 const TABS = [
-  { id: "recommended", label: "Recommended", icon: Sparkles, description: "AI-powered matches for you" },
+  {
+    id: "recommended",
+    label: "Recommended",
+    icon: Sparkles,
+    description: "AI-powered matches for you",
+  },
   { id: "friends", label: "Friends", icon: Users, description: "Looking for friendships" },
   { id: "dating", label: "Dating", icon: Heart, description: "Looking for relationships" },
-  { id: "study_buddy", label: "Study Buddy", icon: GraduationCap, description: "Find study partners" },
-  { id: "networking", label: "Networking", icon: Briefcase, description: "Professional connections" },
+  {
+    id: "study_buddy",
+    label: "Study Buddy",
+    icon: GraduationCap,
+    description: "Find study partners",
+  },
+  {
+    id: "networking",
+    label: "Networking",
+    icon: Briefcase,
+    description: "Professional connections",
+  },
   { id: "startup_partner", label: "Startup", icon: Rocket, description: "Co-founders & team" },
-  { id: "new_students", label: "New Students", icon: Sparkles, description: "Recently joined campus" },
+  {
+    id: "new_students",
+    label: "New Students",
+    icon: Sparkles,
+    description: "Recently joined campus",
+  },
   { id: "nearby", label: "Nearby", icon: MapPin, description: "Students near you" },
   { id: "trending", label: "Trending", icon: TrendingUp, description: "Popular this week" },
 ] as const;
@@ -37,54 +68,56 @@ export function DiscoveryTabs({
   onChat,
   onProfileClick,
 }: DiscoveryTabsProps) {
-  const [activeTab, setActiveTab] = useState<TABS[number]["id"]>("recommended");
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]["id"]>("recommended");
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch profiles for current tab
-  const { data: profiles = [], isLoading, isError, refetch } = useDiscoveryTab(
-    activeTab,
-    undefined,
-    20,
-    offset
-  );
+  const {
+    data: profiles = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useDiscoveryTab(activeTab, undefined, 20, offset);
 
   // Fetch recommended profiles separately
   const { data: recommendedProfiles = [] } = useRecommendedProfiles(10);
 
-  const currentProfiles = activeTab === "recommended" && offset === 0 
-    ? recommendedProfiles 
-    : profiles;
+  const currentProfiles =
+    activeTab === "recommended" && offset === 0 ? recommendedProfiles : profiles;
 
   const handleLoadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
-    
+
     setIsLoadingMore(true);
-    setOffset(prev => prev + 20);
-    
+    setOffset((prev) => prev + 20);
+
     // Prefetch next page
     await queryClient.prefetchQuery({
       queryKey: ["discovery", activeTab, undefined, 20, offset + 20],
     });
-    
+
     setIsLoadingMore(false);
   }, [activeTab, hasMore, isLoadingMore, offset, queryClient]);
 
-  const handleTabChange = (tabId: TABS[number]["id"]) => {
+  const handleTabChange = (tabId: (typeof TABS)[number]["id"]) => {
     setActiveTab(tabId);
     setOffset(0);
     setHasMore(true);
     refetch();
   };
 
-  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
-    const [entry] = entries;
-    if (entry.isIntersecting && !isLoadingMore && hasMore) {
-      handleLoadMore();
-    }
-  }, [handleLoadMore, isLoadingMore, hasMore]);
+  const handleIntersection = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && !isLoadingMore && hasMore) {
+        handleLoadMore();
+      }
+    },
+    [handleLoadMore, isLoadingMore, hasMore],
+  );
 
   // Check if we have more results
   const lastProfile = currentProfiles[currentProfiles.length - 1];
@@ -106,7 +139,7 @@ export function DiscoveryTabs({
                   "flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
                   isActive
                     ? "bg-primary/15 text-foreground border border-primary/30 shadow-sm"
-                    : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground hover:border-border"
+                    : "text-muted-foreground hover:bg-surface-elevated hover:text-foreground hover:border-border",
                 )}
                 title={tab.description}
               >
@@ -123,7 +156,10 @@ export function DiscoveryTabs({
         {isLoading && offset === 0 ? (
           // Skeleton loaders
           Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-border glass min-h-[460px] animate-pulse">
+            <div
+              key={i}
+              className="rounded-2xl border border-border glass min-h-[460px] animate-pulse"
+            >
               <div className="aspect-[3/4] skeleton" />
               <div className="p-4 space-y-3">
                 <div className="h-4 w-3/4 skeleton rounded" />
@@ -145,9 +181,9 @@ export function DiscoveryTabs({
             </div>
             <h3 className="text-lg font-semibold">No profiles found</h3>
             <p className="mt-1 text-sm text-muted-foreground max-w-xs mx-auto">
-              {activeTab === "recommended" 
+              {activeTab === "recommended"
                 ? "No recommendations yet. Complete your profile to get better matches!"
-                : `No profiles in ${TABS.find(t => t.id === activeTab)?.label} yet. Check back later!`}
+                : `No profiles in ${TABS.find((t) => t.id === activeTab)?.label} yet. Check back later!`}
             </p>
             <button
               onClick={() => refetch()}
@@ -172,10 +208,10 @@ export function DiscoveryTabs({
                 showActions={true}
               />
             ))}
-            
+
             {/* Load more trigger */}
             {hasMore && (
-              <div 
+              <div
                 ref={(el) => {
                   if (el) {
                     const observer = new IntersectionObserver(handleIntersection, {

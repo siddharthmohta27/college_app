@@ -107,17 +107,19 @@ function ChatApp() {
 
   // Get current user from Firebase auth
   useEffect(() => {
-    const unsub = firebaseAuth.onAuthStateChanged((user: { uid: string; email: string | null; displayName: string | null } | null) => {
-      if (user) {
-        setCurrentUser({
-          id: user.uid,
-          email: user.email || "",
-          displayName: user.displayName,
-        });
-      } else {
-        setCurrentUser(null);
-      }
-    });
+    const unsub = firebaseAuth.onAuthStateChanged(
+      (user: { uid: string; email: string | null; displayName: string | null } | null) => {
+        if (user) {
+          setCurrentUser({
+            id: user.uid,
+            email: user.email || "",
+            displayName: user.displayName,
+          });
+        } else {
+          setCurrentUser(null);
+        }
+      },
+    );
     return unsub;
   }, []);
 
@@ -148,8 +150,7 @@ function ChatApp() {
       socketRef.current = socket;
 
       // Join default room with user info from auth
-      const displayName =
-        currentUser.displayName || currentUser.email?.split("@")[0] || "Student";
+      const displayName = currentUser.displayName || currentUser.email?.split("@")[0] || "Student";
       const avatar =
         displayName
           .split(" ")
@@ -317,9 +318,7 @@ function ChatApp() {
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium">
-              {currentUser?.displayName ||
-                currentUser?.email?.split("@")[0] ||
-                "Student"}
+              {currentUser?.displayName || currentUser?.email?.split("@")[0] || "Student"}
             </div>
             <div className="truncate font-mono text-[10px] text-muted-foreground">
               online · Campus Connect#0127
@@ -571,7 +570,11 @@ function Message({
       <div className="min-w-0 flex-1">
         {!grouped && (
           <div className="flex items-baseline gap-2">
-            <span className={`font-semibold ${m.color}`}>{m.user}</span>
+            <span
+              className={`font-semibold ${m.color?.replace("bg-", "text-") || "text-foreground"}`}
+            >
+              {m.user}
+            </span>
             <span className="font-mono text-[10px] text-muted-foreground">{m.time}</span>
           </div>
         )}

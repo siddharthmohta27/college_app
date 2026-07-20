@@ -28,12 +28,13 @@ if (!firebaseConfigured) {
 
 // Only initialize if config is present
 const app = firebaseConfigured
-  ? (getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0])
+  ? getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0]
   : null;
 
-export const auth = app ? getAuth(app) : null as unknown as ReturnType<typeof getAuth>;
+export const auth = app ? getAuth(app) : (null as unknown as ReturnType<typeof getAuth>);
 export const googleProvider = new GoogleAuthProvider();
-
 
 // ─── Auth Helpers ──────────────────────────────────────────────
 export const firebaseAuth = {

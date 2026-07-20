@@ -199,10 +199,28 @@ router.get("/channels/:channelId/members", optionalAuth, async (req, res) => {
 
     // Add seeded members as fallback
     const seededMembers = [
-      { name: "Aisha R.", status: "online", role: "Mod", color: "bg-emerald-500", auth_user_id: null },
-      { name: "Marcus K.", status: "online", role: "Student", color: "bg-cyan-500", auth_user_id: null },
+      {
+        name: "Aisha R.",
+        status: "online",
+        role: "Mod",
+        color: "bg-emerald-500",
+        auth_user_id: null,
+      },
+      {
+        name: "Marcus K.",
+        status: "online",
+        role: "Student",
+        color: "bg-cyan-500",
+        auth_user_id: null,
+      },
       { name: "Priya S.", status: "idle", role: "TA", color: "bg-fuchsia-500", auth_user_id: null },
-      { name: "Leo T.", status: "offline", role: "Student", color: "bg-amber-500", auth_user_id: null },
+      {
+        name: "Leo T.",
+        status: "offline",
+        role: "Student",
+        color: "bg-amber-500",
+        auth_user_id: null,
+      },
     ];
 
     const allMembers = [...members.rows];

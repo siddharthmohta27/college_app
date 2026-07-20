@@ -220,7 +220,7 @@ router.put("/photos/:id", requireAuth, async (req, res) => {
     if (!profile) return res.status(404).json({ error: "Profile not found" });
 
     const photos = await getProfilePhotos(profile.id);
-    const photo = photos.find(p => p.id === parseInt(req.params.id));
+    const photo = photos.find((p) => p.id === parseInt(req.params.id));
     if (!photo) return res.status(404).json({ error: "Photo not found" });
 
     const updated = await updateProfilePhoto(req.params.id, req.body);
@@ -238,7 +238,7 @@ router.delete("/photos/:id", requireAuth, async (req, res) => {
     if (!profile) return res.status(404).json({ error: "Profile not found" });
 
     const photos = await getProfilePhotos(profile.id);
-    const photo = photos.find(p => p.id === parseInt(req.params.id));
+    const photo = photos.find((p) => p.id === parseInt(req.params.id));
     if (!photo) return res.status(404).json({ error: "Photo not found" });
 
     await deleteProfilePhoto(req.params.id);
@@ -308,7 +308,7 @@ router.post("/prompts/me", requireAuth, async (req, res) => {
     }
 
     const existing = await getProfilePrompts(profile.id);
-    if (existing.length >= 3 && !existing.some(p => p.prompt_id === prompt_id)) {
+    if (existing.length >= 3 && !existing.some((p) => p.prompt_id === prompt_id)) {
       return res.status(400).json({ error: "Maximum 3 prompts allowed" });
     }
 
@@ -354,9 +354,13 @@ router.post("/prompts/:promptId/like", requireAuth, async (req, res) => {
 
     const like = await likePrompt(likerProfile.id, targetProfileId, req.params.promptId);
     if (like) {
-      await createNotification(targetProfileId, 'prompt_like', 'New Prompt Like', 
-        `${likerProfile.name} liked your prompt answer`, 
-        { likerProfileId: likerProfile.id, promptId: req.params.promptId });
+      await createNotification(
+        targetProfileId,
+        "prompt_like",
+        "New Prompt Like",
+        `${likerProfile.name} liked your prompt answer`,
+        { likerProfileId: likerProfile.id, promptId: req.params.promptId },
+      );
     }
     res.json({ like });
   } catch (err) {
@@ -404,9 +408,13 @@ router.post("/photos/:photoId/like", requireAuth, async (req, res) => {
 
     const like = await likePhoto(likerProfile.id, targetProfileId, req.params.photoId);
     if (like) {
-      await createNotification(targetProfileId, 'photo_like', 'New Photo Like', 
-        `${likerProfile.name} liked your photo`, 
-        { likerProfileId: likerProfile.id, photoId: req.params.photoId });
+      await createNotification(
+        targetProfileId,
+        "photo_like",
+        "New Photo Like",
+        `${likerProfile.name} liked your photo`,
+        { likerProfileId: likerProfile.id, photoId: req.params.photoId },
+      );
     }
     res.json({ like });
   } catch (err) {
@@ -456,10 +464,14 @@ router.post("/friends/request", requireAuth, async (req, res) => {
     if (isBlocked) return res.status(403).json({ error: "Cannot send request" });
 
     const request = await sendFriendRequest(senderProfile.id, receiverProfileId);
-    
-    await createNotification(receiverProfileId, 'friend_request', 'New Friend Request', 
-      `${senderProfile.name} sent you a friend request`, 
-      { senderProfileId: senderProfile.id });
+
+    await createNotification(
+      receiverProfileId,
+      "friend_request",
+      "New Friend Request",
+      `${senderProfile.name} sent you a friend request`,
+      { senderProfileId: senderProfile.id },
+    );
 
     res.status(201).json({ request });
   } catch (err) {
@@ -475,7 +487,7 @@ router.put("/friends/request/:id", requireAuth, async (req, res) => {
     if (!receiverProfile) return res.status(404).json({ error: "Profile not found" });
 
     const { action } = req.body;
-    if (!['accept', 'reject'].includes(action)) {
+    if (!["accept", "reject"].includes(action)) {
       return res.status(400).json({ error: "action must be 'accept' or 'reject'" });
     }
 
@@ -634,7 +646,7 @@ router.get("/notifications", requireAuth, async (req, res) => {
     if (!profile) return res.status(404).json({ error: "Profile not found" });
 
     const limit = parseInt(req.query.limit) || 50;
-    const unreadOnly = req.query.unread === 'true';
+    const unreadOnly = req.query.unread === "true";
     const notifications = await getNotifications(profile.id, limit, unreadOnly);
     const unreadCount = await getUnreadNotificationCount(profile.id);
 
@@ -714,7 +726,7 @@ router.get("/compatibility/top", requireAuth, async (req, res) => {
 router.get("/events", requireAuth, async (req, res) => {
   try {
     const type = req.query.type;
-    const upcomingOnly = req.query.upcoming !== 'false';
+    const upcomingOnly = req.query.upcoming !== "false";
     const events = await getEvents(type, upcomingOnly);
     res.json({ events });
   } catch (err) {
@@ -729,12 +741,26 @@ router.post("/events/:eventId/rsvp", requireAuth, async (req, res) => {
     const profile = await getDatingProfileByAuthId(req.user.id);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
 
-    const { status = 'going' } = req.body;
+    const { status = "going" } = req.body;
     const rsvp = await rsvpToEvent(profile.id, req.params.eventId, status);
     res.json({ rsvp });
   } catch (err) {
     console.error("Error RSVPing to event:", err.message);
     res.status(500).json({ error: "Failed to RSVP" });
+  }
+});
+
+// GET /api/dating/events/rsvps/me - Get my RSVPs  (MUST be before /:eventId/rsvps)
+router.get("/events/rsvps/me", requireAuth, async (req, res) => {
+  try {
+    const profile = await getDatingProfileByAuthId(req.user.id);
+    if (!profile) return res.status(404).json({ error: "Profile not found" });
+
+    const rsvps = await getUserEventRsvps(profile.id);
+    res.json({ rsvps });
+  } catch (err) {
+    console.error("Error fetching user RSVPs:", err.message);
+    res.status(500).json({ error: "Failed to fetch RSVPs" });
   }
 });
 
@@ -745,20 +771,6 @@ router.get("/events/:eventId/rsvps", requireAuth, async (req, res) => {
     res.json({ rsvps });
   } catch (err) {
     console.error("Error fetching RSVPs:", err.message);
-    res.status(500).json({ error: "Failed to fetch RSVPs" });
-  }
-});
-
-// GET /api/dating/events/rsvps/me - Get my RSVPs
-router.get("/events/rsvps/me", requireAuth, async (req, res) => {
-  try {
-    const profile = await getDatingProfileByAuthId(req.user.id);
-    if (!profile) return res.status(404).json({ error: "Profile not found" });
-
-    const rsvps = await getUserEventRsvps(profile.id);
-    res.json({ rsvps });
-  } catch (err) {
-    console.error("Error fetching user RSVPs:", err.message);
     res.status(500).json({ error: "Failed to fetch RSVPs" });
   }
 });
@@ -898,16 +910,18 @@ router.get("/search", requireAuth, async (req, res) => {
     const currentProfile = await getDatingProfileByAuthId(req.user.id);
     if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
 
-    const query = req.query.q || '';
+    const query = req.query.q || "";
     const filters = {
       branch: req.query.branch,
       year: req.query.year,
-      interests: req.query.interests ? req.query.interests.split(',') : undefined,
-      clubs: req.query.clubs ? req.query.clubs.split(',') : undefined,
-      skills: req.query.skills ? req.query.skills.split(',') : undefined,
-      relationship_preference: req.query.relationship_preference ? req.query.relationship_preference.split(',') : undefined,
+      interests: req.query.interests ? req.query.interests.split(",") : undefined,
+      clubs: req.query.clubs ? req.query.clubs.split(",") : undefined,
+      skills: req.query.skills ? req.query.skills.split(",") : undefined,
+      relationship_preference: req.query.relationship_preference
+        ? req.query.relationship_preference.split(",")
+        : undefined,
       gender: req.query.gender,
-      startup_looking_for: req.query.startup_looking_for === 'true',
+      startup_looking_for: req.query.startup_looking_for === "true",
     };
     const limit = parseInt(req.query.limit) || 20;
     const offset = parseInt(req.query.offset) || 0;
@@ -931,7 +945,17 @@ router.get("/discover/:tab", requireAuth, async (req, res) => {
     if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
 
     const tab = req.params.tab;
-    const validTabs = ['recommended', 'friends', 'dating', 'study_buddy', 'networking', 'startup_partner', 'new_students', 'nearby', 'trending'];
+    const validTabs = [
+      "recommended",
+      "friends",
+      "dating",
+      "study_buddy",
+      "networking",
+      "startup_partner",
+      "new_students",
+      "nearby",
+      "trending",
+    ];
     if (!validTabs.includes(tab)) {
       return res.status(400).json({ error: "Invalid tab" });
     }
@@ -939,13 +963,13 @@ router.get("/discover/:tab", requireAuth, async (req, res) => {
     const filters = {
       branch: req.query.branch,
       year: req.query.year,
-      interests: req.query.interests ? req.query.interests.split(',') : undefined,
+      interests: req.query.interests ? req.query.interests.split(",") : undefined,
     };
     const limit = parseInt(req.query.limit) || 20;
     const offset = parseInt(req.query.offset) || 0;
 
     let profiles;
-    if (tab === 'recommended') {
+    if (tab === "recommended") {
       profiles = await getRecommendedProfiles(currentProfile.id, limit);
     } else {
       profiles = await getDiscoveryProfiles(currentProfile.id, tab, filters, limit, offset);
@@ -982,7 +1006,7 @@ router.get("/study-buddies", requireAuth, async (req, res) => {
     const currentProfile = await getDatingProfileByAuthId(req.user.id);
     if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
 
-    const subjects = req.query.subjects ? req.query.subjects.split(',') : [];
+    const subjects = req.query.subjects ? req.query.subjects.split(",") : [];
     const limit = parseInt(req.query.limit) || 20;
 
     const profiles = await getStudyBuddyMatches(currentProfile.id, { subjects }, limit);
@@ -1043,7 +1067,8 @@ router.get("/discover", requireAuth, async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const offset = parseInt(req.query.offset) || 0;
 
-    const profiles = await pool.query(`
+    const profiles = await pool.query(
+      `
       SELECT dp.*, pp.url as main_photo_url
       FROM dating_profiles dp
       LEFT JOIN profile_photos pp ON pp.profile_id = dp.id AND pp.is_main = true
@@ -1057,7 +1082,9 @@ router.get("/discover", requireAuth, async (req, res) => {
         )
       ORDER BY dp.created_at DESC
       LIMIT $2 OFFSET $3
-    `, [currentProfile.id, limit, offset]);
+    `,
+      [currentProfile.id, limit, offset],
+    );
 
     res.json({ profiles: profiles.rows });
   } catch (err) {
@@ -1072,55 +1099,83 @@ router.post("/like", requireAuth, async (req, res) => {
     const { targetProfileId } = req.body;
     const currentProfile = await getDatingProfileByAuthId(req.user.id);
     if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
-    if (currentProfile.id === targetProfileId) return res.status(400).json({ error: "Cannot like yourself" });
+    if (currentProfile.id === targetProfileId)
+      return res.status(400).json({ error: "Cannot like yourself" });
 
-    const isBlocked = await isBlocked(currentProfile.id, targetProfileId);
-    if (isBlocked) return res.status(403).json({ error: "Cannot like this profile" });
+    const blocked = await isBlocked(currentProfile.id, targetProfileId);
+    if (blocked) return res.status(403).json({ error: "Cannot like this profile" });
 
     // Record the like (swipe)
-    await pool.query(`
+    await pool.query(
+      `
       INSERT INTO swipes (swiper_id, swiped_id, action)
       VALUES ($1, $2, 'like')
       ON CONFLICT (swiper_id, swiped_id) DO UPDATE SET action = 'like'
-    `, [currentProfile.id, targetProfileId]);
+    `,
+      [currentProfile.id, targetProfileId],
+    );
 
     // Check for mutual like (match)
-    const mutual = await pool.query(`
+    const mutual = await pool.query(
+      `
       SELECT 1 FROM swipes WHERE swiper_id = $1 AND swiped_id = $2 AND action = 'like'
-    `, [targetProfileId, currentProfile.id]);
+    `,
+      [targetProfileId, currentProfile.id],
+    );
 
     let isMatch = false;
     let matchId = null;
 
     if (mutual.rows.length > 0) {
       // Create match
-      const [u1, u2] = [Math.min(currentProfile.id, targetProfileId), Math.max(currentProfile.id, targetProfileId)];
-      const matchRes = await pool.query(`
+      const [u1, u2] = [
+        Math.min(currentProfile.id, targetProfileId),
+        Math.max(currentProfile.id, targetProfileId),
+      ];
+      const matchRes = await pool.query(
+        `
         INSERT INTO matches (user1_id, user2_id)
         VALUES ($1, $2)
         ON CONFLICT DO NOTHING
         RETURNING id
-      `, [u1, u2]);
-      
+      `,
+        [u1, u2],
+      );
+
       if (matchRes.rows.length > 0) {
         isMatch = true;
         matchId = matchRes.rows[0].id;
-        
+
         // Create campus graph edges
         await pool.query(`SELECT create_match_edge($1, $2)`, [currentProfile.id, targetProfileId]);
-        
+
         // Create notifications for both users
-        await createNotification(targetProfileId, 'match', 'It\'s a Match!', 
-          `${currentProfile.name} liked you back`, { matchId, otherProfileId: currentProfile.id });
-        await createNotification(currentProfile.id, 'match', 'It\'s a Match!',
-          `You and ${(await getDatingProfileById(targetProfileId))?.name || 'someone'} liked each other`, { matchId, otherProfileId: targetProfileId });
+        await createNotification(
+          targetProfileId,
+          "match",
+          "It's a Match!",
+          `${currentProfile.name} liked you back`,
+          { matchId, otherProfileId: currentProfile.id },
+        );
+        await createNotification(
+          currentProfile.id,
+          "match",
+          "It's a Match!",
+          `You and ${(await getDatingProfileById(targetProfileId))?.name || "someone"} liked each other`,
+          { matchId, otherProfileId: targetProfileId },
+        );
       }
     } else {
       // Notify target of like
       const targetProfile = await getDatingProfileById(targetProfileId);
       if (targetProfile) {
-        await createNotification(targetProfileId, 'like', 'New Like',
-          `${currentProfile.name} liked your profile`, { likerProfileId: currentProfile.id });
+        await createNotification(
+          targetProfileId,
+          "like",
+          "New Like",
+          `${currentProfile.name} liked your profile`,
+          { likerProfileId: currentProfile.id },
+        );
       }
     }
 
@@ -1138,11 +1193,14 @@ router.post("/pass", requireAuth, async (req, res) => {
     const currentProfile = await getDatingProfileByAuthId(req.user.id);
     if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
 
-    await pool.query(`
+    await pool.query(
+      `
       INSERT INTO swipes (swiper_id, swiped_id, action)
       VALUES ($1, $2, 'pass')
       ON CONFLICT (swiper_id, swiped_id) DO UPDATE SET action = 'pass'
-    `, [currentProfile.id, targetProfileId]);
+    `,
+      [currentProfile.id, targetProfileId],
+    );
 
     res.json({ success: true });
   } catch (err) {
@@ -1157,7 +1215,8 @@ router.get("/matches", requireAuth, async (req, res) => {
     const currentProfile = await getDatingProfileByAuthId(req.user.id);
     if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
 
-    const matches = await pool.query(`
+    const matches = await pool.query(
+      `
       SELECT m.id, m.matched_at, m.user1_id, m.user2_id,
              dp.id as other_id, dp.name, dp.profile_photo_url, dp.emoji, dp.branch, dp.year, dp.major,
              cs.score as compatibility_score
@@ -1168,7 +1227,9 @@ router.get("/matches", requireAuth, async (req, res) => {
         (cs.profile2_id = $1 AND cs.profile1_id = dp.id)
       WHERE m.user1_id = $1 OR m.user2_id = $1
       ORDER BY m.matched_at DESC
-    `, [currentProfile.id]);
+    `,
+      [currentProfile.id],
+    );
 
     res.json({ matches: matches.rows });
   } catch (err) {
@@ -1184,10 +1245,14 @@ router.post("/undo", requireAuth, async (req, res) => {
     if (!currentProfile) return res.status(404).json({ error: "Profile not found" });
 
     // Delete last swipe
-    await pool.query(`
-      DELETE FROM swipes WHERE swiper_id = $1
-      ORDER BY created_at DESC LIMIT 1
-    `, [currentProfile.id]);
+    await pool.query(
+      `
+      DELETE FROM swipes WHERE id = (
+        SELECT id FROM swipes WHERE swiper_id = $1 ORDER BY created_at DESC LIMIT 1
+      )
+    `,
+      [currentProfile.id],
+    );
 
     res.json({ success: true });
   } catch (err) {
@@ -1217,7 +1282,7 @@ router.get("/admin/users", requireAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
-    const search = req.query.search || '';
+    const search = req.query.search || "";
     const users = await getAllUsersForAdmin(page, limit, search);
     res.json({ users });
   } catch (err) {
@@ -1229,7 +1294,7 @@ router.get("/admin/users", requireAuth, async (req, res) => {
 // GET /api/dating/admin/reports - Get reports for admin
 router.get("/admin/reports", requireAuth, async (req, res) => {
   try {
-    const status = req.query.status || 'pending';
+    const status = req.query.status || "pending";
     const reports = await getReports(status);
     res.json({ reports });
   } catch (err) {

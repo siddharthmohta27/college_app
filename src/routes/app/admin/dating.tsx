@@ -2,11 +2,36 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  ChevronLeft, Loader2, Users, Shield, Flag, TrendingUp, Clock, Search, MoreVertical, X, CheckCircle2, AlertCircle, Eye, EyeOff, Ban, RotateCcw,
+  ChevronLeft,
+  Loader2,
+  Users,
+  Shield,
+  Flag,
+  TrendingUp,
+  Clock,
+  Search,
+  MoreVertical,
+  X,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Ban,
+  RotateCcw,
+  Heart,
+  Sparkles,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { firebaseAuth } from "@/lib/firebase";
-import { useAdminStats, useAdminUsers, useAdminReports, useAdminSuspendUser, useAdminUnsuspendUser, useAdminVerifyUser, useAdminUpdateReport } from "@/hooks/use-dating-api";
+import {
+  useAdminStats,
+  useAdminUsers,
+  useAdminReports,
+  useAdminSuspendUser,
+  useAdminUnsuspendUser,
+  useAdminVerifyUser,
+  useAdminUpdateReport,
+} from "@/hooks/use-dating-api";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/admin/dating")({
@@ -25,11 +50,15 @@ const ADMIN_EMAILS = [
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<{ uid: string; email: string | null } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ uid: string; email: string | null } | null>(
+    null,
+  );
   const [activeTab, setActiveTab] = useState<"stats" | "users" | "reports">("stats");
   const [searchQuery, setSearchQuery] = useState("");
   const [userPage, setUserPage] = useState(1);
-  const [reportStatus, setReportStatus] = useState<"pending" | "reviewed" | "dismissed" | "action_taken">("pending");
+  const [reportStatus, setReportStatus] = useState<
+    "pending" | "reviewed" | "dismissed" | "action_taken"
+  >("pending");
 
   const { data: stats, isLoading: statsLoading } = useAdminStats();
   const { data: users = [], isLoading: usersLoading } = useAdminUsers(userPage, 50, searchQuery);
@@ -120,11 +149,16 @@ function AdminDashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
-      case "reviewed": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-      case "dismissed": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-      case "action_taken": return "bg-rose-500/10 text-rose-400 border-rose-500/20";
-      default: return "bg-surface text-muted-foreground border-border";
+      case "pending":
+        return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+      case "reviewed":
+        return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+      case "dismissed":
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+      case "action_taken":
+        return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+      default:
+        return "bg-surface text-muted-foreground border-border";
     }
   };
 
@@ -146,7 +180,9 @@ function AdminDashboard() {
         <div className="animate-fade-up flex items-start justify-between flex-wrap gap-3">
           <div>
             <h2 className="text-xl font-bold">Admin Dashboard</h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">Campus Match moderation and analytics</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Campus Match moderation and analytics
+            </p>
           </div>
         </div>
         <div className="grid gap-6 md:grid-cols-4">
@@ -167,7 +203,9 @@ function AdminDashboard() {
       <div className="animate-fade-up flex items-start justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-bold">Admin Dashboard</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">Campus Match moderation and analytics</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Campus Match moderation and analytics
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
@@ -207,13 +245,55 @@ function AdminDashboard() {
       {activeTab === "stats" && stats && (
         <div className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Total Profiles" value={stats.totalProfiles} icon={Users} color="text-blue-400" bg="bg-blue-500/10" />
-            <StatCard label="Total Matches" value={stats.totalMatches} icon={Heart} color="text-rose-400" bg="bg-rose-500/10" />
-            <StatCard label="Pending Requests" value={stats.pendingFriendRequests} icon={Clock} color="text-amber-400" bg="bg-amber-500/10" />
-            <StatCard label="Pending Reports" value={stats.pendingReports} icon={Flag} color="text-red-400" bg="bg-red-500/10" />
-            <StatCard label="Online Users" value={stats.onlineUsers} icon={TrendingUp} color="text-emerald-400" bg="bg-emerald-500/10" />
-            <StatCard label="New Users (24h)" value={stats.newUsers24h} icon={Users} color="text-purple-400" bg="bg-purple-500/10" />
-            <StatCard label="Verified Users" value={stats.verifiedUsers} icon={CheckCircle2} color="text-green-400" bg="bg-green-500/10" />
+            <StatCard
+              label="Total Profiles"
+              value={stats.totalProfiles}
+              icon={Users}
+              color="text-blue-400"
+              bg="bg-blue-500/10"
+            />
+            <StatCard
+              label="Total Matches"
+              value={stats.totalMatches}
+              icon={Heart}
+              color="text-rose-400"
+              bg="bg-rose-500/10"
+            />
+            <StatCard
+              label="Pending Requests"
+              value={stats.pendingFriendRequests}
+              icon={Clock}
+              color="text-amber-400"
+              bg="bg-amber-500/10"
+            />
+            <StatCard
+              label="Pending Reports"
+              value={stats.pendingReports}
+              icon={Flag}
+              color="text-red-400"
+              bg="bg-red-500/10"
+            />
+            <StatCard
+              label="Online Users"
+              value={stats.onlineUsers}
+              icon={TrendingUp}
+              color="text-emerald-400"
+              bg="bg-emerald-500/10"
+            />
+            <StatCard
+              label="New Users (24h)"
+              value={stats.newUsers24h}
+              icon={Users}
+              color="text-purple-400"
+              bg="bg-purple-500/10"
+            />
+            <StatCard
+              label="Verified Users"
+              value={stats.verifiedUsers}
+              icon={CheckCircle2}
+              color="text-green-400"
+              bg="bg-green-500/10"
+            />
           </div>
 
           <div className="rounded-2xl border border-border glass p-6">
@@ -234,14 +314,18 @@ function AdminDashboard() {
                 Review Reports
               </button>
               <button
-                onClick={() => { /* TODO: trigger compatibility recalc */ }}
+                onClick={() => {
+                  /* TODO: trigger compatibility recalc */
+                }}
                 className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-medium transition hover:border-primary hover:text-primary"
               >
                 <RotateCcw className="h-4 w-4" />
                 Recalculate Compatibility
               </button>
               <button
-                onClick={() => { /* TODO: generate daily picks */ }}
+                onClick={() => {
+                  /* TODO: generate daily picks */
+                }}
                 className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-medium transition hover:border-primary hover:text-primary"
               >
                 <Sparkles className="h-4 w-4" />
@@ -262,7 +346,7 @@ function AdminDashboard() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by name or email..."
                 className="rounded-xl border border-border bg-surface px-10 py-2 text-sm outline-none focus:border-primary"
               />
@@ -307,27 +391,39 @@ function AdminDashboard() {
                             </div>
                             <div className="min-w-0">
                               <p className="font-medium truncate">{user.name}</p>
-                              <p className="text-xs text-muted-foreground truncate">{user.college_email}</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {user.college_email}
+                              </p>
                             </div>
                           </div>
                         </td>
                         <td className="p-3 hidden md:table-cell">
-                          <p className="text-sm text-muted-foreground">{user.branch || "N/A"} / {user.year || "N/A"}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {user.branch || "N/A"} / {user.year || "N/A"}
+                          </p>
                         </td>
                         <td className="p-3">
-                          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${getUserStatusColor(user.is_incognito, user.is_verified)}`}>
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${getUserStatusColor(user.is_incognito, user.is_verified)}`}
+                          >
                             {getUserStatusLabel(user.is_incognito, user.is_verified)}
                           </span>
                         </td>
                         <td className="p-3">
-                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${user.chat_status === "online" ? "bg-emerald-500/10 text-emerald-400" : "bg-surface text-muted-foreground border border-border"}`}>
-                            <span className={`h-1.5 w-1.5 rounded-full ${user.chat_status === "online" ? "bg-emerald-400" : "bg-muted-foreground/50"}`} />
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${user.chat_status === "online" ? "bg-emerald-500/10 text-emerald-400" : "bg-surface text-muted-foreground border border-border"}`}
+                          >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${user.chat_status === "online" ? "bg-emerald-400" : "bg-muted-foreground/50"}`}
+                            />
                             {user.chat_status || "offline"}
                           </span>
                         </td>
                         <td className="p-3">
                           <p className="text-xs text-muted-foreground">
-                            {user.created_at ? formatDistanceToNow(new Date(user.created_at), { addSuffix: true }) : "Unknown"}
+                            {user.created_at
+                              ? formatDistanceToNow(new Date(user.created_at), { addSuffix: true })
+                              : "Unknown"}
                           </p>
                         </td>
                         <td className="p-3 text-right">
@@ -368,7 +464,7 @@ function AdminDashboard() {
               {users.length === 50 && (
                 <div className="p-4 border-t border-border flex items-center justify-center gap-2">
                   <button
-                    onClick={() => setUserPage(p => p - 1)}
+                    onClick={() => setUserPage((p) => p - 1)}
                     disabled={userPage === 1}
                     className="p-2 rounded-lg border border-border bg-surface text-muted-foreground hover:bg-surface-elevated disabled:opacity-50"
                   >
@@ -376,7 +472,7 @@ function AdminDashboard() {
                   </button>
                   <span className="text-sm text-muted-foreground">Page {userPage}</span>
                   <button
-                    onClick={() => setUserPage(p => p + 1)}
+                    onClick={() => setUserPage((p) => p + 1)}
                     className="p-2 rounded-lg border border-border bg-surface text-muted-foreground hover:bg-surface-elevated"
                   >
                     <ChevronLeft className="h-4 w-4 rotate-180" />
@@ -439,7 +535,9 @@ function AdminDashboard() {
                   <ReportCard
                     key={report.id}
                     report={report}
-                    onUpdateStatus={(status) => handleReportUpdate(report.id.toString(), status)}
+                    onUpdateStatus={(
+                      status: "pending" | "reviewed" | "dismissed" | "action_taken",
+                    ) => handleReportUpdate(report.id.toString(), status)}
                     currentStatus={report.status}
                   />
                 ))
@@ -452,7 +550,19 @@ function AdminDashboard() {
   );
 }
 
-function StatCard({ label, value, icon: Icon, color, bg }: { label: string; value: number; icon: any; color: string; bg: string }) {
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  color,
+  bg,
+}: {
+  label: string;
+  value: number;
+  icon: any;
+  color: string;
+  bg: string;
+}) {
   return (
     <div className="rounded-2xl border border-border glass p-6">
       <div className="flex items-center justify-between">
@@ -486,13 +596,18 @@ function ReportCard({ report, onUpdateStatus, currentStatus }: any) {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${getStatusColor(currentStatus)}`}>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${getStatusColor(currentStatus)}`}
+            >
               {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1).replace("_", " ")}
             </span>
             <span className="text-sm text-muted-foreground">#{report.id}</span>
           </div>
           <p className="mt-1 font-medium">{report.reported_name}</p>
-          <p className="text-xs text-muted-foreground">Reported by {report.reporter_name} • {formatDistanceToNow(new Date(report.created_at), { addSuffix: true })}</p>
+          <p className="text-xs text-muted-foreground">
+            Reported by {report.reporter_name} •{" "}
+            {formatDistanceToNow(new Date(report.created_at), { addSuffix: true })}
+          </p>
           <div className="mt-2 flex items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-0.5 text-xs text-muted-foreground">
               {getReasonLabel(report.reason)}
@@ -538,10 +653,15 @@ function ReportCard({ report, onUpdateStatus, currentStatus }: any) {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "pending": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
-    case "reviewed": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-    case "dismissed": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-    case "action_taken": return "bg-rose-500/10 text-rose-400 border-rose-500/20";
-    default: return "bg-surface text-muted-foreground border-border";
+    case "pending":
+      return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    case "reviewed":
+      return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+    case "dismissed":
+      return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+    case "action_taken":
+      return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+    default:
+      return "bg-surface text-muted-foreground border-border";
   }
 }

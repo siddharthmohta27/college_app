@@ -2,7 +2,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  ChevronLeft, Loader2, RefreshCw, Sparkles, Heart, Calendar, BookOpen, Coffee, Users, Globe, Briefcase, Rocket, MapPin, TrendingUp,
+  ChevronLeft,
+  Loader2,
+  RefreshCw,
+  Sparkles,
+  Heart,
+  Calendar,
+  BookOpen,
+  Coffee,
+  Users,
+  Globe,
+  Briefcase,
+  Rocket,
+  MapPin,
+  TrendingUp,
 } from "lucide-react";
 import { firebaseAuth } from "@/lib/firebase";
 import { useDailyPicks } from "@/hooks/use-dating-api";
@@ -86,9 +99,7 @@ function DailyPicksPage() {
         <div className="animate-fade-up flex items-start justify-between flex-wrap gap-3">
           <div>
             <h2 className="text-xl font-bold">Daily Picks</h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Curated profiles for you today
-            </p>
+            <p className="mt-0.5 text-sm text-muted-foreground">Curated profiles for you today</p>
           </div>
         </div>
         <div className="rounded-2xl border border-border glass min-h-[460px] flex flex-col items-center justify-center gap-3">
@@ -105,9 +116,7 @@ function DailyPicksPage() {
       <div className="animate-fade-up flex items-start justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-bold">Daily Picks</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Curated profiles for you today
-          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">Curated profiles for you today</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -121,7 +130,7 @@ function DailyPicksPage() {
           <input
             type="date"
             value={date}
-            onChange={e => handleDateChange(e.target.value)}
+            onChange={(e) => handleDateChange(e.target.value)}
             max={isToday ? undefined : yesterdayStr}
             className="rounded-xl border border-border bg-surface px-4 py-2 text-sm outline-none focus:border-primary"
           />
@@ -152,10 +161,18 @@ function DailyPicksPage() {
             </div>
             <div>
               <p className="font-medium">
-                {new Date(date).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                {new Date(date).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
               </p>
               <p className="text-xs text-muted-foreground">
-                {isToday ? "Today's picks" : isFuture ? "Future date - no picks available" : "Past picks"}
+                {isToday
+                  ? "Today's picks"
+                  : isFuture
+                    ? "Future date - no picks available"
+                    : "Past picks"}
               </p>
             </div>
           </div>
@@ -195,7 +212,7 @@ function DailyPicksPage() {
           picks.map((pick) => (
             <ProfileCard
               key={pick.id}
-              profile={pick}
+              profile={pick as unknown as import("@/lib/dating-types").DatingProfile}
               onLike={handleLike}
               onPass={handlePass}
               onSave={handleSave}
@@ -210,7 +227,9 @@ function DailyPicksPage() {
 
       {/* Badges Legend */}
       <div className="rounded-xl border border-border bg-surface/50 p-4 animate-fade-up">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">What makes a Daily Pick?</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          What makes a Daily Pick?
+        </h3>
         <div className="flex flex-wrap gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
             <Sparkles className="h-3 w-3" /> High Compatibility

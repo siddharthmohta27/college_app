@@ -2,7 +2,35 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
-  ChevronLeft, ChevronRight, Heart, X, Star, MessageSquare, Share2, Flag, Shield, MapPin, Briefcase, BookOpen, Music, Coffee, Globe, Linkedin, Github, Instagram, MoreHorizontal, Loader2, Users, GraduationCap, Briefcase as BriefcaseIcon, Rocket, Sparkles, MapPin as MapPinIcon, TrendingUp, Clock, Zap,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  X,
+  Star,
+  MessageSquare,
+  Share2,
+  Flag,
+  Shield,
+  MapPin,
+  Briefcase,
+  BookOpen,
+  Music,
+  Coffee,
+  Globe,
+  Linkedin,
+  Github,
+  Instagram,
+  MoreHorizontal,
+  Loader2,
+  Users,
+  GraduationCap,
+  Briefcase as BriefcaseIcon,
+  Rocket,
+  Sparkles,
+  MapPin as MapPinIcon,
+  TrendingUp,
+  Clock,
+  Zap,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useProfile } from "@/hooks/use-dating-api";
@@ -31,10 +59,14 @@ function ProfileView() {
 
   // useProfile queryFn resolves r.profile, so data IS the profile
   const profile = profileData as any;
-  const photos = profile?.photos?.filter((p: any) => p.url).sort((a: any, b: any) => a.display_order - b.display_order) ?? [];
+  const photos =
+    profile?.photos
+      ?.filter((p: any) => p.url)
+      .sort((a: any, b: any) => a.display_order - b.display_order) ?? [];
   const mainPhoto = photos.find((p: any) => p.is_main) || photos[0];
   const currentPhoto = photos[photoIndex] || mainPhoto;
-  const prompts = profile?.prompts?.sort((a: any, b: any) => a.display_order - b.display_order) ?? [];
+  const prompts =
+    profile?.prompts?.sort((a: any, b: any) => a.display_order - b.display_order) ?? [];
 
   const nextPhoto = () => {
     if (photos.length > 1) {
@@ -56,7 +88,7 @@ function ProfileView() {
     startup_partner: "Startup Partner",
   };
 
-  const formatInterest = (interest: string) => 
+  const formatInterest = (interest: string) =>
     interest.charAt(0).toUpperCase() + interest.slice(1).replace(/_/g, " ");
 
   if (isLoading) {
@@ -75,7 +107,9 @@ function ProfileView() {
             <Flag className="h-8 w-8 text-rose-400" />
           </div>
           <h2 className="text-xl font-bold">Profile not found</h2>
-          <p className="mt-1 text-sm text-muted-foreground">This profile doesn't exist or is private</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            This profile doesn't exist or is private
+          </p>
           <button
             onClick={() => navigate({ to: "/app/dating" })}
             className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
@@ -99,7 +133,7 @@ function ProfileView() {
               alt={`${profile.name}'s photo ${photoIndex + 1} of ${photos.length}`}
               className="w-full h-full object-cover"
             />
-            
+
             {/* Photo Navigation */}
             {photos.length > 1 && (
               <>
@@ -123,15 +157,13 @@ function ProfileView() {
             {/* Photo Indicators */}
             {photos.length > 1 && (
               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-                {photos.map((_, i) => (
+                {photos.map((_: any, i: number) => (
                   <button
                     key={i}
                     onClick={() => setPhotoIndex(i)}
                     className={cn(
                       "h-2 w-2 rounded-full transition-all",
-                      i === photoIndex
-                        ? "bg-primary w-8"
-                        : "bg-white/50 hover:bg-white/75"
+                      i === photoIndex ? "bg-primary w-8" : "bg-white/50 hover:bg-white/75",
                     )}
                     aria-label={`Photo ${i + 1}`}
                   />
@@ -180,7 +212,8 @@ function ProfileView() {
                     )}
                   </div>
                   <p className="text-white/90 mt-1 text-sm md:text-base">
-                    {profile.branch || profile.major || "Student"} • {profile.year || "Year unknown"}
+                    {profile.branch || profile.major || "Student"} •{" "}
+                    {profile.year || "Year unknown"}
                   </p>
                   {profile.hostel && (
                     <p className="text-white/70 mt-0.5 text-sm flex items-center gap-1">
@@ -215,8 +248,8 @@ function ProfileView() {
         )}
 
         {/* Compatibility Badge */}
-        {profileData?.score !== undefined && (
-          <div 
+        {profile?.score !== undefined && (
+          <div
             className="absolute top-6 right-6 md:top-8 md:right-8 z-10 cursor-pointer"
             onClick={() => setShowCompatibilityDetails(true)}
           >
@@ -239,9 +272,9 @@ function ProfileView() {
                   stroke="url(#compatibility-gradient)"
                   strokeWidth="4"
                   strokeLinecap="round"
-                  strokeDasharray={`${(profileData.score || 0) * 1.256} 125.6`}
+                  strokeDasharray={`${(profile.score || 0) * 1.256} 125.6`}
                   className="text-primary"
-                  style={{ strokeDashoffset: 31.4 - (profileData.score || 0) * 1.256 }}
+                  style={{ strokeDashoffset: 31.4 - (profile.score || 0) * 1.256 }}
                 />
                 <defs>
                   <linearGradient id="compatibility-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -251,7 +284,7 @@ function ProfileView() {
                 </defs>
               </svg>
               <span className="absolute inset-0 flex items-center justify-center text-sm md:text-base font-bold text-primary-foreground">
-                {profileData.score}%
+                {profile.score}%
               </span>
             </div>
             <p className="text-center text-xs text-white/80 mt-1">Match Score</p>
@@ -276,7 +309,9 @@ function ProfileView() {
             {profile.bio && (
               <div className="rounded-xl border border-border glass p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">About</h3>
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    About
+                  </h3>
                   <button
                     onClick={() => setShowFullBio(!showFullBio)}
                     className="text-xs text-primary hover:underline"
@@ -292,7 +327,9 @@ function ProfileView() {
             {prompts.length > 0 && (
               <div className="rounded-xl border border-border glass p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Prompts</h3>
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    Prompts
+                  </h3>
                   <button
                     onClick={() => setShowPromptAnswers(!showPromptAnswers)}
                     className="text-xs text-primary hover:underline"
@@ -301,8 +338,11 @@ function ProfileView() {
                   </button>
                 </div>
                 <div className="space-y-3">
-                  {prompts.slice(0, showPromptAnswers ? prompts.length : 2).map((prompt) => (
-                    <div key={prompt.id} className="rounded-lg border border-border bg-surface/50 p-3">
+                  {prompts.slice(0, showPromptAnswers ? prompts.length : 2).map((prompt: any) => (
+                    <div
+                      key={prompt.id}
+                      className="rounded-lg border border-border bg-surface/50 p-3"
+                    >
                       <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
                         {prompt.prompt_category || "Prompt"}
                       </p>
@@ -325,9 +365,11 @@ function ProfileView() {
             {/* Interests */}
             {(profile.interests?.length ?? 0) > 0 && (
               <div className="rounded-xl border border-border glass p-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Interests</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Interests
+                </h3>
                 <div className="flex flex-wrap gap-1.5">
-                  {profile.interests.slice(0, 10).map((interest) => (
+                  {profile.interests.slice(0, 10).map((interest: string) => (
                     <span
                       key={interest}
                       className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground"
@@ -335,7 +377,7 @@ function ProfileView() {
                       {formatInterest(interest)}
                     </span>
                   ))}
-                  {(profile.interests.length > 10) && (
+                  {profile.interests.length > 10 && (
                     <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
                       +{profile.interests.length - 10} more
                     </span>
@@ -347,9 +389,11 @@ function ProfileView() {
             {/* Clubs */}
             {(profile.clubs?.length ?? 0) > 0 && (
               <div className="rounded-xl border border-border glass p-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Clubs & Societies</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Clubs & Societies
+                </h3>
                 <div className="flex flex-wrap gap-1.5">
-                  {profile.clubs.slice(0, 6).map((club) => (
+                  {profile.clubs.slice(0, 6).map((club: string) => (
                     <span
                       key={club}
                       className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary"
@@ -364,9 +408,11 @@ function ProfileView() {
             {/* Skills */}
             {(profile.skills?.length ?? 0) > 0 && (
               <div className="rounded-xl border border-border glass p-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Skills</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Skills
+                </h3>
                 <div className="flex flex-wrap gap-1.5">
-                  {profile.skills.slice(0, 8).map((skill) => (
+                  {profile.skills.slice(0, 8).map((skill: string) => (
                     <span
                       key={skill}
                       className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400"
@@ -381,9 +427,11 @@ function ProfileView() {
             {/* Relationship Preferences */}
             {(profile.relationship_preference?.length ?? 0) > 0 && (
               <div className="rounded-xl border border-border glass p-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Looking For</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Looking For
+                </h3>
                 <div className="flex flex-wrap gap-1.5">
-                  {profile.relationship_preference.map((pref) => (
+                  {profile.relationship_preference.map((pref: string) => (
                     <span
                       key={pref}
                       className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-3 py-1 text-xs text-rose-400"
@@ -404,10 +452,27 @@ function ProfileView() {
                   Study Preferences
                 </h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">Subjects:</span> {profile.study_subjects.join(", ")}</p>
-                  {profile.study_cgpa_goal && <p><span className="font-medium">CGPA Goal:</span> {profile.study_cgpa_goal}</p>}
-                  {profile.study_preferred_time && <p><span className="font-medium">Preferred Time:</span> {profile.study_preferred_time}</p>}
-                  {profile.study_preferred_location && <p><span className="font-medium">Preferred Location:</span> {profile.study_preferred_location}</p>}
+                  <p>
+                    <span className="font-medium">Subjects:</span>{" "}
+                    {profile.study_subjects.join(", ")}
+                  </p>
+                  {profile.study_cgpa_goal && (
+                    <p>
+                      <span className="font-medium">CGPA Goal:</span> {profile.study_cgpa_goal}
+                    </p>
+                  )}
+                  {profile.study_preferred_time && (
+                    <p>
+                      <span className="font-medium">Preferred Time:</span>{" "}
+                      {profile.study_preferred_time}
+                    </p>
+                  )}
+                  {profile.study_preferred_location && (
+                    <p>
+                      <span className="font-medium">Preferred Location:</span>{" "}
+                      {profile.study_preferred_location}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -420,37 +485,79 @@ function ProfileView() {
                   Startup Match
                 </h3>
                 <div className="space-y-2 text-sm">
-                  {profile.startup_role && <p><span className="font-medium">Role:</span> {profile.startup_role}</p>}
-                  {profile.startup_skills.length > 0 && <p><span className="font-medium">Skills:</span> {profile.startup_skills.join(", ")}</p>}
+                  {profile.startup_role && (
+                    <p>
+                      <span className="font-medium">Role:</span> {profile.startup_role}
+                    </p>
+                  )}
+                  {profile.startup_skills.length > 0 && (
+                    <p>
+                      <span className="font-medium">Skills:</span>{" "}
+                      {profile.startup_skills.join(", ")}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
 
             {/* Social Links */}
             {[
-              { label: "Instagram", url: profile.instagram_url, icon: Instagram, color: "text-pink-400" },
-              { label: "LinkedIn", url: profile.linkedin_url, icon: Linkedin, color: "text-blue-400" },
+              {
+                label: "Instagram",
+                url: profile.instagram_url,
+                icon: Instagram,
+                color: "text-pink-400",
+              },
+              {
+                label: "LinkedIn",
+                url: profile.linkedin_url,
+                icon: Linkedin,
+                color: "text-blue-400",
+              },
               { label: "GitHub", url: profile.github_url, icon: Github, color: "text-gray-400" },
-            ].filter(s => s.url).length > 0 && (
+            ].filter((s) => s.url).length > 0 && (
               <div className="rounded-xl border border-border glass p-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Social</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Social
+                </h3>
                 <div className="flex gap-3">
                   {[
-                    { label: "Instagram", url: profile.instagram_url, icon: Instagram, color: "text-pink-400" },
-                    { label: "LinkedIn", url: profile.linkedin_url, icon: Linkedin, color: "text-blue-400" },
-                    { label: "GitHub", url: profile.github_url, icon: Github, color: "text-gray-400" },
-                  ].filter(s => s.url).map((social) => (
-                    <a
-                      key={social.label}
-                      href={social.url!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={cn("flex items-center gap-1.5 text-sm font-medium transition-colors", social.color, "hover:opacity-75")}
-                    >
-                      <social.icon className="h-4 w-4" />
-                      {social.label}
-                    </a>
-                  ))}
+                    {
+                      label: "Instagram",
+                      url: profile.instagram_url,
+                      icon: Instagram,
+                      color: "text-pink-400",
+                    },
+                    {
+                      label: "LinkedIn",
+                      url: profile.linkedin_url,
+                      icon: Linkedin,
+                      color: "text-blue-400",
+                    },
+                    {
+                      label: "GitHub",
+                      url: profile.github_url,
+                      icon: Github,
+                      color: "text-gray-400",
+                    },
+                  ]
+                    .filter((s) => s.url)
+                    .map((social) => (
+                      <a
+                        key={social.label}
+                        href={social.url!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          "flex items-center gap-1.5 text-sm font-medium transition-colors",
+                          social.color,
+                          "hover:opacity-75",
+                        )}
+                      >
+                        <social.icon className="h-4 w-4" />
+                        {social.label}
+                      </a>
+                    ))}
                 </div>
               </div>
             )}
@@ -458,9 +565,11 @@ function ProfileView() {
             {/* Badges */}
             {profile.badges && profile.badges.length > 0 && (
               <div className="rounded-xl border border-border glass p-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Badges</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  Badges
+                </h3>
                 <div className="flex flex-wrap gap-2">
-                  {profile.badges.map((badge) => (
+                  {profile.badges.map((badge: any) => (
                     <BadgeBadge key={badge.id} badge={badge} />
                   ))}
                 </div>
@@ -471,7 +580,7 @@ function ProfileView() {
       </div>
 
       {/* Compatibility Details Modal */}
-      {showCompatibilityDetails && profileData?.reasons && profileData.reasons.length > 0 && (
+      {showCompatibilityDetails && profile?.reasons && profile.reasons.length > 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-md rounded-3xl border border-primary/30 glass-strong p-6 animate-fade-up">
             <div className="flex items-center justify-between mb-6">
@@ -484,14 +593,19 @@ function ProfileView() {
               </button>
             </div>
             <div className="space-y-4">
-              {profileData.reasons.map((reason: any) => (
-                <div key={reason.type} className="flex items-center gap-4 p-3 rounded-xl bg-surface/50">
+              {profile.reasons.map((reason: any) => (
+                <div
+                  key={reason.type}
+                  className="flex items-center gap-4 p-3 rounded-xl bg-surface/50"
+                >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20">
                     <span className="text-xl">{getReasonIcon(reason.type)}</span>
                   </div>
                   <div className="flex-1">
                     <p className="font-medium">{reason.label}</p>
-                    <p className="text-xs text-muted-foreground">{reason.detail || `Weight: ${reason.weight}%`}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {reason.detail || `Weight: ${reason.weight}%`}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-primary">+{reason.weight}%</p>
@@ -500,7 +614,7 @@ function ProfileView() {
               ))}
               <div className="pt-3 border-t border-border flex justify-between font-bold">
                 <span>Total Score</span>
-                <span className="text-primary">{profileData.score}%</span>
+                <span className="text-primary">{profile.score}%</span>
               </div>
             </div>
             <button
@@ -518,19 +632,56 @@ function ProfileView() {
 
 function BadgeBadge({ badge }: { badge: any }) {
   const badgeConfig: Record<string, { label: string; icon: string; color: string }> = {
-    verified_student: { label: "Verified Student", icon: "🎓", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
-    club_lead: { label: "Club Lead", icon: "👑", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
-    hackathon_winner: { label: "Hackathon Winner", icon: "🏆", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
-    startup_founder: { label: "Startup Founder", icon: "🚀", color: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
-    placement_coordinator: { label: "Placement Coordinator", icon: "💼", color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30" },
-    athlete: { label: "Athlete", icon: "🏃", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
-    alumni_mentor: { label: "Alumni Mentor", icon: "🧑‍🏫", color: "bg-pink-500/20 text-pink-400 border-pink-500/30" },
+    verified_student: {
+      label: "Verified Student",
+      icon: "🎓",
+      color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    },
+    club_lead: {
+      label: "Club Lead",
+      icon: "👑",
+      color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    },
+    hackathon_winner: {
+      label: "Hackathon Winner",
+      icon: "🏆",
+      color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    },
+    startup_founder: {
+      label: "Startup Founder",
+      icon: "🚀",
+      color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    },
+    placement_coordinator: {
+      label: "Placement Coordinator",
+      icon: "💼",
+      color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    },
+    athlete: {
+      label: "Athlete",
+      icon: "🏃",
+      color: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    },
+    alumni_mentor: {
+      label: "Alumni Mentor",
+      icon: "🧑‍🏫",
+      color: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    },
   };
 
-  const config = badgeConfig[badge.badge_type] || { label: badge.badge_type, icon: "🏅", color: "bg-primary/20 text-primary border-primary/30" };
+  const config = badgeConfig[badge.badge_type] || {
+    label: badge.badge_type,
+    icon: "🏅",
+    color: "bg-primary/20 text-primary border-primary/30",
+  };
 
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold", config.color)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold",
+        config.color,
+      )}
+    >
       <span className="text-sm">{config.icon}</span>
       {config.label}
     </span>

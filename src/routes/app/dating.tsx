@@ -1,10 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Heart, Sparkles, Users, GraduationCap, Briefcase, Rocket, MapPin, TrendingUp, Loader2, RefreshCw, Settings, User, MessageSquare, Star, Bell, ChevronLeft, X, RotateCcw } from "lucide-react";
+import {
+  Heart,
+  Sparkles,
+  Users,
+  GraduationCap,
+  Briefcase,
+  Rocket,
+  MapPin,
+  TrendingUp,
+  Loader2,
+  RefreshCw,
+  Settings,
+  User,
+  MessageSquare,
+  Star,
+  Bell,
+  ChevronLeft,
+  X,
+  RotateCcw,
+} from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { firebaseAuth } from "@/lib/firebase";
 import { DiscoveryTabs } from "@/components/dating/DiscoveryTabs";
-import { useMyProfile, useDiscoverProfiles, useLikeProfile, usePassProfile, useUndoSwipe, useSaveProfile } from "@/hooks/use-dating-api";
+import {
+  useMyProfile,
+  useDiscoverProfiles,
+  useLikeProfile,
+  usePassProfile,
+  useUndoSwipe,
+  useSaveProfile,
+} from "@/hooks/use-dating-api";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/dating")({
@@ -28,10 +54,21 @@ const TABS = [
 
 function CampusMatch() {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<{ uid: string; email: string | null; displayName: string | null } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    uid: string;
+    email: string | null;
+    displayName: string | null;
+  } | null>(null);
   const [showMatchModal, setShowMatchModal] = useState(false);
-  const [matchedProfile, setMatchedProfile] = useState<{ id: number; name: string; emoji?: string } | null>(null);
-  const [lastSwiped, setLastSwiped] = useState<{ profileId: number; action: 'like' | 'pass' } | null>(null);
+  const [matchedProfile, setMatchedProfile] = useState<{
+    id: number;
+    name: string;
+    emoji?: string;
+  } | null>(null);
+  const [lastSwiped, setLastSwiped] = useState<{
+    profileId: number;
+    action: "like" | "pass";
+  } | null>(null);
 
   const { data: myProfile, isLoading: profileLoading } = useMyProfile();
   const { data: profiles = [], isLoading: discoverLoading, refetch } = useDiscoverProfiles(20, 0);
@@ -56,19 +93,19 @@ function CampusMatch() {
     likeProfile.mutate(profileId, {
       onSuccess: (data) => {
         if (data.isMatch) {
-          const match = profiles.find(p => p.id === profileId);
+          const match = profiles.find((p) => p.id === profileId);
           setMatchedProfile({ id: profileId, name: match?.name || "Match!", emoji: match?.emoji });
           setShowMatchModal(true);
           toast.success("It's a match! 🎉");
         }
       },
     });
-    setLastSwiped({ profileId, action: 'like' });
+    setLastSwiped({ profileId, action: "like" });
   };
 
   const handlePass = (profileId: number) => {
     passProfile.mutate(profileId);
-    setLastSwiped({ profileId, action: 'pass' });
+    setLastSwiped({ profileId, action: "pass" });
   };
 
   const handleSave = (profileId: number) => {
@@ -178,7 +215,7 @@ function CampusMatch() {
       {lastSwiped && (
         <div className="animate-fade-up flex items-center justify-between p-4 rounded-xl border border-border bg-surface">
           <span className="text-sm text-muted-foreground">
-            {lastSwiped.action === 'like' ? 'Liked' : 'Passed'} a profile
+            {lastSwiped.action === "like" ? "Liked" : "Passed"} a profile
           </span>
           <button
             onClick={handleUndo}
@@ -210,7 +247,8 @@ function CampusMatch() {
             </div>
             <h3 className="mt-4 text-xl font-bold">It's a Match!</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              You and <strong className="text-foreground">{matchedProfile.name}</strong> liked each other.
+              You and <strong className="text-foreground">{matchedProfile.name}</strong> liked each
+              other.
             </p>
             <div className="my-6 flex justify-center gap-4">
               <div className="text-5xl">🚀</div>

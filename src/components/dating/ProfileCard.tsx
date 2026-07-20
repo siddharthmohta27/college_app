@@ -1,7 +1,34 @@
 import { useState, useCallback, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Heart, X, Star, Shield, Loader2, MapPin, Briefcase, BookOpen, Music, Coffee, Globe, Linkedin, Github, Instagram, MoreHorizontal, Flag, MessageSquare, Share2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  X,
+  Star,
+  Shield,
+  Loader2,
+  MapPin,
+  Briefcase,
+  BookOpen,
+  Music,
+  Coffee,
+  Globe,
+  Linkedin,
+  Github,
+  Instagram,
+  MoreHorizontal,
+  Flag,
+  MessageSquare,
+  Share2,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import type { DatingProfile, ProfilePhoto, ProfilePrompt, CompatibilityReason, ProfileBadge } from "@/lib/dating-types";
+import type {
+  DatingProfile,
+  ProfilePhoto,
+  ProfilePrompt,
+  CompatibilityReason,
+  ProfileBadge,
+} from "@/lib/dating-types";
 import { cn } from "@/lib/utils";
 
 interface ProfileCardProps {
@@ -43,8 +70,9 @@ export function ProfileCard({
   const [showFullBio, setShowFullBio] = useState(false);
   const [showCompatibilityDetails, setShowCompatibilityDetails] = useState(false);
 
-  const photos = profile.photos?.filter(p => p.url).sort((a, b) => a.display_order - b.display_order) ?? [];
-  const mainPhoto = photos.find(p => p.is_main) || photos[0];
+  const photos =
+    profile.photos?.filter((p) => p.url).sort((a, b) => a.display_order - b.display_order) ?? [];
+  const mainPhoto = photos.find((p) => p.is_main) || photos[0];
   const currentPhoto = photos[photoIndex] || mainPhoto;
   const prompts = profile.prompts?.sort((a, b) => a.display_order - b.display_order) ?? [];
 
@@ -68,11 +96,16 @@ export function ProfileCard({
     startup_partner: "Startup Partner",
   };
 
-  const formatInterest = (interest: string) => 
+  const formatInterest = (interest: string) =>
     interest.charAt(0).toUpperCase() + interest.slice(1).replace(/_/g, " ");
 
   return (
-    <div className={cn("relative rounded-2xl border border-border glass overflow-hidden animate-fade-up", className)}>
+    <div
+      className={cn(
+        "relative rounded-2xl border border-border glass overflow-hidden animate-fade-up",
+        className,
+      )}
+    >
       {/* Photo Carousel */}
       <div className="relative aspect-[3/4] overflow-hidden">
         {photos.length > 0 ? (
@@ -82,7 +115,7 @@ export function ProfileCard({
               alt={`${profile.name}'s photo ${photoIndex + 1} of ${photos.length}`}
               className="w-full h-full object-cover transition-opacity duration-300"
             />
-            
+
             {/* Photo Navigation */}
             {photos.length > 1 && (
               <>
@@ -112,9 +145,7 @@ export function ProfileCard({
                     onClick={() => setPhotoIndex(i)}
                     className={cn(
                       "h-1.5 w-1.5 rounded-full transition-all",
-                      i === photoIndex
-                        ? "bg-primary w-5"
-                        : "bg-white/50 hover:bg-white/75"
+                      i === photoIndex ? "bg-primary w-5" : "bg-white/50 hover:bg-white/75",
                     )}
                     aria-label={`Photo ${i + 1}`}
                   />
@@ -142,7 +173,7 @@ export function ProfileCard({
 
             {/* Compatibility Badge */}
             {showCompatibility && compatibilityScore !== undefined && (
-              <div 
+              <div
                 className="absolute top-3 right-3 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -202,7 +233,7 @@ export function ProfileCard({
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-        
+
         {/* Name, Age, Location */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-start justify-between">
@@ -227,14 +258,20 @@ export function ProfileCard({
             </div>
             <div className="flex items-center gap-1">
               <button
-                onClick={(e) => { e.stopPropagation(); onShare?.(profile.id); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare?.(profile.id);
+                }}
                 className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
                 aria-label="Share profile"
               >
                 <Share2 className="h-4 w-4" />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); onReport?.(profile.id); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReport?.(profile.id);
+                }}
                 className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
                 aria-label="Report profile"
               >
@@ -251,7 +288,9 @@ export function ProfileCard({
         {profile.bio && (
           <div>
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">About</h4>
+              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                About
+              </h4>
               <button
                 onClick={() => setShowFullBio(!showFullBio)}
                 className="text-xs text-primary hover:underline"
@@ -269,7 +308,9 @@ export function ProfileCard({
         {prompts.length > 0 && (
           <div>
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Prompts</h4>
+              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Prompts
+              </h4>
               <button
                 onClick={() => setShowPromptAnswers(!showPromptAnswers)}
                 className="text-xs text-primary hover:underline"
@@ -301,7 +342,9 @@ export function ProfileCard({
         {/* Interests */}
         {(profile.interests?.length ?? 0) > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Interests</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Interests
+            </h4>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {profile.interests.slice(0, 8).map((interest) => (
                 <span
@@ -311,7 +354,7 @@ export function ProfileCard({
                   {formatInterest(interest)}
                 </span>
               ))}
-              {(profile.interests.length > 8) && (
+              {profile.interests.length > 8 && (
                 <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
                   +{profile.interests.length - 8} more
                 </span>
@@ -323,7 +366,9 @@ export function ProfileCard({
         {/* Clubs */}
         {(profile.clubs?.length ?? 0) > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Clubs & Societies</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Clubs & Societies
+            </h4>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {profile.clubs.slice(0, 5).map((club) => (
                 <span
@@ -340,7 +385,9 @@ export function ProfileCard({
         {/* Skills */}
         {(profile.skills?.length ?? 0) > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Skills</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Skills
+            </h4>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {profile.skills.slice(0, 6).map((skill) => (
                 <span
@@ -357,7 +404,9 @@ export function ProfileCard({
         {/* Relationship Preferences */}
         {(profile.relationship_preference?.length ?? 0) > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Looking For</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Looking For
+            </h4>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {profile.relationship_preference.map((pref) => (
                 <span
@@ -374,29 +423,52 @@ export function ProfileCard({
 
         {/* Social Links */}
         {[
-          { label: "Instagram", url: profile.instagram_url, icon: Instagram, color: "text-pink-400" },
+          {
+            label: "Instagram",
+            url: profile.instagram_url,
+            icon: Instagram,
+            color: "text-pink-400",
+          },
           { label: "LinkedIn", url: profile.linkedin_url, icon: Linkedin, color: "text-blue-400" },
           { label: "GitHub", url: profile.github_url, icon: Github, color: "text-gray-400" },
-        ].filter(s => s.url).length > 0 && (
+        ].filter((s) => s.url).length > 0 && (
           <div className="pt-3 border-t border-border">
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Social</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              Social
+            </h4>
             <div className="flex gap-3">
               {[
-                { label: "Instagram", url: profile.instagram_url, icon: Instagram, color: "text-pink-400" },
-                { label: "LinkedIn", url: profile.linkedin_url, icon: Linkedin, color: "text-blue-400" },
+                {
+                  label: "Instagram",
+                  url: profile.instagram_url,
+                  icon: Instagram,
+                  color: "text-pink-400",
+                },
+                {
+                  label: "LinkedIn",
+                  url: profile.linkedin_url,
+                  icon: Linkedin,
+                  color: "text-blue-400",
+                },
                 { label: "GitHub", url: profile.github_url, icon: Github, color: "text-gray-400" },
-              ].filter(s => s.url).map((social) => (
-                <a
-                  key={social.label}
-                  href={social.url!}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn("flex items-center gap-1.5 text-sm font-medium transition-colors", social.color, "hover:opacity-75")}
-                >
-                  <social.icon className="h-4 w-4" />
-                  {social.label}
-                </a>
-              ))}
+              ]
+                .filter((s) => s.url)
+                .map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.url!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "flex items-center gap-1.5 text-sm font-medium transition-colors",
+                      social.color,
+                      "hover:opacity-75",
+                    )}
+                  >
+                    <social.icon className="h-4 w-4" />
+                    {social.label}
+                  </a>
+                ))}
             </div>
           </div>
         )}
@@ -404,7 +476,9 @@ export function ProfileCard({
         {/* Badges */}
         {profile.badges && profile.badges.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Badges</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Badges
+            </h4>
             <div className="mt-2 flex flex-wrap gap-2">
               {profile.badges.map((badge) => (
                 <BadgeBadge key={badge.id} badge={badge} />
@@ -431,7 +505,7 @@ export function ProfileCard({
                 "flex h-12 w-12 items-center justify-center rounded-full transition disabled:opacity-50",
                 isSaved
                   ? "bg-primary/20 text-primary border border-primary/30"
-                  : "bg-surface border border-border text-muted-foreground hover:border-primary hover:text-primary"
+                  : "bg-surface border border-border text-muted-foreground hover:border-primary hover:text-primary",
               )}
               aria-label={isSaved ? "Unsave" : "Save"}
             >
@@ -481,13 +555,18 @@ export function ProfileCard({
             </div>
             <div className="space-y-4">
               {compatibilityReasons.map((reason) => (
-                <div key={reason.type} className="flex items-center gap-4 p-3 rounded-xl bg-surface/50">
+                <div
+                  key={reason.type}
+                  className="flex items-center gap-4 p-3 rounded-xl bg-surface/50"
+                >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20">
                     <span className="text-xl">{getReasonIcon(reason.type)}</span>
                   </div>
                   <div className="flex-1">
                     <p className="font-medium">{reason.label}</p>
-                    <p className="text-xs text-muted-foreground">{reason.detail || `Weight: ${reason.weight}%`}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {reason.detail || `Weight: ${reason.weight}%`}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-primary">+{reason.weight}%</p>
@@ -522,15 +601,22 @@ function PromptCard({
   compatibilityReasons?: CompatibilityReason[];
 }) {
   const isMatchingPrompt = compatibilityReasons?.some(
-    r => r.type === "shared_prompt" && r.detail?.includes(prompt.prompt_id?.toString() ?? "")
+    (r) => r.type === "shared_prompt" && r.detail?.includes(prompt.prompt_id?.toString() ?? ""),
   );
 
   return (
-    <div className={cn("relative rounded-xl border p-4 transition", isMatchingPrompt ? "border-primary/30 bg-primary/5" : "border-border bg-surface/50")}>
+    <div
+      className={cn(
+        "relative rounded-xl border p-4 transition",
+        isMatchingPrompt ? "border-primary/30 bg-primary/5" : "border-border bg-surface/50",
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
-            {prompt.prompt_category ? prompt.prompt_category.charAt(0).toUpperCase() + prompt.prompt_category.slice(1) : "Prompt"}
+            {prompt.prompt_category
+              ? prompt.prompt_category.charAt(0).toUpperCase() + prompt.prompt_category.slice(1)
+              : "Prompt"}
           </p>
           <p className="text-sm font-medium text-foreground">{prompt.prompt_text}</p>
           <p className="mt-2 text-sm text-foreground/90 italic">"{prompt.answer}"</p>
@@ -555,19 +641,56 @@ function PromptCard({
 
 function BadgeBadge({ badge }: { badge: ProfileBadge }) {
   const badgeConfig: Record<string, { label: string; icon: string; color: string }> = {
-    verified_student: { label: "Verified Student", icon: "🎓", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
-    club_lead: { label: "Club Lead", icon: "👑", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
-    hackathon_winner: { label: "Hackathon Winner", icon: "🏆", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
-    startup_founder: { label: "Startup Founder", icon: "🚀", color: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
-    placement_coordinator: { label: "Placement Coordinator", icon: "💼", color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30" },
-    athlete: { label: "Athlete", icon: "🏃", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
-    alumni_mentor: { label: "Alumni Mentor", icon: "🧑‍🏫", color: "bg-pink-500/20 text-pink-400 border-pink-500/30" },
+    verified_student: {
+      label: "Verified Student",
+      icon: "🎓",
+      color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    },
+    club_lead: {
+      label: "Club Lead",
+      icon: "👑",
+      color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    },
+    hackathon_winner: {
+      label: "Hackathon Winner",
+      icon: "🏆",
+      color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    },
+    startup_founder: {
+      label: "Startup Founder",
+      icon: "🚀",
+      color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    },
+    placement_coordinator: {
+      label: "Placement Coordinator",
+      icon: "💼",
+      color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+    },
+    athlete: {
+      label: "Athlete",
+      icon: "🏃",
+      color: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+    },
+    alumni_mentor: {
+      label: "Alumni Mentor",
+      icon: "🧑‍🏫",
+      color: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+    },
   };
 
-  const config = badgeConfig[badge.badge_type] || { label: badge.badge_type, icon: "🏅", color: "bg-primary/20 text-primary border-primary/30" };
+  const config = badgeConfig[badge.badge_type] || {
+    label: badge.badge_type,
+    icon: "🏅",
+    color: "bg-primary/20 text-primary border-primary/30",
+  };
 
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold", config.color)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold",
+        config.color,
+      )}
+    >
       <span className="text-sm">{config.icon}</span>
       {config.label}
     </span>

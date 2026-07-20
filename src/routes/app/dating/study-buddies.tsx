@@ -2,7 +2,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  ChevronLeft, Loader2, BookOpen, Coffee, Users, Heart, Briefcase, Rocket, MapPin, TrendingUp, Sparkles, Search, Filter, X,
+  ChevronLeft,
+  Loader2,
+  BookOpen,
+  Coffee,
+  Users,
+  Heart,
+  Briefcase,
+  Rocket,
+  MapPin,
+  TrendingUp,
+  Sparkles,
+  Search,
+  Filter,
+  X,
 } from "lucide-react";
 import { firebaseAuth } from "@/lib/firebase";
 import { useStudyBuddyMatches } from "@/hooks/use-dating-api";
@@ -17,8 +30,18 @@ export const Route = createFileRoute("/app/dating/study-buddies")({
 });
 
 const STUDY_SUBJECTS = [
-  "DSA", "DBMS", "OS", "CN", "ML", "AI", "CG", "Compiler Design",
-  "Software Engineering", "Computer Architecture", "Digital Logic", "Theory of Computation",
+  "DSA",
+  "DBMS",
+  "OS",
+  "CN",
+  "ML",
+  "AI",
+  "CG",
+  "Compiler Design",
+  "Software Engineering",
+  "Computer Architecture",
+  "Digital Logic",
+  "Theory of Computation",
 ];
 
 function StudyBuddiesPage() {
@@ -42,10 +65,8 @@ function StudyBuddiesPage() {
   }, [navigate]);
 
   const handleSubjectToggle = (subject: string) => {
-    setSelectedSubjects(prev =>
-      prev.includes(subject)
-        ? prev.filter(s => s !== subject)
-        : [...prev, subject]
+    setSelectedSubjects((prev) =>
+      prev.includes(subject) ? prev.filter((s) => s !== subject) : [...prev, subject],
     );
   };
 
@@ -88,7 +109,10 @@ function StudyBuddiesPage() {
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-border glass min-h-[460px] animate-pulse">
+            <div
+              key={i}
+              className="rounded-2xl border border-border glass min-h-[460px] animate-pulse"
+            >
               <div className="aspect-[3/4] skeleton" />
               <div className="p-4 space-y-3">
                 <div className="h-4 w-3/4 skeleton rounded" />
@@ -127,7 +151,12 @@ function StudyBuddiesPage() {
             }`}
           >
             <Filter className="h-4 w-4" />
-            Filters {hasActiveFilters && <span className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/20 text-primary text-[10px] font-bold">*</span>}
+            Filters{" "}
+            {hasActiveFilters && (
+              <span className="h-5 w-5 flex items-center justify-center rounded-full bg-primary/20 text-primary text-[10px] font-bold">
+                *
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -136,7 +165,9 @@ function StudyBuddiesPage() {
       {showFilters && (
         <div className="rounded-xl border border-border bg-surface/50 p-4 animate-fade-up">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Filter by Subjects</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Filter by Subjects
+            </h3>
             {hasActiveFilters && (
               <button
                 type="button"
@@ -204,7 +235,8 @@ function StudyBuddiesPage() {
 
       {profiles.length > 0 && (
         <p className="text-center text-xs text-muted-foreground py-4">
-          Showing {profiles.length} result{profiles.length !== 1 ? "s" : ""} for {selectedSubjects.length > 0 ? selectedSubjects.join(", ") : "all subjects"}
+          Showing {profiles.length} result{profiles.length !== 1 ? "s" : ""} for{" "}
+          {selectedSubjects.length > 0 ? selectedSubjects.join(", ") : "all subjects"}
         </p>
       )}
     </div>

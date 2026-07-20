@@ -15,11 +15,10 @@ router.get("/profiles", requireAuth, async (req, res) => {
       name: req.user.email?.split("@")[0] || "Student",
     });
 
-// Get current user's dating profile ID (numeric)
-    const profileRes = await pool.query(
-      `SELECT id FROM dating_profiles WHERE auth_user_id = $1`,
-      [firebaseUid]
-    );
+    // Get current user's dating profile ID (numeric)
+    const profileRes = await pool.query(`SELECT id FROM dating_profiles WHERE auth_user_id = $1`, [
+      firebaseUid,
+    ]);
     const currentProfile = profileRes.rows[0];
     if (!currentProfile) {
       return res.json({ profiles: [], source: "database" });
@@ -34,7 +33,7 @@ router.get("/profiles", requireAuth, async (req, res) => {
            SELECT swiped_id FROM swipes WHERE swiper_id = $1
          )
        ORDER BY created_at DESC`,
-      [currentProfileId]
+      [currentProfileId],
     );
     res.json({ profiles: result.rows, source: "database" });
   } catch (err) {
@@ -55,10 +54,9 @@ router.post("/swipe", requireAuth, async (req, res) => {
 
   try {
     // Get current user's dating profile ID
-    const profileRes = await pool.query(
-      `SELECT id FROM dating_profiles WHERE auth_user_id = $1`,
-      [firebaseUid]
-    );
+    const profileRes = await pool.query(`SELECT id FROM dating_profiles WHERE auth_user_id = $1`, [
+      firebaseUid,
+    ]);
     const currentProfile = profileRes.rows[0];
     if (!currentProfile) {
       return res.status(400).json({ error: "Dating profile not found" });
@@ -70,7 +68,7 @@ router.post("/swipe", requireAuth, async (req, res) => {
       `INSERT INTO swipes (swiper_id, swiped_id, action)
        VALUES ($1, $2, $3)
        ON CONFLICT (swiper_id, swiped_id) DO NOTHING`,
-      [swiperId, swipedId, action]
+      [swiperId, swipedId, action],
     );
 
     let isMatch = false;
@@ -80,7 +78,7 @@ router.post("/swipe", requireAuth, async (req, res) => {
       const mutual = await pool.query(
         `SELECT id FROM swipes
          WHERE swiper_id = $1 AND swiped_id = $2 AND action = 'like'`,
-        [swipedId, swiperId]
+        [swipedId, swiperId],
       );
 
       if (mutual.rows.length > 0) {
@@ -88,7 +86,7 @@ router.post("/swipe", requireAuth, async (req, res) => {
         const [u1, u2] = [Math.min(swiperId, swipedId), Math.max(swiperId, swipedId)];
         await pool.query(
           `INSERT INTO matches (user1_id, user2_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-          [u1, u2]
+          [u1, u2],
         );
         isMatch = true;
       }
@@ -108,10 +106,9 @@ router.get("/matches", requireAuth, async (req, res) => {
 
   try {
     // Get current user's dating profile ID
-    const profileRes = await pool.query(
-      `SELECT id FROM dating_profiles WHERE auth_user_id = $1`,
-      [firebaseUid]
-    );
+    const profileRes = await pool.query(`SELECT id FROM dating_profiles WHERE auth_user_id = $1`, [
+      firebaseUid,
+    ]);
     const currentProfile = profileRes.rows[0];
     if (!currentProfile) {
       return res.json({ matches: [], source: "database" });
@@ -125,7 +122,7 @@ router.get("/matches", requireAuth, async (req, res) => {
          ON (m.user1_id = dp.id OR m.user2_id = dp.id) AND dp.id != $1
        WHERE m.user1_id = $1 OR m.user2_id = $1
        ORDER BY m.created_at DESC`,
-      [userId]
+      [userId],
     );
     res.json({ matches: result.rows, source: "database" });
   } catch (err) {

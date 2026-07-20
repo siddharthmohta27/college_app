@@ -118,17 +118,13 @@ function Marketplace() {
   const toggleSave = async (id: number) => {
     if (!currentUser) return;
     // Optimistic update
-    setListings((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, saved: !l.saved } : l))
-    );
+    setListings((prev) => prev.map((l) => (l.id === id ? { ...l, saved: !l.saved } : l)));
     try {
       const headers = await getAuthHeaders();
       await fetch(`${API}/listings/${id}/save`, { method: "POST", headers });
     } catch (_) {
       // revert on error
-      setListings((prev) =>
-        prev.map((l) => (l.id === id ? { ...l, saved: !l.saved } : l))
-      );
+      setListings((prev) => prev.map((l) => (l.id === id ? { ...l, saved: !l.saved } : l)));
     }
   };
 
@@ -149,9 +145,7 @@ function Marketplace() {
     try {
       const headers = await getAuthHeaders();
       await fetch(`${API}/listings/${id}/sold`, { method: "PATCH", headers });
-      setListings((prev) =>
-        prev.map((l) => (l.id === id ? { ...l, is_sold: true } : l))
-      );
+      setListings((prev) => prev.map((l) => (l.id === id ? { ...l, is_sold: true } : l)));
     } catch (err) {
       alert("Failed to mark as sold.");
     }
@@ -277,8 +271,13 @@ function Marketplace() {
 
       {/* Results count */}
       <p className="text-xs text-muted-foreground">
-        {loading ? "Loading listings..." : (
-          <>Showing <span className="font-semibold text-foreground">{filtered.length}</span> listings{search && ` for "${search}"`}</>
+        {loading ? (
+          "Loading listings..."
+        ) : (
+          <>
+            Showing <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
+            listings{search && ` for "${search}"`}
+          </>
         )}
       </p>
 
@@ -413,7 +412,10 @@ function Marketplace() {
               </h3>
               <button
                 id="close-post-modal"
-                onClick={() => { setShowPost(false); setPostError(null); }}
+                onClick={() => {
+                  setShowPost(false);
+                  setPostError(null);
+                }}
                 className="text-muted-foreground hover:text-foreground"
               >
                 <X className="h-5 w-5" />
@@ -432,7 +434,10 @@ function Marketplace() {
                   </div>
                 )}
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-title">
+                  <label
+                    className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                    htmlFor="post-title"
+                  >
                     Title *
                   </label>
                   <input
@@ -445,7 +450,10 @@ function Marketplace() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-price">
+                    <label
+                      className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                      htmlFor="post-price"
+                    >
                       Price (₹) *
                     </label>
                     <input
@@ -459,7 +467,10 @@ function Marketplace() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-category">
+                    <label
+                      className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                      htmlFor="post-category"
+                    >
                       Category *
                     </label>
                     <select
@@ -474,7 +485,10 @@ function Marketplace() {
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-condition">
+                  <label
+                    className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                    htmlFor="post-condition"
+                  >
                     Condition *
                   </label>
                   <select
@@ -482,11 +496,16 @@ function Marketplace() {
                     name="condition"
                     className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
                   >
-                    {CONDITIONS.map((c) => <option key={c}>{c}</option>)}
+                    {CONDITIONS.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-desc">
+                  <label
+                    className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                    htmlFor="post-desc"
+                  >
                     Description
                   </label>
                   <textarea
@@ -498,7 +517,10 @@ function Marketplace() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="post-location">
+                  <label
+                    className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                    htmlFor="post-location"
+                  >
                     <MapPin className="inline h-3 w-3 mr-1" />
                     Pickup Location
                   </label>
@@ -515,7 +537,13 @@ function Marketplace() {
                   disabled={posting}
                   className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary disabled:opacity-50 inline-flex items-center justify-center gap-2"
                 >
-                  {posting ? <><Loader2 className="h-4 w-4 animate-spin" /> Posting...</> : "Post Listing"}
+                  {posting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Posting...
+                    </>
+                  ) : (
+                    "Post Listing"
+                  )}
                 </button>
               </form>
             )}

@@ -90,6 +90,55 @@
   --shadow-elevated: 0 15px 45px -15px oklch(0.02 0.005 250 / 0.9);
 }
 
+:root.light,
+html.light,
+.light {
+  /* Clean Light Mode brand palette */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+
+  --surface: #ffffff;
+  --surface-elevated: #f1f5f9;
+
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  --primary: #d97706; /* Rich Gold/Amber */
+  --primary-foreground: #ffffff;
+
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+
+  --muted: #f1f5f9;
+  --muted-foreground: #475569; /* Crisp readable slate */
+
+  --accent: #fef3c7;
+  --accent-foreground: #92400e;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #d97706;
+
+  --neon-cyan: #2563eb;
+  --neon-violet: #7c3aed;
+  --neon-pink: #db2777;
+
+  --gradient-primary: linear-gradient(135deg, #d97706, #b45309);
+  --gradient-glow: radial-gradient(circle at 50% 0%, rgba(217, 119, 6, 0.12), transparent 70%);
+  --gradient-mesh:
+    radial-gradient(at 0% 0%, rgba(217, 119, 6, 0.05), transparent 50%),
+    radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.03), transparent 60%);
+
+  --shadow-glow: 0 0 35px rgba(217, 119, 6, 0.2);
+  --shadow-glow-cyan: 0 0 25px rgba(37, 99, 235, 0.12);
+  --shadow-elevated: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -126,24 +175,24 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.24 0.01 250 / 0.8);
+    background: var(--color-border);
     border-radius: 8px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.84 0.18 85 / 0.7);
+    background: var(--color-primary);
   }
 }
 
 @utility glass {
-  background: oklch(0.14 0.005 250 / 0.75);
+  background: var(--surface);
   backdrop-filter: blur(20px) saturate(120%);
-  border: 1px solid oklch(1 0 0 / 0.05);
+  border: 1px solid var(--border);
 }
 
 @utility glass-strong {
-  background: oklch(0.14 0.005 250 / 0.9);
+  background: var(--surface-elevated);
   backdrop-filter: blur(28px) saturate(130%);
-  border: 1px solid oklch(1 0 0 / 0.07);
+  border: 1px solid var(--border);
 }
 
 @utility gradient-text {
@@ -328,8 +377,8 @@
     border-color 150ms ease;
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px -8px oklch(0 0 0 / 0.5);
-    border-color: oklch(0.84 0.18 85 / 0.25);
+    box-shadow: var(--shadow-elevated);
+    border-color: var(--color-primary);
   }
   &:active {
     transform: translateY(-1px);

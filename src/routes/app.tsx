@@ -28,6 +28,7 @@ import { firebaseAuth, isValidPecEmail } from "@/lib/firebase";
 import { auth } from "@/lib/firebase";
 import { UserProfileModal } from "@/components/user-profile-modal";
 import { parsePecEmail } from "@/lib/pec-email";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async () => {
@@ -230,6 +231,7 @@ function AppShell() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <button
                 id="notifications-btn"
                 className="relative grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-surface hover:text-foreground icon-hover"

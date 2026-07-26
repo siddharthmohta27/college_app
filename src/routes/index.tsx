@@ -18,6 +18,7 @@ import {
 import { firebaseAuth } from "@/lib/firebase";
 import { auth } from "@/lib/firebase";
 import heroBg from "@/assets/hero-bg.jpg";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -168,6 +169,7 @@ function Landing() {
           </a>
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <button
             id="signin-btn"
             onClick={() => {

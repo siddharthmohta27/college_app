@@ -49,13 +49,13 @@ const DAY_LABELS: Record<Day, string> = {
 function slotColors(type: ClassType): string {
   switch (type) {
     case "lecture":
-      return "bg-primary/10 border-primary/30 text-primary";
+      return "bg-primary/10 border-primary/30 text-primary font-medium";
     case "lab":
-      return "bg-violet-500/10 border-violet-500/30 text-violet-400";
+      return "bg-violet-500/10 border-violet-500/30 text-violet-700 dark:text-violet-400 font-medium";
     case "tutorial":
-      return "bg-amber-500/10 border-amber-500/30 text-amber-400";
+      return "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400 font-medium";
     case "lunch":
-      return "bg-emerald-500/10 border-emerald-500/30 text-emerald-400";
+      return "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-medium";
     default:
       return "bg-transparent border-transparent text-muted-foreground/40";
   }
@@ -200,7 +200,7 @@ function TodayHero({
         ) : !nextInfo ? (
           <p className="mt-4 text-sm text-muted-foreground">All classes for today are done. 🎓</p>
         ) : (
-          <div className="mt-4 flex items-start gap-4 rounded-xl border border-primary/20 bg-black/20 p-3.5">
+          <div className="mt-4 flex items-start gap-4 rounded-xl border border-primary/20 bg-surface-elevated p-3.5">
             <div
               className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border ${slotColors(nextInfo.slot.slot!.type)}`}
             >

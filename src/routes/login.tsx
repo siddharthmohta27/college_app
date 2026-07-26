@@ -32,7 +32,10 @@ function LoginPage() {
     return unsub;
   }, [navigate]);
 
-  const friendlyError = (code: string) => {
+  const friendlyError = (code: string, message?: string) => {
+    if (message && message.includes("@pec.edu.in")) {
+      return message;
+    }
     const map: Record<string, string> = {
       "auth/user-not-found": "No account found with this email.",
       "auth/wrong-password": "Incorrect password. Please try again.",
@@ -43,7 +46,7 @@ function LoginPage() {
       "auth/popup-closed-by-user": "Google sign-in was cancelled.",
       "auth/network-request-failed": "Network error. Check your internet connection.",
     };
-    return map[code] ?? "Something went wrong. Please try again.";
+    return map[code] ?? message ?? "Something went wrong. Please try again.";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,7 +62,8 @@ function LoginPage() {
       navigate({ to: "/app" });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code ?? "";
-      setError(friendlyError(code));
+      const msg = (err as { message?: string }).message;
+      setError(friendlyError(code, msg));
     } finally {
       setLoading(false);
     }
@@ -73,7 +77,8 @@ function LoginPage() {
       navigate({ to: "/app" });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code ?? "";
-      setError(friendlyError(code));
+      const msg = (err as { message?: string }).message;
+      setError(friendlyError(code, msg));
     } finally {
       setGoogleLoading(false);
     }
@@ -167,7 +172,7 @@ function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@college.edu"
+                  placeholder="you@pec.edu.in"
                   required
                   className="w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />

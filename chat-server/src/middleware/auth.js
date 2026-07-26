@@ -23,6 +23,12 @@ function requireAuth(req, res, next) {
 
   verifyFirebaseToken(token)
     .then((decoded) => {
+      if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Only @pec.edu.in email domain is allowed",
+        });
+      }
       req.user = {
         id: getUserIdFromToken(decoded),
         email: decoded.email,
@@ -55,6 +61,10 @@ function optionalAuth(req, res, next) {
 
   verifyFirebaseToken(token)
     .then((decoded) => {
+      if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
+        req.user = null;
+        return next();
+      }
       req.user = {
         id: getUserIdFromToken(decoded),
         email: decoded.email,
@@ -100,6 +110,9 @@ function socketAuth(socket, next) {
 
   verifyFirebaseToken(token)
     .then((decoded) => {
+      if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
+        return next(new Error("Only @pec.edu.in email domain is allowed"));
+      }
       socket.user = {
         id: getUserIdFromToken(decoded),
         email: decoded.email,

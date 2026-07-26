@@ -159,6 +159,10 @@ io.use(async (socket, next) => {
       return next(new Error("Invalid token: no user ID"));
     }
 
+    if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
+      return next(new Error("Only @pec.edu.in email domain is allowed"));
+    }
+
     // Attach user info to socket
     socket.user = {
       id: userId,

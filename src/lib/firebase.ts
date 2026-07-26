@@ -36,10 +36,18 @@ const app = firebaseConfigured
 export const auth = app ? getAuth(app) : (null as unknown as ReturnType<typeof getAuth>);
 export const googleProvider = new GoogleAuthProvider();
 
+export const isValidPecEmail = (email: string | null | undefined): boolean => {
+  if (!email) return false;
+  return email.trim().toLowerCase().endsWith("@pec.edu.in");
+};
+
 // ─── Auth Helpers ──────────────────────────────────────────────
 export const firebaseAuth = {
   // Sign up with email + password
   async signUp(email: string, password: string, displayName?: string) {
+    if (!isValidPecEmail(email)) {
+      throw new Error("Only @pec.edu.in email addresses are allowed.");
+    }
     const { user } = await createUserWithEmailAndPassword(auth, email, password);
     if (displayName) {
       await updateProfile(user, { displayName });
@@ -49,6 +57,9 @@ export const firebaseAuth = {
 
   // Sign in with email + password
   async signIn(email: string, password: string) {
+    if (!isValidPecEmail(email)) {
+      throw new Error("Only @pec.edu.in email addresses are allowed.");
+    }
     const { user } = await signInWithEmailAndPassword(auth, email, password);
     return user;
   },
@@ -56,6 +67,10 @@ export const firebaseAuth = {
   // Sign in with Google popup
   async signInWithGoogle() {
     const { user } = await signInWithPopup(auth, googleProvider);
+    if (!isValidPecEmail(user.email)) {
+      await signOut(auth);
+      throw new Error("Only @pec.edu.in email addresses are allowed.");
+    }
     return user;
   },
 

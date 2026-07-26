@@ -11,6 +11,9 @@ async function requireAuth(req, res, next) {
   try {
     const token = auth.split("Bearer ")[1];
     const decoded = await verifyFirebaseToken(token);
+    if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
+      return res.status(403).json({ error: "Only @pec.edu.in email domain is allowed" });
+    }
     req.firebaseUid = decoded.uid;
     req.firebaseEmail = decoded.email || null;
     req.firebaseName = decoded.name || decoded.email?.split("@")[0] || "Student";

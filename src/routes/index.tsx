@@ -46,7 +46,10 @@ function Landing() {
     return unsub;
   }, [navigate]);
 
-  const friendlyError = (code: string) => {
+  const friendlyError = (code: string, message?: string) => {
+    if (message && message.includes("@pec.edu.in")) {
+      return message;
+    }
     const map: Record<string, string> = {
       "auth/user-not-found": "No account found with this email.",
       "auth/wrong-password": "Incorrect password. Please try again.",
@@ -57,7 +60,7 @@ function Landing() {
       "auth/popup-closed-by-user": "Google sign-in was cancelled.",
       "auth/network-request-failed": "Network error. Check your internet connection.",
     };
-    return map[code] ?? "Something went wrong. Please try again.";
+    return map[code] ?? message ?? "Something went wrong. Please try again.";
   };
 
   const handleAuthSubmit = async (
@@ -80,7 +83,7 @@ function Landing() {
         navigate({ to: "/app" });
       }
     } catch (err: any) {
-      setAuthError(friendlyError(err.code || ""));
+      setAuthError(friendlyError(err.code || "", err.message));
     } finally {
       setAuthLoading(false);
     }
@@ -96,7 +99,7 @@ function Landing() {
         navigate({ to: "/app" });
       }
     } catch (err: any) {
-      setAuthError(friendlyError(err.code || ""));
+      setAuthError(friendlyError(err.code || "", err.message));
       setAuthLoading(false);
     }
   };
@@ -448,7 +451,7 @@ function AuthCard({
             type="email"
             id="auth-email"
             name="email"
-            placeholder="you@university.edu"
+            placeholder="you@pec.edu.in"
             value={formData.email}
             onChange={handleChange}
           />

@@ -17,6 +17,7 @@ import {
   FileText,
   LogOut,
   User,
+  CalendarDays,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { SearchProvider } from "@/components/search";
@@ -46,6 +47,7 @@ export const Route = createFileRoute("/app")({
 
 const NAV_ITEMS = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/app/timetable", label: "Timetable", icon: CalendarDays },
   { to: "/app/marketplace", label: "Marketplace", icon: ShoppingBag },
   { to: "/app/canteen", label: "Canteen", icon: UtensilsCrossed },
   { to: "/app/chat", label: "Chat", icon: MessageSquare },

@@ -14,6 +14,7 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppTimetableRouteImport } from './routes/app/timetable'
 import { Route as AppStudyRouteImport } from './routes/app/study'
 import { Route as AppResourcesRouteImport } from './routes/app/resources'
 import { Route as AppMarketplaceRouteImport } from './routes/app/marketplace'
@@ -58,6 +59,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTimetableRoute = AppTimetableRouteImport.update({
+  id: '/timetable',
+  path: '/timetable',
   getParentRoute: () => AppRoute,
 } as any)
 const AppStudyRoute = AppStudyRouteImport.update({
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/app/marketplace': typeof AppMarketplaceRoute
   '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
+  '/app/timetable': typeof AppTimetableRoute
   '/app/': typeof AppIndexRoute
   '/app/admin/dating': typeof AppAdminDatingRoute
   '/app/dating/chat': typeof AppDatingChatRoute
@@ -200,6 +207,7 @@ export interface FileRoutesByTo {
   '/app/marketplace': typeof AppMarketplaceRoute
   '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
+  '/app/timetable': typeof AppTimetableRoute
   '/app': typeof AppIndexRoute
   '/app/admin/dating': typeof AppAdminDatingRoute
   '/app/dating/chat': typeof AppDatingChatRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/app/marketplace': typeof AppMarketplaceRoute
   '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
+  '/app/timetable': typeof AppTimetableRoute
   '/app/': typeof AppIndexRoute
   '/app/admin/dating': typeof AppAdminDatingRoute
   '/app/dating/chat': typeof AppDatingChatRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/app/marketplace'
     | '/app/resources'
     | '/app/study'
+    | '/app/timetable'
     | '/app/'
     | '/app/admin/dating'
     | '/app/dating/chat'
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/app/marketplace'
     | '/app/resources'
     | '/app/study'
+    | '/app/timetable'
     | '/app'
     | '/app/admin/dating'
     | '/app/dating/chat'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/app/marketplace'
     | '/app/resources'
     | '/app/study'
+    | '/app/timetable'
     | '/app/'
     | '/app/admin/dating'
     | '/app/dating/chat'
@@ -367,6 +379,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/timetable': {
+      id: '/app/timetable'
+      path: '/timetable'
+      fullPath: '/app/timetable'
+      preLoaderRoute: typeof AppTimetableRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/study': {
@@ -553,6 +572,7 @@ interface AppRouteChildren {
   AppMarketplaceRoute: typeof AppMarketplaceRoute
   AppResourcesRoute: typeof AppResourcesRoute
   AppStudyRoute: typeof AppStudyRoute
+  AppTimetableRoute: typeof AppTimetableRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAdminDatingRoute: typeof AppAdminDatingRoute
 }
@@ -566,6 +586,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMarketplaceRoute: AppMarketplaceRoute,
   AppResourcesRoute: AppResourcesRoute,
   AppStudyRoute: AppStudyRoute,
+  AppTimetableRoute: AppTimetableRoute,
   AppIndexRoute: AppIndexRoute,
   AppAdminDatingRoute: AppAdminDatingRoute,
 }

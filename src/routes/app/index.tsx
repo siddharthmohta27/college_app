@@ -16,8 +16,16 @@ import {
   CheckSquare,
   FileText,
   GraduationCap,
+  CalendarDays,
+  MapPin,
+  User,
+  FlaskConical,
 } from "lucide-react";
 import { TodaysOverview } from "@/components/dashboard/todays-overview";
+import { useState, useEffect } from "react";
+import { firebaseAuth } from "@/lib/firebase";
+import { parsePecEmail } from "@/lib/pec-email";
+import { getSectionFromRollNo, getTimetableForSection, getTodaySchedule, getNextClass } from "@/lib/pec-timetable";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
@@ -62,6 +70,13 @@ const ANNOUNCEMENTS = [
 ];
 
 const QUICK_LINKS = [
+  {
+    to: "/app/timetable",
+    label: "My Timetable",
+    icon: CalendarDays,
+    iconColor: "text-primary",
+    count: "Auto-detected by section",
+  },
   {
     to: "/app/marketplace",
     label: "Marketplace",
@@ -127,6 +142,104 @@ const TRENDING = [
   { text: "Coding Club hackathon — register by Sunday", tag: "Events", time: "3 hr ago" },
 ];
 
+function TodaysScheduleWidget() {
+  const [email, setEmail] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsub = firebaseAuth.onAuthStateChanged((u) => {
+      setEmail(u?.email ?? null);
+      setDisplayName(u?.displayName ?? null);
+    });
+    return unsub;
+  }, []);
+
+  const profile = parsePecEmail(email, displayName);
+  const section = getSectionFromRollNo(profile.rollNo);
+  const timetable = section ? getTimetableForSection(section) : null;
+  const todaySchedule = timetable ? getTodaySchedule(timetable) : null;
+  const nextInfo = todaySchedule ? getNextClass(todaySchedule) : null;
+  const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
+
+  function fmt(t: string) {
+    const [h, m] = t.split(":").map(Number);
+    const suffix = h < 12 ? "AM" : "PM";
+    const d = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    return `${d}:${m.toString().padStart(2, "0")} ${suffix}`;
+  }
+
+  return (
+    <section className="animate-fade-up">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+          <CalendarDays className="h-4 w-4 text-primary" /> Today's Classes
+        </h2>
+        <Link to="/app/timetable" className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1">
+          Full Timetable <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="rounded-2xl border border-border glass p-4">
+        {!section ? (
+          <p className="text-sm text-muted-foreground">Update your roll number in profile to see your timetable.</p>
+        ) : !timetable ? (
+          <div className="flex items-center gap-3">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-surface-elevated">
+              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold">Section {section}</div>
+              <div className="text-xs text-muted-foreground">Timetable not yet uploaded</div>
+            </div>
+          </div>
+        ) : isWeekend ? (
+          <p className="text-sm text-muted-foreground">Weekend — no classes today! 🎉</p>
+        ) : !nextInfo ? (
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🎓</span>
+            <div>
+              <div className="text-sm font-semibold">All done for today!</div>
+              <div className="text-xs text-muted-foreground">No more classes today</div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border ${
+              nextInfo.slot.slot?.type === "lab"
+                ? "bg-violet-500/10 border-violet-500/30 text-violet-400"
+                : "bg-primary/10 border-primary/30 text-primary"
+            }`}>
+              {nextInfo.slot.slot?.type === "lab"
+                ? <FlaskConical className="h-4 w-4" />
+                : <BookOpen className="h-4 w-4" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase ${
+                  nextInfo.status === "ongoing" ? "bg-emerald-500 text-white animate-pulse" : "bg-primary/20 text-primary"
+                }`}>
+                  {nextInfo.status === "ongoing" ? "Live Now" : "Up Next"}
+                </span>
+                <span className="text-[10px] font-mono text-muted-foreground">
+                  {fmt(nextInfo.slot.start)} – {fmt(nextInfo.slot.end)}
+                </span>
+              </div>
+              <div className="mt-0.5 text-sm font-bold">{nextInfo.slot.slot?.subject}</div>
+              <div className="mt-0.5 flex gap-3 text-[11px] text-muted-foreground">
+                {nextInfo.slot.slot?.room && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{nextInfo.slot.slot.room}</span>}
+                {nextInfo.slot.slot?.faculty && <span className="flex items-center gap-1"><User className="h-3 w-3" />{nextInfo.slot.slot.faculty}</span>}
+              </div>
+            </div>
+            <div className="shrink-0 text-right">
+              <div className="text-[10px] text-muted-foreground">Section</div>
+              <div className="text-sm font-bold text-primary">{section}</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function Dashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -182,6 +295,8 @@ function Dashboard() {
       </section>
 
       <TodaysOverview />
+
+      <TodaysScheduleWidget />
 
       {/* Quick nav cards */}
       <section>

@@ -26,15 +26,29 @@ export interface WeeklyTimetable {
   branch: string;
   period: string;
   schedule: DaySchedule[];
+  approximate?: boolean; // true when schedule is extracted from image (verify with dept)
+  labSubgroup?: string;  // e.g. "G1, G2, G3" or "G4, G5, G6"
 }
 
 // ─── Roll No → Section Lookup ────────────────────────────────────────────────
 
 const SECTION_RANGES: { section: string; min: number; max: number }[] = [
+  // ── CSE Data Science (branch code 60) ─────────────────────────────────────
   { section: "DS1", min: 25106001, max: 25106016 },
   { section: "DS2", min: 25106017, max: 25106032 },
   { section: "DS3", min: 25106033, max: 25106048 },
   { section: "DS4", min: 25106049, max: 25106064 },
+  // ── ECE (branch code 50) ──────────────────────────────────────────────────
+  // Each group = 20 students; G1-G6 = roll 001-120; BC (branch change) = 121+
+  // Lab Subgroup 1 (LSG1): G1, G2, G3  →  roll 001-060
+  // Lab Subgroup 2 (LSG2): G4, G5, G6  →  roll 061-120
+  { section: "ECE-G1", min: 25105001, max: 25105020 },
+  { section: "ECE-G2", min: 25105021, max: 25105040 },
+  { section: "ECE-G3", min: 25105041, max: 25105060 },
+  { section: "ECE-G4", min: 25105061, max: 25105080 },
+  { section: "ECE-G5", min: 25105081, max: 25105100 },
+  { section: "ECE-G6", min: 25105101, max: 25105120 },
+  { section: "ECE-G6", min: 25105121, max: 25105999 }, // Branch-change students → same as G6
 ];
 
 export function getSectionFromRollNo(rollNo: string): string | null {
@@ -342,16 +356,195 @@ const DS4_TIMETABLE: WeeklyTimetable = {
   ],
 };
 
+// ─── ECE Subject helpers ──────────────────────────────────────────────────────
+
+function ece(subject: string, code: string, room: string, faculty: string, type: ClassType = "lecture", groups?: string): ClassSlot {
+  return { subject, code, room, faculty, type, groups };
+}
+
+// ─── ECE LSG1 Timetable (G1, G2, G3 — Roll 25105001–25105060) ────────────────
+// Extracted from dept timetable w.e.f 27/07/26 — B.Tech ECE 3rd Sem 26-27-1
+// Subjects: EXN301=DLD(Dhawan/Lab2), EXN302=EDC(Kedia/Lab1), EXN303=PRP(Satinder), EXN304=CT(NF-1)
+
+const ECE_LSG1_TIMETABLE: WeeklyTimetable = {
+  section: "ECE-LSG1",
+  semester: "3rd Sem",
+  branch: "B.Tech ECE",
+  period: "Jul–Dec 2026",
+  approximate: true,
+  labSubgroup: "G1, G2, G3",
+  schedule: [
+    {
+      day: "MON",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: ece("Prob. & Random Processes", "EXN303", "L-23", "Dr. Satinder Mohar") },
+        { start: "10:00", end: "11:00", slot: ece("Electronic Devices & Circuits", "EXN302", "L-25", "Dr. J. Kedia") },
+        { start: "11:00", end: "12:00", slot: free() },
+        { start: "12:00", end: "13:00", slot: ece("Digital Logic Design", "EXN301", "L-24", "Dr. D. Dhawan") },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: ece("Circuit Theory Tutorial", "EXN304 T", "L-25", "NF-1", "tutorial") },
+        { start: "15:00", end: "16:00", slot: ece("HSM", "HSM", "L-20 & L-23", "Dr. Jaskirat") },
+        { start: "16:00", end: "17:00", slot: ece("Minor Specialization", "Minor Spec", "", "") },
+      ],
+    },
+    {
+      day: "TUE",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: ece("Prob. & Random Processes", "EXN303", "L-23", "Dr. Satinder Mohar") },
+        { start: "10:00", end: "11:00", slot: ece("Electronic Devices & Circuits", "EXN302", "L-25", "Dr. J. Kedia") },
+        { start: "11:00", end: "12:00", slot: ece("HSM", "HSM", "L-20 & L-23", "Dr. Jaskirat") },
+        { start: "12:00", end: "13:00", slot: ece("Circuit Theory", "EXN304", "L-24", "NF-1") },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "16:00", slot: ece("EDC Lab / DLD Lab (rotating G1-G3)", "EXN302/EXN301 Lab", "Lab-1 / Lab-2", "Dr. Kedia / Dr. Dhawan", "lab", "G1, G2, G3") },
+        { start: "16:00", end: "17:00", slot: ece("PRP Tutorial", "EXN303 T", "L-24", "Dr. Satinder Mohar", "tutorial") },
+      ],
+    },
+    {
+      day: "WED",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: free() },
+        { start: "10:00", end: "11:00", slot: ece("Prob. & Random Processes", "EXN303", "L-23", "Dr. Satinder Mohar") },
+        { start: "11:00", end: "13:00", slot: ece("EDC Lab G2", "EXN302 Lab", "Lab-1", "Dr. Radhika", "lab", "G2") },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: ece("Digital Logic Design", "EXN301", "L-24", "Dr. D. Dhawan") },
+        { start: "15:00", end: "16:00", slot: ece("HSM Tutorial", "HSM T", "", "Dr. Jaskirat", "tutorial") },
+        { start: "16:00", end: "17:00", slot: free() },
+      ],
+    },
+    {
+      day: "THU",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: free() },
+        { start: "10:00", end: "11:00", slot: ece("Digital Logic Design", "EXN301", "L-24", "Dr. D. Dhawan") },
+        { start: "11:00", end: "12:00", slot: ece("Digital Logic Design", "EXN301", "L-24", "Dr. D. Dhawan") },
+        { start: "12:00", end: "13:00", slot: free() },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: ece("CT Tutorial G3", "EXN304 T", "L-25", "NF-1", "tutorial", "G3") },
+        { start: "15:00", end: "17:00", slot: ece("DLD Lab G1 / EDC Lab G2", "EXN301/EXN302 Lab", "Lab-2 / Lab-1", "Dr. Dhawan / Dr. Kedia", "lab", "G1, G2") },
+        { start: "17:00", end: "18:00", slot: ece("HSM Tutorial", "HSM T", "", "Dr. Jaskirat", "tutorial") },
+      ],
+    },
+    {
+      day: "FRI",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: free() },
+        { start: "10:00", end: "11:00", slot: ece("Digital Logic Design", "EXN301", "L-24", "Dr. D. Dhawan") },
+        { start: "11:00", end: "12:00", slot: ece("Prob. & Random Processes", "EXN303", "L-23", "Dr. Satinder Mohar") },
+        { start: "12:00", end: "13:00", slot: ece("PRP Tutorial G3", "EXN303 T", "Lab-6", "Dr. Satinder Mohar", "tutorial", "G3") },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: ece("HSM Tutorial", "HSM T", "", "Dr. Jaskirat", "tutorial") },
+        { start: "15:00", end: "16:00", slot: ece("Minor Specialization", "Minor Spec", "", "") },
+        { start: "16:00", end: "17:00", slot: free() },
+      ],
+    },
+  ],
+};
+
+// ─── ECE LSG2 Timetable (G4, G5, G6 — Roll 25105061–25105120) ────────────────
+
+const ECE_LSG2_TIMETABLE: WeeklyTimetable = {
+  section: "ECE-LSG2",
+  semester: "3rd Sem",
+  branch: "B.Tech ECE",
+  period: "Jul–Dec 2026",
+  approximate: true,
+  labSubgroup: "G4, G5, G6",
+  schedule: [
+    {
+      day: "MON",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: ece("Circuit Theory", "EXN304", "L-25", "NF-1") },
+        { start: "10:00", end: "11:00", slot: ece("Prob. & Random Processes", "EXN303", "L-23", "Dr. Satinder Mohar") },
+        { start: "11:00", end: "12:00", slot: ece("CT Tutorial", "EXN304 T", "T-9", "NF-1", "tutorial") },
+        { start: "12:00", end: "13:00", slot: ece("Digital Logic Design", "EXN301", "L-20", "Dr. D. Dhawan") },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: ece("PRP Tutorial", "EXN303 T", "T-9", "Dr. Satinder Mohar", "tutorial") },
+        { start: "15:00", end: "16:00", slot: ece("HSM", "HSM", "L-20 & L-23", "Dr. Jaskirat") },
+        { start: "16:00", end: "17:00", slot: ece("Minor Specialization", "Minor Spec", "", "") },
+      ],
+    },
+    {
+      day: "TUE",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: ece("Electronic Devices & Circuits", "EXN302", "L-25", "Dr. J. Kedia") },
+        { start: "10:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: ece("HSM", "HSM", "L-20 & L-23", "Dr. Jaskirat") },
+        { start: "12:00", end: "13:00", slot: ece("Circuit Theory", "EXN304", "L-24", "NF-1") },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "16:00", slot: ece("EDC Lab G3", "EXN302 Lab", "Lab-1", "Dr. J. Kedia", "lab", "G3 (LSG2)") },
+        { start: "16:00", end: "17:00", slot: ece("PRP Tutorial G5", "EXN303 T", "T-9", "Dr. Satinder Mohar", "tutorial", "G5") },
+      ],
+    },
+    {
+      day: "WED",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: ece("PRP Tutorial", "EXN303 T", "L-23", "Dr. Satinder Mohar", "tutorial") },
+        { start: "10:00", end: "11:00", slot: ece("Electronic Devices & Circuits", "EXN302", "L-25", "Dr. J. Kedia") },
+        { start: "11:00", end: "12:00", slot: ece("DLD Lab G3", "EXN301 Lab", "Lab-2", "Dr. D. Dhawan", "lab", "G3") },
+        { start: "12:00", end: "13:00", slot: ece("Circuit Theory", "EXN304", "L-24", "NF-1") },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: free() },
+        { start: "15:00", end: "16:00", slot: ece("HSM Tutorial", "HSM T", "", "Dr. Jaskirat", "tutorial") },
+        { start: "16:00", end: "18:00", slot: ece("EDC Lab G4 / DLD Lab G5", "EXN302/EXN301 Lab", "Lab-1 / Lab-2", "Dr. Kedia / Dr. Neelam R. Prakash", "lab", "G4, G5") },
+      ],
+    },
+    {
+      day: "THU",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "11:00", slot: ece("EDC Lab G5 / DLD Lab G6", "EXN302/EXN301 Lab", "Lab-1 / Lab-2", "Dr. Sukhwinder Singh / Dr. Jasbir Kaur", "lab", "G5, G6") },
+        { start: "11:00", end: "12:00", slot: ece("Digital Logic Design", "EXN301", "L-24", "Dr. D. Dhawan") },
+        { start: "12:00", end: "13:00", slot: ece("Electronic Devices & Circuits", "EXN302", "L-25", "Dr. J. Kedia") },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: free() },
+        { start: "15:00", end: "16:00", slot: ece("CT Tutorial G5", "EXN304 T", "L-25", "NF-1", "tutorial", "G5") },
+        { start: "16:00", end: "17:00", slot: ece("CT Tutorial G5 cont.", "EXN304 T", "L-25", "NF-1", "tutorial", "G5") },
+        { start: "17:00", end: "18:00", slot: ece("HSM Tutorial", "HSM T", "", "Dr. Jaskirat", "tutorial") },
+      ],
+    },
+    {
+      day: "FRI",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "11:00", slot: ece("EDC Lab G6 / DLD Lab G4", "EXN302/EXN301 Lab", "Lab-1 / Lab-2", "Dr. J. Kedia / Dr. D. Dhawan", "lab", "G4, G6") },
+        { start: "11:00", end: "12:00", slot: ece("Digital Logic Design", "EXN301", "L-24", "Dr. D. Dhawan") },
+        { start: "12:00", end: "13:00", slot: ece("Electronic Devices & Circuits", "EXN302", "L-25", "Dr. J. Kedia") },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: ece("HSM Tutorial", "HSM T", "", "Dr. Jaskirat", "tutorial") },
+        { start: "15:00", end: "16:00", slot: ece("Minor Specialization", "Minor Spec", "", "") },
+        { start: "16:00", end: "17:00", slot: free() },
+      ],
+    },
+  ],
+};
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 const TIMETABLE_REGISTRY: Record<string, WeeklyTimetable> = {
+  // DS sections
   DS1: DS1_TIMETABLE,
   DS4: DS4_TIMETABLE,
+  // ECE sections — G1,G2,G3 → LSG1; G4,G5,G6 → LSG2; BC students → G6 (LSG2)
+  "ECE-G1": ECE_LSG1_TIMETABLE,
+  "ECE-G2": ECE_LSG1_TIMETABLE,
+  "ECE-G3": ECE_LSG1_TIMETABLE,
+  "ECE-G4": ECE_LSG2_TIMETABLE,
+  "ECE-G5": ECE_LSG2_TIMETABLE,
+  "ECE-G6": ECE_LSG2_TIMETABLE,
 };
 
 export function getTimetableForSection(section: string): WeeklyTimetable | null {
   return TIMETABLE_REGISTRY[section] ?? null;
 }
+
 
 // ─── Utility helpers ──────────────────────────────────────────────────────────
 

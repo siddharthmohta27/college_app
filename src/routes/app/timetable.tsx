@@ -291,8 +291,23 @@ function TimetablePage() {
         </div>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">My Timetable</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          {timetable ? `${timetable.branch} · ${timetable.semester} · ${timetable.period}` : "B.Tech CSE (Data Science) · 3rd Sem · Jul–Dec 2026"}
+          {timetable
+            ? `${timetable.branch} · ${timetable.semester} · ${timetable.period}`
+            : "B.Tech · 3rd Sem · Jul–Dec 2026"}
         </p>
+        {/* ECE group info */}
+        {section?.startsWith("ECE") && timetable && (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 text-[11px] font-semibold text-cyan-400">
+              <GraduationCap className="h-3 w-3" /> Group {section.replace("ECE-", "")}
+            </span>
+            {timetable.labSubgroup && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 border border-violet-500/20 px-3 py-1 text-[11px] font-semibold text-violet-400">
+                <FlaskConical className="h-3 w-3" /> Lab Subgroup: {timetable.labSubgroup}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* No section or timetable available */}
@@ -301,8 +316,12 @@ function TimetablePage() {
           <AlertTriangle className="mx-auto h-8 w-8 text-amber-400" />
           <h3 className="mt-3 font-bold text-foreground">Section could not be determined</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your roll number ({profile.rollNo}) doesn't match any known DS section range. Please update your roll number in your profile.
+            Your roll number ({profile.rollNo}) doesn't match any known section. Please update your roll number in your profile.
           </p>
+          <div className="mt-3 rounded-xl border border-border bg-surface/50 p-3 text-xs text-muted-foreground">
+            <strong className="text-foreground">DS:</strong> 25106001–25106064 &nbsp;|&nbsp;
+            <strong className="text-foreground">ECE:</strong> 25105001–25105999
+          </div>
         </div>
       ) : !timetable ? (
         <div className="rounded-2xl border border-border bg-surface/50 p-8 text-center animate-fade-up">
@@ -317,13 +336,23 @@ function TimetablePage() {
             The schedule for <strong>{section}</strong> hasn't been added yet. Check back soon — your coordinator will upload it.
           </p>
           <div className="mt-4 rounded-xl border border-border bg-surface/50 p-3 text-xs text-muted-foreground">
-            Available sections: <strong className="text-foreground">DS1</strong> and <strong className="text-foreground">DS4</strong>
+            Available: <strong className="text-foreground">DS1, DS4, ECE G1–G6</strong>
           </div>
         </div>
       ) : (
         <>
           {/* Today's hero */}
           <TodayHero todaySchedule={todaySchedule} section={section} />
+
+          {/* Approximate data notice for ECE */}
+          {timetable.approximate && (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-[11px] text-amber-300 animate-fade-up">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
+              <span>
+                This schedule was extracted from the dept timetable image (w.e.f. 27/07/26). Individual lab slots rotate between groups — verify exact slot with your group coordinator.
+              </span>
+            </div>
+          )}
 
           {/* Lab summary */}
           <section className="animate-fade-up">

@@ -121,22 +121,7 @@ function broadcastChannelMembers(channelId) {
     }
   });
 
-  // Always append seeded offline/idle mock members
-  const seededMembers = [
-    { name: "Aisha R.", status: "online", role: "Mod", color: "bg-emerald-500" },
-    { name: "Marcus K.", status: "online", role: "Student", color: "bg-cyan-500" },
-    { name: "Priya S.", status: "idle", role: "TA", color: "bg-fuchsia-500" },
-    { name: "Leo T.", status: "offline", role: "Student", color: "bg-amber-500" },
-  ];
-
-  const allMembers = [...membersInChannel];
-  seededMembers.forEach((seeded) => {
-    if (!allMembers.some((m) => m.name === seeded.name)) {
-      allMembers.push(seeded);
-    }
-  });
-
-  io.to(channelId).emit("members", allMembers);
+  io.to(channelId).emit("members", membersInChannel);
 }
 
 // ─── Socket.io Auth Middleware ────────────────────────────────────

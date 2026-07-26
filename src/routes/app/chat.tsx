@@ -78,16 +78,16 @@ const SERVERS = [
 
 const CHANNELS = {
   text: [
-    { id: "general", name: "general", unread: 3 },
+    { id: "general", name: "general", unread: 0 },
     { id: "announcements", name: "announcements", unread: 0 },
-    { id: "assignments", name: "assignments-help", unread: 12 },
+    { id: "assignments", name: "assignments-help", unread: 0 },
     { id: "random", name: "random", unread: 0 },
-    { id: "internships", name: "internships", unread: 5 },
+    { id: "internships", name: "internships", unread: 0 },
   ],
   voice: [
-    { id: "study-1", name: "Study Room 1", users: 4 },
-    { id: "study-2", name: "Late Night Grind", users: 2 },
-    { id: "chill", name: "Chill Lounge", users: 8 },
+    { id: "study-1", name: "Study Room 1", users: 0 },
+    { id: "study-2", name: "Late Night Grind", users: 0 },
+    { id: "chill", name: "Chill Lounge", users: 0 },
   ],
 };
 

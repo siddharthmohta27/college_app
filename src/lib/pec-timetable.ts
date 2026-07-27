@@ -356,6 +356,148 @@ const DS4_TIMETABLE: WeeklyTimetable = {
   ],
 };
 
+// ─── DS3 Timetable ───────────────────────────────────────────────────────────
+
+const DS3_TIMETABLE: WeeklyTimetable = {
+  section: "DS3",
+  semester: "3rd Sem",
+  branch: "B.Tech CSE (Data Science)",
+  period: "Jul–Dec 2026",
+  schedule: [
+    {
+      day: "MON",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        {
+          start: "09:00", end: "11:00",
+          slot: { subject: "DS Lab", code: "DSN3001L", room: "306", type: "lab", groups: "DS3" },
+        },
+        {
+          start: "11:00", end: "12:00",
+          slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" },
+        },
+        {
+          start: "12:00", end: "13:00",
+          slot: { subject: "Operating Systems", code: "DSN3003", type: "lecture" },
+        },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        {
+          start: "14:00", end: "15:00",
+          slot: { subject: "Probability & Data Statistics", code: "DSN3002", type: "lecture" },
+        },
+        {
+          start: "15:00", end: "16:00",
+          slot: { subject: "Data Structures", code: "DSN3001", type: "lecture" },
+        },
+        { start: "16:00", end: "17:00", slot: free() },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "TUE",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: free() },
+        { start: "10:00", end: "11:00", slot: free() },
+        {
+          start: "11:00", end: "12:00",
+          slot: { subject: "Data Structures", code: "DSN3001", type: "lecture" },
+        },
+        {
+          start: "12:00", end: "13:00",
+          slot: { subject: "Computer Networks", code: "DSN3004", type: "lecture" },
+        },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        {
+          start: "14:00", end: "15:00",
+          slot: { subject: "Probability & Data Statistics", code: "DSN3002", type: "lecture" },
+        },
+        {
+          start: "15:00", end: "16:00",
+          slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" },
+        },
+        { start: "16:00", end: "17:00", slot: free() },
+        {
+          start: "17:00", end: "19:00",
+          slot: { subject: "OS Lab", code: "DSN3003L", room: "306", type: "lab", groups: "DS3" },
+        },
+      ],
+    },
+    {
+      day: "WED",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        {
+          start: "09:00", end: "11:00",
+          slot: { subject: "PDS Lab", code: "DSN3002L", room: "304 & 306", type: "lab", groups: "DS3" },
+        },
+        {
+          start: "11:00", end: "12:00",
+          slot: { subject: "Data Structures", code: "DSN3001", type: "lecture" },
+        },
+        {
+          start: "12:00", end: "13:00",
+          slot: { subject: "Operating Systems", code: "DSN3003", type: "lecture" },
+        },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: free() },
+        { start: "15:00", end: "16:00", slot: free() },
+        { start: "16:00", end: "17:00", slot: free() },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "THU",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: free() },
+        { start: "10:00", end: "11:00", slot: free() },
+        {
+          start: "11:00", end: "12:00",
+          slot: { subject: "Computer Networks", code: "DSN3004", type: "lecture" },
+        },
+        {
+          start: "12:00", end: "13:00",
+          slot: { subject: "Probability & Data Statistics", code: "DSN3002", type: "lecture" },
+        },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: free() },
+        {
+          start: "15:00", end: "17:00",
+          slot: { subject: "HSM-II (Class + Tutorial)", code: "HSM-II T", type: "tutorial" },
+        },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "FRI",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        {
+          start: "09:00", end: "11:00",
+          slot: { subject: "CN Lab", code: "DSN3004L", room: "CL13 + CL14", type: "lab", groups: "DS3" },
+        },
+        {
+          start: "11:00", end: "12:00",
+          slot: { subject: "Computer Networks", code: "DSN3004", type: "lecture" },
+        },
+        {
+          start: "12:00", end: "13:00",
+          slot: { subject: "Operating Systems", code: "DSN3003", type: "lecture" },
+        },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        {
+          start: "14:00", end: "15:00",
+          slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" },
+        },
+        { start: "15:00", end: "16:00", slot: free() },
+        { start: "16:00", end: "17:00", slot: free() },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+  ],
+};
+
 // ─── ECE Subject helpers ──────────────────────────────────────────────────────
 
 function ece(subject: string, code: string, room: string, faculty: string, type: ClassType = "lecture", groups?: string): ClassSlot {
@@ -531,6 +673,7 @@ const ECE_LSG2_TIMETABLE: WeeklyTimetable = {
 const TIMETABLE_REGISTRY: Record<string, WeeklyTimetable> = {
   // DS sections
   DS1: DS1_TIMETABLE,
+  DS3: DS3_TIMETABLE,
   DS4: DS4_TIMETABLE,
   // ECE sections — G1,G2,G3 → LSG1; G4,G5,G6 → LSG2; BC students → G6 (LSG2)
   "ECE-G1": ECE_LSG1_TIMETABLE,

@@ -336,7 +336,7 @@ function TimetablePage() {
             The schedule for <strong>{section}</strong> hasn't been added yet. Check back soon — your coordinator will upload it.
           </p>
           <div className="mt-4 rounded-xl border border-border bg-surface/50 p-3 text-xs text-muted-foreground">
-            Available: <strong className="text-foreground">DS1, DS4, ECE G1–G6</strong>
+            Available: <strong className="text-foreground">DS1, DS3, DS4, ECE G1–G6</strong>
           </div>
         </div>
       ) : (

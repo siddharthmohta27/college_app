@@ -120,55 +120,94 @@ export function saveLocalAttendance(subjects: AttendanceSubject[]) {
 }
 
 /**
- * Sync attendance records with Supabase
+ * Sync attendance records with PostgreSQL & Supabase
  */
 export async function syncSupabaseAttendance(userId: string, subjects: AttendanceSubject[]) {
-  if (!supabase || !userId) return;
-  try {
-    const recordsToUpsert = subjects.map((s) => ({
-      user_id: userId,
-      subject_code: s.code,
-      subject_name: s.name,
-      attended: s.lecturesAttended,
-      absent: s.lecturesAbsent,
-      cancelled: s.lecturesCancelled,
-      updated_at: new Date().toISOString(),
-    }));
+  if (!userId) return;
 
-    await supabase
-      .from("user_attendance")
-      .upsert(recordsToUpsert, { onConflict: "user_id,subject_code" });
+  const recordsToUpsert = subjects.map((s) => ({
+    user_id: userId,
+    subject_code: s.code,
+    subject_name: s.name,
+    attended: s.lecturesAttended,
+    absent: s.lecturesAbsent,
+    cancelled: s.lecturesCancelled,
+    updated_at: new Date().toISOString(),
+  }));
+
+  // 1. Sync to PostgreSQL backend
+  try {
+    await fetch("http://localhost:3001/api/attendance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, records: recordsToUpsert }),
+    });
   } catch (err) {
-    // Graceful fallback to local storage
-    console.warn("Supabase attendance sync notice:", err);
+    console.warn("PostgreSQL attendance sync fallback:", err);
+  }
+
+  // 2. Sync to Supabase if configured
+  if (supabase) {
+    try {
+      await supabase
+        .from("user_attendance")
+        .upsert(recordsToUpsert, { onConflict: "user_id,subject_code" });
+    } catch (err) {
+      console.warn("Supabase attendance sync fallback:", err);
+    }
   }
 }
 
 /**
- * Load attendance from Supabase if logged in
+ * Load attendance from PostgreSQL & Supabase if logged in
  */
 export async function fetchSupabaseAttendance(userId: string): Promise<AttendanceSubject[] | null> {
-  if (!supabase || !userId) return null;
+  if (!userId) return null;
+
+  // 1. Try PostgreSQL first
   try {
-    const { data, error } = await supabase
-      .from("user_attendance")
-      .select("*")
-      .eq("user_id", userId);
-
-    if (error || !data || data.length === 0) return null;
-
-    return data.map((row: any) => ({
-      id: row.subject_code,
-      name: row.subject_name,
-      code: row.subject_code,
-      lecturesAttended: row.attended || 0,
-      lecturesAbsent: row.absent || 0,
-      lecturesCancelled: row.cancelled || 0,
-      lastUpdated: new Date(row.updated_at || Date.now()).toLocaleDateString(),
-    }));
-  } catch (_) {
-    return null;
+    const res = await fetch(`http://localhost:3001/api/attendance?userId=${encodeURIComponent(userId)}`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.data && json.data.length > 0) {
+        return json.data.map((row: any) => ({
+          id: row.subject_code,
+          name: row.subject_name,
+          code: row.subject_code,
+          lecturesAttended: row.attended || 0,
+          lecturesAbsent: row.absent || 0,
+          lecturesCancelled: row.cancelled || 0,
+          lastUpdated: new Date(row.updated_at || Date.now()).toLocaleDateString(),
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn("PostgreSQL attendance fetch notice:", err);
   }
+
+  // 2. Fallback to Supabase
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("user_attendance")
+        .select("*")
+        .eq("user_id", userId);
+
+      if (!error && data && data.length > 0) {
+        return data.map((row: any) => ({
+          id: row.subject_code,
+          name: row.subject_name,
+          code: row.subject_code,
+          lecturesAttended: row.attended || 0,
+          lecturesAbsent: row.absent || 0,
+          lecturesCancelled: row.cancelled || 0,
+          lastUpdated: new Date(row.updated_at || Date.now()).toLocaleDateString(),
+        }));
+      }
+    } catch (_) {}
+  }
+
+  return null;
 }
 
 /**

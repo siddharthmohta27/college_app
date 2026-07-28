@@ -7,6 +7,7 @@ const datingRouter = require("./src/routes/dating");
 const datingV3Router = require("./src/routes/dating-v3");
 const chatRouter = require("./src/routes/chat");
 const marketplaceRouter = require("./src/routes/marketplace");
+const attendanceRouter = require("./src/routes/attendance");
 const {
   pool,
   verifyFirebaseToken,
@@ -24,6 +25,7 @@ app.use("/api/dating", datingRouter);
 app.use("/api/dating", datingV3Router);
 app.use("/api/chat", chatRouter);
 app.use("/api/marketplace", marketplaceRouter);
+app.use("/api/attendance", attendanceRouter);
 
 const server = http.createServer(app);
 const io = new Server(server, {

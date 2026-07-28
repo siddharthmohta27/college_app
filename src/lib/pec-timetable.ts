@@ -46,7 +46,12 @@ const SECTION_RANGES: { section: string; min: number; max: number }[] = [
   { section: "CSE-4", min: 25101062, max: 25101083 },
   { section: "CSE-5", min: 25101084, max: 25101105 },
   { section: "CSE-6", min: 25101106, max: 25101128 },
-  { section: "CSE-6", min: 25101129, max: 25101999 }, // Branch-change students
+  // ── CSE AI (branch code 65 / 61) ──────────────────────────────────────────
+  { section: "AI-1", min: 25106501, max: 25106515 },
+  { section: "AI-2", min: 25106516, max: 25106531 },
+  { section: "AI-2", min: 25106532, max: 25106599 }, // Branch-change / higher roll
+  { section: "AI-1", min: 25106101, max: 25106115 },
+  { section: "AI-2", min: 25106116, max: 25106199 },
   // ── ECE (branch code 50) ──────────────────────────────────────────────────
   // Each group = 20 students; G1-G6 = roll 001-120; BC (branch change) = 121+
   // Lab Subgroup 1 (LSG1): G1, G2, G3  →  roll 001-060
@@ -805,6 +810,152 @@ const CSE_G2_TIMETABLE: WeeklyTimetable = {
   ],
 };
 
+// ─── CSE AI1 Timetable (Roll 25106501–25106515 / Roll 1-15) ─────────────────────
+
+const AI1_TIMETABLE: WeeklyTimetable = {
+  section: "AI-1",
+  semester: "3rd Sem",
+  branch: "B.Tech CSE (Artificial Intelligence)",
+  period: "Jul–Dec 2026",
+  labSubgroup: "AI1",
+  schedule: [
+    {
+      day: "MON",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: { subject: "OOP", code: "CSN3004", type: "lecture" } },
+        { start: "10:00", end: "11:00", slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" } },
+        { start: "11:00", end: "12:00", slot: { subject: "Data Science & ML", code: "CSN3002", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Structures", code: "CSN3001", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "16:00", slot: { subject: "DS Lab", code: "CSN3001L", type: "lab", groups: "AI1" } },
+        { start: "16:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "TUE",
+      slots: [
+        { start: "08:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "Maths Foundations of AI", code: "AIN3001", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "OOP", code: "CSN3004", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "16:00", slot: { subject: "DSML Lab", code: "CSN3002L", type: "lab", groups: "AI1" } },
+        { start: "16:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "WED",
+      slots: [
+        { start: "08:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "Data Science & ML", code: "CSN3002", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "Data Structures", code: "CSN3001", type: "lecture" } },
+        { start: "15:00", end: "16:00", slot: { subject: "Maths Foundations of AI", code: "AIN3001", type: "lecture" } },
+        { start: "16:00", end: "17:00", slot: free() },
+        { start: "17:00", end: "19:00", slot: { subject: "OOP Lab", code: "CSN3004L", type: "lab", groups: "AI1" } },
+      ],
+    },
+    {
+      day: "THU",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: { subject: "OOP", code: "CSN3004", type: "lecture" } },
+        { start: "10:00", end: "12:00", slot: { subject: "MFAI Lab", code: "AIN3001L", type: "lab", groups: "AI1" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Maths Foundations of AI", code: "AIN3001", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "Data Structures", code: "CSN3001", type: "lecture" } },
+        { start: "15:00", end: "16:00", slot: free() },
+        { start: "16:00", end: "17:00", slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" } },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "FRI",
+      slots: [
+        { start: "08:00", end: "10:00", slot: free() },
+        { start: "10:00", end: "11:00", slot: { subject: "Data Science & ML", code: "CSN3002", type: "lecture" } },
+        { start: "11:00", end: "13:00", slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "19:00", slot: free() },
+      ],
+    },
+  ],
+};
+
+// ─── CSE AI2 Timetable (Roll 25106516–25106599 / Roll 16-31+) ────────────────────
+
+const AI2_TIMETABLE: WeeklyTimetable = {
+  section: "AI-2",
+  semester: "3rd Sem",
+  branch: "B.Tech CSE (Artificial Intelligence)",
+  period: "Jul–Dec 2026",
+  labSubgroup: "AI2",
+  schedule: [
+    {
+      day: "MON",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: { subject: "OOP", code: "CSN3004", type: "lecture" } },
+        { start: "10:00", end: "11:00", slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" } },
+        { start: "11:00", end: "12:00", slot: { subject: "Data Science & ML", code: "CSN3002", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Structures", code: "CSN3001", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "16:00", slot: { subject: "OOP Lab", code: "CSN3004L", type: "lab", groups: "AI2" } },
+        { start: "16:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "TUE",
+      slots: [
+        { start: "08:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "Maths Foundations of AI", code: "AIN3001", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "OOP", code: "CSN3004", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "17:00", slot: free() },
+        { start: "17:00", end: "19:00", slot: { subject: "MFAI Lab", code: "AIN3001L", type: "lab", groups: "AI2" } },
+      ],
+    },
+    {
+      day: "WED",
+      slots: [
+        { start: "08:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "Data Science & ML", code: "CSN3002", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "Data Structures", code: "CSN3001", type: "lecture" } },
+        { start: "15:00", end: "16:00", slot: { subject: "Maths Foundations of AI", code: "AIN3001", type: "lecture" } },
+        { start: "16:00", end: "17:00", slot: free() },
+        { start: "17:00", end: "19:00", slot: { subject: "DS Lab", code: "CSN3001L", type: "lab", groups: "AI2" } },
+      ],
+    },
+    {
+      day: "THU",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: { subject: "OOP", code: "CSN3004", type: "lecture" } },
+        { start: "10:00", end: "12:00", slot: { subject: "DSML Lab", code: "CSN3002L", type: "lab", groups: "AI2" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Maths Foundations of AI", code: "AIN3001", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "Data Structures", code: "CSN3001", type: "lecture" } },
+        { start: "15:00", end: "16:00", slot: free() },
+        { start: "16:00", end: "17:00", slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" } },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "FRI",
+      slots: [
+        { start: "08:00", end: "10:00", slot: free() },
+        { start: "10:00", end: "11:00", slot: { subject: "Data Science & ML", code: "CSN3002", type: "lecture" } },
+        { start: "11:00", end: "13:00", slot: { subject: "HSM-II", code: "HSM-II", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "19:00", slot: free() },
+      ],
+    },
+  ],
+};
+
 // ─── ECE Subject helpers ──────────────────────────────────────────────────────
 
 function ece(subject: string, code: string, room: string, faculty: string, type: ClassType = "lecture", groups?: string): ClassSlot {
@@ -990,6 +1141,9 @@ const TIMETABLE_REGISTRY: Record<string, WeeklyTimetable> = {
   "CSE-4": CSE_G2_TIMETABLE,
   "CSE-5": CSE_G2_TIMETABLE,
   "CSE-6": CSE_G2_TIMETABLE,
+  // CSE AI sections
+  "AI-1": AI1_TIMETABLE,
+  "AI-2": AI2_TIMETABLE,
   // ECE sections — G1,G2,G3 → LSG1; G4,G5,G6 → LSG2; BC students → G6 (LSG2)
   "ECE-G1": ECE_LSG1_TIMETABLE,
   "ECE-G2": ECE_LSG1_TIMETABLE,

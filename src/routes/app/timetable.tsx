@@ -296,10 +296,10 @@ function TimetablePage() {
             : "B.Tech · 3rd Sem · Jul–Dec 2026"}
         </p>
         {/* Group info badge */}
-        {(section?.startsWith("ECE") || section?.startsWith("CSE")) && timetable && (
+        {(section?.startsWith("ECE") || section?.startsWith("CSE") || section?.startsWith("AI")) && timetable && (
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 text-[11px] font-semibold text-cyan-400">
-              <GraduationCap className="h-3 w-3" /> Group {section.replace("ECE-", "").replace("CSE-", "CSE ")}
+              <GraduationCap className="h-3 w-3" /> Group {section.replace("ECE-", "").replace("CSE-", "CSE ").replace("AI-", "AI ")}
             </span>
             {timetable.labSubgroup && (
               <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 border border-violet-500/20 px-3 py-1 text-[11px] font-semibold text-violet-400">
@@ -320,6 +320,7 @@ function TimetablePage() {
           </p>
           <div className="mt-3 rounded-xl border border-border bg-surface/50 p-3 text-xs text-muted-foreground">
             <strong className="text-foreground">CSE:</strong> 25101001–25101999 &nbsp;|&nbsp;
+            <strong className="text-foreground">AI:</strong> 25106501–25106599 &nbsp;|&nbsp;
             <strong className="text-foreground">DS:</strong> 25106001–25106064 &nbsp;|&nbsp;
             <strong className="text-foreground">ECE:</strong> 25105001–25105999
           </div>
@@ -337,7 +338,7 @@ function TimetablePage() {
             The schedule for <strong>{section}</strong> hasn't been added yet. Check back soon — your coordinator will upload it.
           </p>
           <div className="mt-4 rounded-xl border border-border bg-surface/50 p-3 text-xs text-muted-foreground">
-            Available: <strong className="text-foreground">CSE 1–6, DS 1–4, ECE G1–G6</strong>
+            Available: <strong className="text-foreground">CSE 1–6, AI 1–2, DS 1–4, ECE G1–G6</strong>
           </div>
         </div>
       ) : (

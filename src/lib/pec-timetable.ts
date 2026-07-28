@@ -38,6 +38,15 @@ const SECTION_RANGES: { section: string; min: number; max: number }[] = [
   { section: "DS2", min: 25106017, max: 25106032 },
   { section: "DS3", min: 25106033, max: 25106048 },
   { section: "DS4", min: 25106049, max: 25106064 },
+  // ── CSE Core (branch code 10) ─────────────────────────────────────────────
+  // CSE1-CSE6; Subgroup G1 (CSE1-CSE3) = roll 001-061; Subgroup G2 (CSE4-CSE6) = roll 062-128+
+  { section: "CSE-1", min: 25101001, max: 25101021 },
+  { section: "CSE-2", min: 25101022, max: 25101041 },
+  { section: "CSE-3", min: 25101042, max: 25101061 },
+  { section: "CSE-4", min: 25101062, max: 25101083 },
+  { section: "CSE-5", min: 25101084, max: 25101105 },
+  { section: "CSE-6", min: 25101106, max: 25101128 },
+  { section: "CSE-6", min: 25101129, max: 25101999 }, // Branch-change students
   // ── ECE (branch code 50) ──────────────────────────────────────────────────
   // Each group = 20 students; G1-G6 = roll 001-120; BC (branch change) = 121+
   // Lab Subgroup 1 (LSG1): G1, G2, G3  →  roll 001-060
@@ -640,6 +649,162 @@ const DS3_TIMETABLE: WeeklyTimetable = {
   ],
 };
 
+// ─── CSE Core G1 Timetable (CSE-1, CSE-2, CSE-3 — Roll 25101001–25101061) ──────
+
+const CSE_G1_TIMETABLE: WeeklyTimetable = {
+  section: "CSE-G1",
+  semester: "3rd Sem",
+  branch: "B.Tech CSE",
+  period: "Jul–Dec 2026",
+  labSubgroup: "CSE1, CSE2, CSE3",
+  schedule: [
+    {
+      day: "MON",
+      slots: [
+        { start: "08:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "HSM-II", code: "HSM-II", room: "L405, L406, L407", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Science & ML", code: "CSN3002", room: "L21", faculty: "Poonam Saini", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "16:00", slot: { subject: "DSML Lab", code: "CSN3002L", room: "301+303+306", faculty: "Poonam Saini", type: "lab", groups: "CSE1, CSE2, CSE3" } },
+        { start: "16:00", end: "17:00", slot: { subject: "Minor Specialization", code: "CSE MSC", room: "L21", type: "lecture" } },
+        { start: "17:00", end: "19:00", slot: { subject: "OOP Lab", code: "CSN3004L", room: "304+301+306", faculty: "TF4", type: "lab", groups: "CSE1, CSE2, CSE3" } },
+      ],
+    },
+    {
+      day: "TUE",
+      slots: [
+        { start: "08:00", end: "10:00", slot: free() },
+        { start: "10:00", end: "12:00", slot: { subject: "Discrete Structures & CS", code: "CSN3003", room: "L21", faculty: "Amandeep Kaur", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Structures", code: "CSN3001", room: "L21", faculty: "Mayank Gupta", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "HSM-II", code: "HSM-II", room: "L405, L406, L407", type: "lecture" } },
+        { start: "15:00", end: "16:00", slot: { subject: "DSCS Tutorial", code: "CSN3003 T", room: "301+303", faculty: "Amandeep Kaur", type: "tutorial", groups: "CSE1, CSE2" } },
+        { start: "16:00", end: "17:00", slot: { subject: "Minor Specialization", code: "CSE MSC", room: "L21", type: "lecture" } },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "WED",
+      slots: [
+        { start: "08:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "Data Science & ML", code: "CSN3002", room: "L21", faculty: "Poonam Saini", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "OOP", code: "CSN3004", room: "L21", faculty: "TF4", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "HSM-II Tutorial", code: "HSM-II T", room: "L405–L407, T9–T12", type: "tutorial" } },
+        { start: "15:00", end: "16:00", slot: { subject: "Data Structures", code: "CSN3001", room: "L21", faculty: "Mayank Gupta", type: "lecture" } },
+        { start: "16:00", end: "17:00", slot: { subject: "Minor Specialization", code: "CSE MSC", room: "L21", type: "lecture" } },
+        { start: "17:00", end: "19:00", slot: { subject: "Data Structures Lab", code: "CSN3001L", room: "301+303+306", faculty: "Mayank Gupta", type: "lab", groups: "CSE1, CSE2, CSE3" } },
+      ],
+    },
+    {
+      day: "THU",
+      slots: [
+        { start: "08:00", end: "10:00", slot: free() },
+        { start: "10:00", end: "11:00", slot: { subject: "Discrete Structures & CS", code: "CSN3003", room: "L21", faculty: "Amandeep Kaur", type: "lecture" } },
+        { start: "11:00", end: "12:00", slot: { subject: "OOP", code: "CSN3004", room: "L21", faculty: "TF4", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Science & ML", code: "CSN3002", room: "L21", faculty: "Poonam Saini", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "16:00", slot: { subject: "DSML Lab", code: "CSN3002L", room: "303", faculty: "Poonam Saini", type: "lab", groups: "CSE3" } },
+        { start: "16:00", end: "17:00", slot: { subject: "HSM-II Tutorial", code: "HSM-II T", type: "tutorial" } },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "FRI",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: { subject: "DSCS Tutorial", code: "CSN3003 T", faculty: "Amandeep Kaur", type: "tutorial", groups: "CSE3" } },
+        { start: "10:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "OOP", code: "CSN3004", room: "L21", faculty: "TF4", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Science & ML", code: "CSN3002", room: "L21", faculty: "Poonam Saini", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "HSM-II Tutorial", code: "HSM-II T", type: "tutorial" } },
+        { start: "15:00", end: "17:00", slot: { subject: "Minor Spec. Tut/Practical", code: "CSE MSC", room: "DS Lab", type: "lab" } },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+  ],
+};
+
+// ─── CSE Core G2 Timetable (CSE-4, CSE-5, CSE-6 — Roll 25101062–25101999) ──────
+
+const CSE_G2_TIMETABLE: WeeklyTimetable = {
+  section: "CSE-G2",
+  semester: "3rd Sem",
+  branch: "B.Tech CSE",
+  period: "Jul–Dec 2026",
+  labSubgroup: "CSE4, CSE5, CSE6",
+  schedule: [
+    {
+      day: "MON",
+      slots: [
+        { start: "08:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "HSM-II", code: "HSM-II", room: "L405, L406, L407", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Structures", code: "CSN3001", room: "L22", faculty: "Mayank Gupta", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "OOP", code: "CSN3004", room: "L22", faculty: "TF5", type: "lecture" } },
+        { start: "15:00", end: "16:00", slot: { subject: "DSCS Tutorial", code: "CSN3003 T", room: "304+305", faculty: "Amandeep Kaur", type: "tutorial", groups: "CSE4, CSE5" } },
+        { start: "16:00", end: "17:00", slot: { subject: "Minor Specialization", code: "CSE MSC", room: "L21", type: "lecture" } },
+        { start: "17:00", end: "19:00", slot: { subject: "Data Structures Lab", code: "CSN3001L", room: "303+DS Lab", faculty: "Mayank Gupta", type: "lab", groups: "CSE4, CSE5, CSE6" } },
+      ],
+    },
+    {
+      day: "TUE",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: { subject: "OOP", code: "CSN3004", room: "L22", faculty: "TF5", type: "lecture" } },
+        { start: "10:00", end: "11:00", slot: { subject: "DSML Lab", code: "CSN3002L", room: "303+504", faculty: "Poonam Saini", type: "lab", groups: "CSE5, CSE6" } },
+        { start: "11:00", end: "12:00", slot: { subject: "Discrete Structures & CS", code: "CSN3003", room: "L22", faculty: "Amandeep Kaur", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: free() },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "HSM-II", code: "HSM-II", room: "L405, L406, L407", type: "lecture" } },
+        { start: "15:00", end: "16:00", slot: free() },
+        { start: "16:00", end: "17:00", slot: { subject: "Minor Specialization", code: "CSE MSC", room: "L21", type: "lecture" } },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "WED",
+      slots: [
+        { start: "08:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "Discrete Structures & CS", code: "CSN3003", room: "L22", faculty: "Amandeep Kaur", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Structures", code: "CSN3001", room: "L22", faculty: "Mayank Gupta", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "HSM-II Tutorial", code: "HSM-II T", type: "tutorial" } },
+        { start: "15:00", end: "16:00", slot: { subject: "Data Science & ML", code: "CSN3002", room: "L22", faculty: "Poonam Saini", type: "lecture" } },
+        { start: "16:00", end: "17:00", slot: { subject: "Minor Specialization", code: "CSE MSC", room: "L21", type: "lecture" } },
+        { start: "17:00", end: "19:00", slot: { subject: "OOP Lab", code: "CSN3004L", room: "DS Lab & 304", faculty: "TF4, TF5", type: "lab", groups: "CSE4, CSE5, CSE6" } },
+      ],
+    },
+    {
+      day: "THU",
+      slots: [
+        { start: "08:00", end: "09:00", slot: free() },
+        { start: "09:00", end: "10:00", slot: { subject: "OOP", code: "CSN3004", room: "L22", faculty: "TF5", type: "lecture" } },
+        { start: "10:00", end: "11:00", slot: { subject: "Data Science & ML", code: "CSN3002", room: "L22", faculty: "Poonam Saini", type: "lecture" } },
+        { start: "11:00", end: "12:00", slot: { subject: "Discrete Structures & CS", code: "CSN3003", room: "L22", faculty: "Amandeep Kaur", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Structures", code: "CSN3001", room: "L22", faculty: "Mayank Gupta", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "16:00", slot: { subject: "DSML Lab", code: "CSN3002L", room: "303", faculty: "Poonam Saini", type: "lab", groups: "CSE4" } },
+        { start: "16:00", end: "17:00", slot: { subject: "HSM-II Tutorial", code: "HSM-II T", type: "tutorial" } },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+    {
+      day: "FRI",
+      slots: [
+        { start: "08:00", end: "11:00", slot: free() },
+        { start: "11:00", end: "12:00", slot: { subject: "Discrete Structures & CS", code: "CSN3003", room: "L22", faculty: "Amandeep Kaur", type: "lecture" } },
+        { start: "12:00", end: "13:00", slot: { subject: "Data Science & ML", code: "CSN3002", room: "L22", faculty: "Poonam Saini", type: "lecture" } },
+        { start: "13:00", end: "14:00", slot: lunch() },
+        { start: "14:00", end: "15:00", slot: { subject: "HSM-II Tutorial", code: "HSM-II T", type: "tutorial" } },
+        { start: "15:00", end: "17:00", slot: { subject: "Minor Spec. Tut/Practical", code: "CSE MSC", room: "DS Lab", type: "lab" } },
+        { start: "17:00", end: "19:00", slot: free() },
+      ],
+    },
+  ],
+};
+
 // ─── ECE Subject helpers ──────────────────────────────────────────────────────
 
 function ece(subject: string, code: string, room: string, faculty: string, type: ClassType = "lecture", groups?: string): ClassSlot {
@@ -818,6 +983,13 @@ const TIMETABLE_REGISTRY: Record<string, WeeklyTimetable> = {
   DS2: DS2_TIMETABLE,
   DS3: DS3_TIMETABLE,
   DS4: DS4_TIMETABLE,
+  // CSE sections — CSE1,CSE2,CSE3 → G1; CSE4,CSE5,CSE6 → G2
+  "CSE-1": CSE_G1_TIMETABLE,
+  "CSE-2": CSE_G1_TIMETABLE,
+  "CSE-3": CSE_G1_TIMETABLE,
+  "CSE-4": CSE_G2_TIMETABLE,
+  "CSE-5": CSE_G2_TIMETABLE,
+  "CSE-6": CSE_G2_TIMETABLE,
   // ECE sections — G1,G2,G3 → LSG1; G4,G5,G6 → LSG2; BC students → G6 (LSG2)
   "ECE-G1": ECE_LSG1_TIMETABLE,
   "ECE-G2": ECE_LSG1_TIMETABLE,

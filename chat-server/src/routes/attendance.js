@@ -2,8 +2,10 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../config/db");
 
-// Auto-create user_attendance table if it does not exist
+let isTableInitialized = false;
+
 async function initAttendanceTable() {
+  if (isTableInitialized) return;
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS user_attendance (
@@ -18,13 +20,15 @@ async function initAttendanceTable() {
         CONSTRAINT user_subject_unique UNIQUE (user_id, subject_code)
       );
     `);
-    console.log("✅ PostgreSQL user_attendance table initialized");
+    isTableInitialized = true;
+    console.log("✅ PostgreSQL user_attendance table initialized successfully");
   } catch (err) {
-    console.error("⚠️ Failed to initialize PostgreSQL user_attendance table:", err.message);
+    console.error("⚠️ PostgreSQL user_attendance table init warning:", err?.message || err);
   }
 }
 
-initAttendanceTable();
+// Run immediately and also ensure table exists on routes
+setTimeout(initAttendanceTable, 1000);
 
 // GET /api/attendance?userId=xyz
 router.get("/", async (req, res) => {

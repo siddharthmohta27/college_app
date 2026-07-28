@@ -26,30 +26,16 @@ const BRANCH_2DIGIT_MAP: Record<string, string> = {
 
 // Alpha branch alias mapping to 2-digit branch code
 const BRANCH_TO_2DIGIT_CODE: Record<string, string> = {
-  cseds: "60",
-  csed: "60",
-  csds: "60",
-  ds: "60",
-  cseai: "65",
-  csai: "65",
-  ai: "65",
-  cse: "10",
-  cs: "10",
-  ece: "50",
-  ec: "50",
-  ee: "40",
-  elec: "40",
-  me: "30",
-  mech: "30",
-  ce: "20",
-  civil: "20",
-  met: "70",
-  meta: "70",
-  mmt: "70",
-  pie: "80",
-  prod: "80",
-  aero: "90",
-  aer: "90",
+  cseds: "60", csed: "60", csds: "60", ds: "60",
+  cseai: "65", csai: "65", ai: "65",
+  cse: "10", cs: "10",
+  ece: "50", ec: "50",
+  ee: "40", ele: "40", elec: "40", electrical: "40",
+  me: "30", mech: "30", mechanical: "30",
+  ce: "20", civil: "20",
+  met: "70", meta: "70", mmt: "70", metallurgy: "70",
+  pie: "80", prod: "80", production: "80",
+  aero: "90", aer: "90", aerospace: "90",
 };
 
 const BRANCH_MAP: Record<string, string> = {
@@ -65,18 +51,24 @@ const BRANCH_MAP: Record<string, string> = {
   ece: "Electronics & Communication Engineering",
   ec: "Electronics & Communication Engineering",
   ee: "Electrical Engineering",
+  ele: "Electrical Engineering",
   elec: "Electrical Engineering",
+  electrical: "Electrical Engineering",
   me: "Mechanical Engineering",
   mech: "Mechanical Engineering",
+  mechanical: "Mechanical Engineering",
   ce: "Civil Engineering",
   civil: "Civil Engineering",
   met: "Materials & Metallurgical Engineering",
   meta: "Materials & Metallurgical Engineering",
   mmt: "Materials & Metallurgical Engineering",
+  metallurgy: "Materials & Metallurgical Engineering",
   pie: "Production & Industrial Engineering",
   prod: "Production & Industrial Engineering",
+  production: "Production & Industrial Engineering",
   aero: "Aerospace Engineering",
   aer: "Aerospace Engineering",
+  aerospace: "Aerospace Engineering",
 };
 
 const DEGREE_CODE_MAP: Record<string, string> = {
@@ -105,7 +97,7 @@ function formatNameFromEmail(namePart: string): string {
     const surnames = [
       "mohta", "singh", "sharma", "kumar", "gupta", "verma", "jain", "agarwal",
       "bansal", "goyal", "mehta", "chawla", "kool", "kaur", "garg", "malhotra",
-      "sood", "bhatia", "arora", "kapoor", "joshi", "rao", "reddy", "patel"
+      "sood", "bhatia", "arora", "kapoor", "joshi", "rao", "reddy", "patel", "pratap"
     ];
     const lower = clean.toLowerCase();
     for (const surname of surnames) {
@@ -134,33 +126,23 @@ export function setStoredRollNo(email: string, rollNo: string): void {
 }
 
 /**
- * Parse PEC email like `siddharthmohta.bt25cseds@pec.edu.in` or `siddharthmohta.25106047@pec.edu.in`
+ * Parse PEC email like `siddharthmohta.bt25cseds@pec.edu.in` or `ayaanpratapsingh.bt25ele@pec.edu.in`
  * PEC Roll Number structure: 8 digits [YY][DEGREE][BRANCH][CLASS_ROLL]
- * e.g., 25 10 60 47 -> Year 2025, B.Tech (10), CSE Data Science (60), Roll 47
+ * e.g., 25 10 40 21 -> Year 2025, B.Tech (10), Electrical (40), Roll 21
  */
 export function parsePecEmail(email: string | null | undefined, overrideDisplayName?: string | null): PecProfile {
   const defaultCollege = "Punjab Engineering College (PEC)";
   
-  if (!email) {
-    return {
-      email: email || "",
-      name: overrideDisplayName || "Student",
-      rollNo: "25106047",
-      degree: "B.Tech",
-      branch: "CSE (Data Science)",
-      batch: "2025",
-      college: defaultCollege,
-      classRollNo: "47",
-    };
-  }
-
   // Check if custom roll number is stored in localStorage
   let storedRollNo: string | null = null;
-  try {
-    storedRollNo = localStorage.getItem(`pec_roll_no_${email.toLowerCase().trim()}`);
-  } catch (_) {}
+  if (email) {
+    try {
+      storedRollNo = localStorage.getItem(`pec_roll_no_${email.toLowerCase().trim()}`);
+    } catch (_) {}
+  }
 
-  const handle = email.split("@")[0].trim().toLowerCase();
+  const emailText = (email || "").toLowerCase().trim();
+  const handle = emailText.split("@")[0] || "";
   const parts = handle.split(".");
 
   let namePart = "";
@@ -186,13 +168,15 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
   let classRollNo = "";
 
   if (!rollNo) {
-    // 1. Check for 8-digit numeric PEC Roll Number e.g. "25106047"
-    const numericMatch = handle.match(/(?:bt|mt|phd)?(\d{2})(10|20|30)(\d{2})(\d{2})/i);
+    // 1. Search for 8-digit numeric PEC Roll Number in handle OR overrideDisplayName (e.g. "bt25104021" or "25104021")
+    const fullSearch = `${handle} ${overrideDisplayName || ""}`;
+    const numericMatch = fullSearch.match(/(?:bt|mt|phd)?(\d{2})(10|20|30)(\d{2})(\d{2})/i);
+
     if (numericMatch) {
-      const yearCode = numericMatch[1];  // "25"
-      const degCode = numericMatch[2];   // "10" (B.Tech)
-      const branchCode = numericMatch[3];// "60" (DS), "40" (EE), "20" (Civil), "30" (Mech)
-      const classRoll = numericMatch[4]; // "47"
+      const yearCode = numericMatch[1];   // "25"
+      const degCode = numericMatch[2];    // "10" (B.Tech)
+      const branchCode = numericMatch[3]; // "40" (EE), "60" (DS), "50" (ECE), "10" (CSE)
+      const classRoll = numericMatch[4];  // "21"
 
       batch = `20${yearCode}`;
       if (DEGREE_CODE_MAP[degCode]) degree = DEGREE_CODE_MAP[degCode];
@@ -200,12 +184,12 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
       classRollNo = classRoll;
       rollNo = `${yearCode}${degCode}${branchCode}${classRoll}`;
     } else {
-      // 2. Parse alpha codePart e.g. "bt25cseds" or "bt25csed" or "bt25ee"
+      // 2. Parse alpha codePart e.g. "bt25ele" or "bt25ee" or "bt25cseds"
       const codeMatch = codePart.match(/^(bt|mt|phd|ar|barch)?(\d{2})([a-z]+)$/i);
       if (codeMatch) {
         const degCode = (codeMatch[1] || "bt").toLowerCase();
         const yearCode = codeMatch[2]; // e.g. "25"
-        const branchCode = codeMatch[3].toLowerCase(); // e.g. "cseds", "ee", "civil", "mech"
+        const branchCode = codeMatch[3].toLowerCase(); // e.g. "ele", "ee", "cseds", "civil"
 
         if (DEGREE_MAP[degCode]) {
           degree = DEGREE_MAP[degCode];
@@ -215,15 +199,16 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
         }
         if (BRANCH_MAP[branchCode]) {
           branch = BRANCH_MAP[branchCode];
+        } else if (BRANCH_2DIGIT_MAP[BRANCH_TO_2DIGIT_CODE[branchCode]]) {
+          branch = BRANCH_2DIGIT_MAP[BRANCH_TO_2DIGIT_CODE[branchCode]];
         }
 
         const deg2Digit = degCode === "mt" ? "20" : degCode === "phd" ? "30" : "10";
         const branch2Digit = BRANCH_TO_2DIGIT_CODE[branchCode] || "60";
-        
-        // For Siddharth Mohta or cseds, class roll is 47 -> 25106047
-        if (namePart.includes("siddharth") || branchCode === "cseds" || branchCode === "csed") {
+
+        if (namePart.includes("siddharth")) {
           classRollNo = "47";
-          rollNo = `${yearCode}${deg2Digit}${branch2Digit}47`; // 25106047
+          rollNo = `${yearCode}${deg2Digit}${branch2Digit}47`;
         } else {
           classRollNo = "01";
           rollNo = `${yearCode}${deg2Digit}${branch2Digit}01`;
@@ -234,17 +219,19 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
       }
     }
   } else {
-    // Extract class roll if stored roll no is 8 digits
     const m = rollNo.match(/\d{2}$/);
     if (m) classRollNo = m[0];
   }
 
-  const name = overrideDisplayName && overrideDisplayName.trim().length > 0
+  // Format student name, stripping any leading roll numbers like "bt25104021 "
+  let rawName = overrideDisplayName && overrideDisplayName.trim().length > 0
     ? overrideDisplayName
     : formatNameFromEmail(namePart);
 
+  const name = rawName.replace(/^(?:bt|mt|phd)?\d{7,8}\s*/i, "").trim() || rawName;
+
   return {
-    email,
+    email: email || "",
     name,
     rollNo,
     degree,

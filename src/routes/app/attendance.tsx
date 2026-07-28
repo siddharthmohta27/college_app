@@ -117,7 +117,95 @@ function AttendanceTracker() {
     }
   };
 
-  // Mark attendance status for a course
+  const [dailyLogs, setDailyLogs] = useState<Record<string, AttendanceStatus>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const saved = localStorage.getItem("campus_connect_daily_logs_v1");
+      return saved ? JSON.parse(saved) : {};
+    } catch (_) {
+      return {};
+    }
+  });
+
+  // Save daily logs
+  const saveDailyLogs = (logs: Record<string, AttendanceStatus>) => {
+    setDailyLogs(logs);
+    try {
+      localStorage.setItem("campus_connect_daily_logs_v1", JSON.stringify(logs));
+    } catch (_) {}
+  };
+
+  // Mark attendance for today's specific slot (1 click per slot per day)
+  const handleMarkDailySlot = (slotKey: string, code: string, newStatus: AttendanceStatus) => {
+    const prevStatus = dailyLogs[slotKey];
+
+    // If same status clicked, do nothing
+    if (prevStatus === newStatus) return;
+
+    const updatedSubjects = subjects.map((sub) => {
+      if (sub.code === code) {
+        let attended = sub.lecturesAttended;
+        let absent = sub.lecturesAbsent;
+        let cancelled = sub.lecturesCancelled;
+
+        // Undo previous status if any
+        if (prevStatus === "present" && attended > 0) attended -= 1;
+        if (prevStatus === "absent" && absent > 0) absent -= 1;
+        if (prevStatus === "cancelled" && cancelled > 0) cancelled -= 1;
+
+        // Apply new status
+        if (newStatus === "present") attended += 1;
+        if (newStatus === "absent") absent += 1;
+        if (newStatus === "cancelled") cancelled += 1;
+
+        return {
+          ...sub,
+          lecturesAttended: attended,
+          lecturesAbsent: absent,
+          lecturesCancelled: cancelled,
+          lastUpdated: `Today (${newStatus})`,
+        };
+      }
+      return sub;
+    });
+
+    updateSubjectsState(updatedSubjects);
+    saveDailyLogs({ ...dailyLogs, [slotKey]: newStatus });
+  };
+
+  // Undo daily slot marking
+  const handleUndoDailySlot = (slotKey: string, code: string) => {
+    const prevStatus = dailyLogs[slotKey];
+    if (!prevStatus) return;
+
+    const updatedSubjects = subjects.map((sub) => {
+      if (sub.code === code) {
+        let attended = sub.lecturesAttended;
+        let absent = sub.lecturesAbsent;
+        let cancelled = sub.lecturesCancelled;
+
+        if (prevStatus === "present" && attended > 0) attended -= 1;
+        if (prevStatus === "absent" && absent > 0) absent -= 1;
+        if (prevStatus === "cancelled" && cancelled > 0) cancelled -= 1;
+
+        return {
+          ...sub,
+          lecturesAttended: attended,
+          lecturesAbsent: absent,
+          lecturesCancelled: cancelled,
+        };
+      }
+      return sub;
+    });
+
+    const newLogs = { ...dailyLogs };
+    delete newLogs[slotKey];
+
+    updateSubjectsState(updatedSubjects);
+    saveDailyLogs(newLogs);
+  };
+
+  // Mark attendance status for a course generally
   const handleMarkAttendance = (code: string, status: AttendanceStatus) => {
     const updated = subjects.map((sub) => {
       if (sub.code === code) {
@@ -190,6 +278,7 @@ function AttendanceTracker() {
   const overallPct = totalConducted > 0 ? (totalAttended / totalConducted) * 100 : 100;
 
   // Get Today's classes from timetable
+  const todayStr = new Date().toISOString().split("T")[0];
   const todaySchedule = timetable ? getTodaySchedule(timetable) : null;
   const todayClasses = todaySchedule
     ? todaySchedule.slots.filter((ts) => ts.slot && ts.slot.type !== "free" && ts.slot.type !== "lunch")
@@ -313,21 +402,29 @@ function AttendanceTracker() {
         </div>
       </div>
 
-      {/* Today's Scheduled Classes Logger */}
+      {/* Today's Scheduled Classes Logger (1 click per slot per day) */}
       {todayClasses.length > 0 && (
         <section className="animate-fade-up">
-          <h2 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            <Calendar className="h-4 w-4 text-primary" /> Today's Scheduled Classes
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <Calendar className="h-4 w-4 text-primary" /> Today's Scheduled Classes
+            </h2>
+            <span className="text-[11px] text-muted-foreground">1-click per class slot today</span>
+          </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {todayClasses.map((ts, idx) => {
               const slot = ts.slot!;
               const code = slot.code || slot.subject;
+              const slotKey = `${todayStr}_${code}_${ts.start}`;
+              const markedStatus = dailyLogs[slotKey];
+
               return (
                 <div
                   key={idx}
-                  className="group relative rounded-2xl border border-border/80 glass p-4 transition hover:border-primary/40"
+                  className={`group relative rounded-2xl border glass p-4 transition duration-300 ${
+                    markedStatus ? "border-primary/40 bg-primary/5" : "border-border/80 hover:border-primary/40"
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -344,29 +441,57 @@ function AttendanceTracker() {
                     )}
                   </div>
 
-                  {/* Action Buttons for Today's Class */}
-                  <div className="mt-4 flex items-center justify-between gap-1.5 pt-2 border-t border-border/50">
-                    <button
-                      onClick={() => handleMarkAttendance(code, "present")}
-                      className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-1.5 text-xs font-semibold text-emerald-400 transition hover:bg-emerald-500/20"
-                      title="Mark Present"
-                    >
-                      <Check className="h-3.5 w-3.5" /> Present
-                    </button>
-                    <button
-                      onClick={() => handleMarkAttendance(code, "absent")}
-                      className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-rose-500/10 border border-rose-500/20 py-1.5 text-xs font-semibold text-rose-400 transition hover:bg-rose-500/20"
-                      title="Mark Absent"
-                    >
-                      <X className="h-3.5 w-3.5" /> Absent
-                    </button>
-                    <button
-                      onClick={() => handleMarkAttendance(code, "cancelled")}
-                      className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-amber-500/10 border border-amber-500/20 py-1.5 text-xs font-semibold text-amber-400 transition hover:bg-amber-500/20"
-                      title="Class Cancelled by Faculty"
-                    >
-                      <Ban className="h-3.5 w-3.5" /> Cancelled
-                    </button>
+                  {/* Class Marked Status or Action Buttons */}
+                  <div className="mt-4 pt-2 border-t border-border/50">
+                    {markedStatus ? (
+                      <div className="flex items-center justify-between gap-2">
+                        <div
+                          className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold ${
+                            markedStatus === "present"
+                              ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+                              : markedStatus === "absent"
+                              ? "bg-rose-500/10 border border-rose-500/20 text-rose-400"
+                              : "bg-amber-500/10 border border-amber-500/20 text-amber-400"
+                          }`}
+                        >
+                          {markedStatus === "present" && <Check className="h-3.5 w-3.5" />}
+                          {markedStatus === "absent" && <X className="h-3.5 w-3.5" />}
+                          {markedStatus === "cancelled" && <Ban className="h-3.5 w-3.5" />}
+                          <span className="capitalize">Marked {markedStatus}</span>
+                        </div>
+
+                        <button
+                          onClick={() => handleUndoDailySlot(slotKey, code)}
+                          className="text-[11px] text-muted-foreground hover:text-foreground transition underline font-medium"
+                        >
+                          Change
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-1.5">
+                        <button
+                          onClick={() => handleMarkDailySlot(slotKey, code, "present")}
+                          className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-1.5 text-xs font-semibold text-emerald-400 transition hover:bg-emerald-500/20"
+                          title="Mark Present for Today's Class"
+                        >
+                          <Check className="h-3.5 w-3.5" /> Present
+                        </button>
+                        <button
+                          onClick={() => handleMarkDailySlot(slotKey, code, "absent")}
+                          className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-rose-500/10 border border-rose-500/20 py-1.5 text-xs font-semibold text-rose-400 transition hover:bg-rose-500/20"
+                          title="Mark Absent for Today's Class"
+                        >
+                          <X className="h-3.5 w-3.5" /> Absent
+                        </button>
+                        <button
+                          onClick={() => handleMarkDailySlot(slotKey, code, "cancelled")}
+                          className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-amber-500/10 border border-amber-500/20 py-1.5 text-xs font-semibold text-amber-400 transition hover:bg-amber-500/20"
+                          title="Class Cancelled by Faculty Today"
+                        >
+                          <Ban className="h-3.5 w-3.5" /> Cancelled
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );

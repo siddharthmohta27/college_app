@@ -133,13 +133,6 @@ export function setStoredRollNo(email: string, rollNo: string): void {
 export function parsePecEmail(email: string | null | undefined, overrideDisplayName?: string | null): PecProfile {
   const defaultCollege = "Punjab Engineering College (PEC)";
   
-  // Check if custom roll number is stored in localStorage
-  let storedRollNo: string | null = null;
-  if (email) {
-    try {
-      storedRollNo = localStorage.getItem(`pec_roll_no_${email.toLowerCase().trim()}`);
-    } catch (_) {}
-  }
 
   const emailText = (email || "").toLowerCase().trim();
   const handle = emailText.split("@")[0] || "";
@@ -161,6 +154,18 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
     }
   }
 
+  // Check if valid custom roll number is stored in localStorage
+  let storedRollNo: string | null = null;
+  if (email) {
+    try {
+      const val = localStorage.getItem(`pec_roll_no_${email.toLowerCase().trim()}`);
+      // Only keep stored roll no if it's not the old hardcoded 25106047 for non-Siddharth users
+      if (val && (namePart.includes("siddharth") || val !== "25106047")) {
+        storedRollNo = val.trim();
+      }
+    } catch (_) {}
+  }
+
   let degree = "B.Tech";
   let batch = "2025";
   let branch = "CSE (Data Science)";
@@ -168,15 +173,15 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
   let classRollNo = "";
 
   if (!rollNo) {
-    // 1. Search for 8-digit numeric PEC Roll Number in handle OR overrideDisplayName (e.g. "bt25104021" or "25104021")
-    const fullSearch = `${handle} ${overrideDisplayName || ""}`;
+    // 1. Search for 8-digit numeric PEC Roll Number in handle, email, OR overrideDisplayName (e.g. "bt25104021" or "25104021" or "25106012")
+    const fullSearch = `${handle} ${emailText} ${overrideDisplayName || ""}`;
     const numericMatch = fullSearch.match(/(?:bt|mt|phd)?(\d{2})(10|20|30)(\d{2})(\d{2})/i);
 
     if (numericMatch) {
       const yearCode = numericMatch[1];   // "25"
       const degCode = numericMatch[2];    // "10" (B.Tech)
       const branchCode = numericMatch[3]; // "40" (EE), "60" (DS), "50" (ECE), "10" (CSE)
-      const classRoll = numericMatch[4];  // "21"
+      const classRoll = numericMatch[4];  // "21" or "47"
 
       batch = `20${yearCode}`;
       if (DEGREE_CODE_MAP[degCode]) degree = DEGREE_CODE_MAP[degCode];
@@ -184,12 +189,12 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
       classRollNo = classRoll;
       rollNo = `${yearCode}${degCode}${branchCode}${classRoll}`;
     } else {
-      // 2. Parse alpha codePart e.g. "bt25ele" or "bt25ee" or "bt25cseds"
+      // 2. Parse alpha codePart e.g. "bt25ele" or "bt25ee" or "bt25cseds" or "bt25ece"
       const codeMatch = codePart.match(/^(bt|mt|phd|ar|barch)?(\d{2})([a-z]+)$/i);
       if (codeMatch) {
         const degCode = (codeMatch[1] || "bt").toLowerCase();
         const yearCode = codeMatch[2]; // e.g. "25"
-        const branchCode = codeMatch[3].toLowerCase(); // e.g. "ele", "ee", "cseds", "civil"
+        const branchCode = codeMatch[3].toLowerCase(); // e.g. "ele", "ee", "cseds", "civil", "ece"
 
         if (DEGREE_MAP[degCode]) {
           degree = DEGREE_MAP[degCode];
@@ -197,25 +202,38 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
         if (yearCode) {
           batch = `20${yearCode}`;
         }
-        if (BRANCH_MAP[branchCode]) {
+
+        const branch2Digit = BRANCH_TO_2DIGIT_CODE[branchCode] || "60";
+        if (BRANCH_2DIGIT_MAP[branch2Digit]) {
+          branch = BRANCH_2DIGIT_MAP[branch2Digit];
+        } else if (BRANCH_MAP[branchCode]) {
           branch = BRANCH_MAP[branchCode];
-        } else if (BRANCH_2DIGIT_MAP[BRANCH_TO_2DIGIT_CODE[branchCode]]) {
-          branch = BRANCH_2DIGIT_MAP[BRANCH_TO_2DIGIT_CODE[branchCode]];
         }
 
         const deg2Digit = degCode === "mt" ? "20" : degCode === "phd" ? "30" : "10";
-        const branch2Digit = BRANCH_TO_2DIGIT_CODE[branchCode] || "60";
 
         if (namePart.includes("siddharth")) {
           classRollNo = "47";
           rollNo = `${yearCode}${deg2Digit}${branch2Digit}47`;
         } else {
-          classRollNo = "01";
-          rollNo = `${yearCode}${deg2Digit}${branch2Digit}01`;
+          // Calculate a unique roll number derived from name for other students
+          let hash = 0;
+          for (let i = 0; i < namePart.length; i++) {
+            hash = (hash << 5) - hash + namePart.charCodeAt(i);
+            hash |= 0;
+          }
+          const num = (Math.abs(hash) % 45) + 2; // 02 to 46
+          classRollNo = num < 10 ? `0${num}` : `${num}`;
+          rollNo = `${yearCode}${deg2Digit}${branch2Digit}${classRollNo}`;
         }
       } else {
-        rollNo = "25106047";
-        classRollNo = "47";
+        if (namePart.includes("siddharth")) {
+          rollNo = "25106047";
+          classRollNo = "47";
+        } else {
+          rollNo = "25106001";
+          classRollNo = "01";
+        }
       }
     }
   } else {

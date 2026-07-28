@@ -9,15 +9,15 @@ export interface PecProfile {
   classRollNo?: string;
 }
 
-// 2-digit Branch Code mapping for PEC (e.g. 60 = DS, 40 = Electrical, 20 = Civil, 30 = Mechanical)
+// 2-digit Branch Code mapping for PEC (e.g. 60 = DS, 30 = CS, 10 = Mechanical, 40 = Electrical, 20 = Civil, 50 = ECE)
 const BRANCH_2DIGIT_MAP: Record<string, string> = {
   "60": "CSE (Data Science)",
   "65": "CSE (Artificial Intelligence)",
   "61": "CSE (Artificial Intelligence)",
-  "10": "Computer Science & Engineering",
+  "30": "Computer Science & Engineering",
+  "10": "Mechanical Engineering",
   "50": "Electronics & Communication Engineering",
   "40": "Electrical Engineering",
-  "30": "Mechanical Engineering",
   "20": "Civil Engineering",
   "70": "Materials & Metallurgical Engineering",
   "80": "Production & Industrial Engineering",
@@ -28,10 +28,10 @@ const BRANCH_2DIGIT_MAP: Record<string, string> = {
 const BRANCH_TO_2DIGIT_CODE: Record<string, string> = {
   cseds: "60", csed: "60", csds: "60", ds: "60",
   cseai: "65", csai: "65", ai: "65",
-  cse: "10", cs: "10",
+  cse: "30", cs: "30",
   ece: "50", ec: "50",
   ee: "40", ele: "40", elec: "40", electrical: "40",
-  me: "30", mech: "30", mechanical: "30",
+  me: "10", mech: "10", mechanical: "10",
   ce: "20", civil: "20",
   met: "70", meta: "70", mmt: "70", metallurgy: "70",
   pie: "80", prod: "80", production: "80",

@@ -38,8 +38,15 @@ const SECTION_RANGES: { section: string; min: number; max: number }[] = [
   { section: "DS2", min: 25106017, max: 25106032 },
   { section: "DS3", min: 25106033, max: 25106048 },
   { section: "DS4", min: 25106049, max: 25106064 },
-  // ── CSE Core (branch code 10) ─────────────────────────────────────────────
+  // ── CSE Core (branch code 30 / 10) ─────────────────────────────────────────
   // CSE1-CSE6; Subgroup G1 (CSE1-CSE3) = roll 001-061; Subgroup G2 (CSE4-CSE6) = roll 062-128+
+  { section: "CSE-1", min: 25103001, max: 25103021 },
+  { section: "CSE-2", min: 25103022, max: 25103041 },
+  { section: "CSE-3", min: 25103042, max: 25103061 },
+  { section: "CSE-4", min: 25103062, max: 25103083 },
+  { section: "CSE-5", min: 25103084, max: 25103105 },
+  { section: "CSE-6", min: 25103106, max: 25103128 },
+  { section: "CSE-6", min: 25103129, max: 25103999 },
   { section: "CSE-1", min: 25101001, max: 25101021 },
   { section: "CSE-2", min: 25101022, max: 25101041 },
   { section: "CSE-3", min: 25101042, max: 25101061 },

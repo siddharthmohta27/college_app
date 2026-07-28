@@ -1,6 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Check, X, AlertTriangle, Calendar, Plus, BookOpen, Star, RefreshCw } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Check,
+  X,
+  Ban,
+  AlertTriangle,
+  Calendar,
+  Plus,
+  BookOpen,
+  Star,
+  RefreshCw,
+  Clock,
+  Sparkles,
+  Zap,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  Trash2,
+  GraduationCap,
+} from "lucide-react";
+import { firebaseAuth } from "@/lib/firebase";
+import { parsePecEmail } from "@/lib/pec-email";
+import {
+  getSectionFromRollNo,
+  getTimetableForSection,
+  getTodaySchedule,
+  WeeklyTimetable,
+  ClassSlot,
+} from "@/lib/pec-timetable";
+import {
+  AttendanceSubject,
+  AttendanceStatus,
+  extractSubjectsFromTimetable,
+  mergeTimetableWithSaved,
+  loadLocalAttendance,
+  saveLocalAttendance,
+  syncSupabaseAttendance,
+  fetchSupabaseAttendance,
+  calculateSubjectStats,
+} from "@/lib/attendance";
 
 export const Route = createFileRoute("/app/attendance")({
   head: () => ({
@@ -9,340 +47,556 @@ export const Route = createFileRoute("/app/attendance")({
   component: AttendanceTracker,
 });
 
-type Subject = {
-  id: number;
-  name: string;
-  code: string;
-  lecturesConducted: number;
-  lecturesAttended: number;
-  lastUpdated: string;
-};
-
-const INITIAL_SUBJECTS: Subject[] = [
-  {
-    id: 1,
-    name: "Design & Analysis of Algorithms",
-    code: "CS301",
-    lecturesConducted: 24,
-    lecturesAttended: 20,
-    lastUpdated: "Today, 10:30 AM",
-  },
-  {
-    id: 2,
-    name: "Database Management Systems",
-    code: "CS302",
-    lecturesConducted: 20,
-    lecturesAttended: 18,
-    lastUpdated: "Yesterday",
-  },
-  {
-    id: 3,
-    name: "Operating Systems",
-    code: "CS303",
-    lecturesConducted: 22,
-    lecturesAttended: 15,
-    lastUpdated: "July 3",
-  },
-  {
-    id: 4,
-    name: "Compiler Design",
-    code: "CS304",
-    lecturesConducted: 18,
-    lecturesAttended: 12,
-    lastUpdated: "July 2",
-  },
-  {
-    id: 5,
-    name: "Machine Learning Basic",
-    code: "CS305",
-    lecturesConducted: 16,
-    lecturesAttended: 14,
-    lastUpdated: "Today, 11:30 AM",
-  },
-];
-
 function AttendanceTracker() {
-  const [subjects, setSubjects] = useState<Subject[]>(INITIAL_SUBJECTS);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const [subjects, setSubjects] = useState<AttendanceSubject[]>([]);
+  const [timetable, setTimetable] = useState<WeeklyTimetable | null>(null);
+  const [section, setSection] = useState<string | null>(null);
+
   const [newSubjectName, setNewSubjectName] = useState("");
   const [newSubjectCode, setNewSubjectCode] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  const handleUpdate = (id: number, attend: boolean) => {
-    setSubjects((prev) =>
-      prev.map((sub) => {
-        if (sub.id === id) {
-          return {
-            ...sub,
-            lecturesConducted: sub.lecturesConducted + 1,
-            lecturesAttended: sub.lecturesAttended + (attend ? 1 : 0),
-            lastUpdated: "Just now",
-          };
+  // Load auth profile & timetable
+  useEffect(() => {
+    const unsub = firebaseAuth.onAuthStateChanged((user) => {
+      if (user) {
+        setUserEmail(user.email);
+        setUserName(user.displayName);
+        setUserId(user.uid);
+
+        const profile = parsePecEmail(user.email, user.displayName);
+        const sec = getSectionFromRollNo(profile.rollNo);
+        setSection(sec);
+        if (sec) {
+          const tt = getTimetableForSection(sec);
+          setTimetable(tt);
         }
-        return sub;
-      }),
-    );
+      }
+    });
+    return unsub;
+  }, []);
+
+  // Sync attendance records on load
+  useEffect(() => {
+    async function loadAttendanceData() {
+      setIsSyncing(true);
+      let saved = loadLocalAttendance();
+
+      if (userId) {
+        const remote = await fetchSupabaseAttendance(userId);
+        if (remote && remote.length > 0) {
+          saved = remote;
+          saveLocalAttendance(remote);
+        }
+      }
+
+      let timetableSubjects: { name: string; code: string }[] = [];
+      if (timetable) {
+        timetableSubjects = extractSubjectsFromTimetable(timetable);
+      }
+
+      const merged = mergeTimetableWithSaved(timetableSubjects, saved);
+      setSubjects(merged);
+      setIsSyncing(false);
+    }
+
+    loadAttendanceData();
+  }, [timetable, userId]);
+
+  // Save changes to localStorage & Supabase
+  const updateSubjectsState = (updated: AttendanceSubject[]) => {
+    setSubjects(updated);
+    saveLocalAttendance(updated);
+    if (userId) {
+      syncSupabaseAttendance(userId, updated);
+    }
   };
 
+  // Mark attendance status for a course
+  const handleMarkAttendance = (code: string, status: AttendanceStatus) => {
+    const updated = subjects.map((sub) => {
+      if (sub.code === code) {
+        return {
+          ...sub,
+          lecturesAttended: sub.lecturesAttended + (status === "present" ? 1 : 0),
+          lecturesAbsent: sub.lecturesAbsent + (status === "absent" ? 1 : 0),
+          lecturesCancelled: sub.lecturesCancelled + (status === "cancelled" ? 1 : 0),
+          lastUpdated: `Just now (${status})`,
+        };
+      }
+      return sub;
+    });
+    updateSubjectsState(updated);
+  };
+
+  // Undo last action for a subject
+  const handleDecrement = (code: string, field: "attended" | "absent" | "cancelled") => {
+    const updated = subjects.map((sub) => {
+      if (sub.code === code) {
+        if (field === "attended" && sub.lecturesAttended > 0) {
+          return { ...sub, lecturesAttended: sub.lecturesAttended - 1 };
+        }
+        if (field === "absent" && sub.lecturesAbsent > 0) {
+          return { ...sub, lecturesAbsent: sub.lecturesAbsent - 1 };
+        }
+        if (field === "cancelled" && sub.lecturesCancelled > 0) {
+          return { ...sub, lecturesCancelled: sub.lecturesCancelled - 1 };
+        }
+      }
+      return sub;
+    });
+    updateSubjectsState(updated);
+  };
+
+  // Add custom course
   const handleAddSubject = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSubjectName || !newSubjectCode) return;
-    const newSub: Subject = {
-      id: Date.now(),
-      name: newSubjectName,
-      code: newSubjectCode,
-      lecturesConducted: 0,
+
+    const newSub: AttendanceSubject = {
+      id: newSubjectCode.trim().toUpperCase(),
+      name: newSubjectName.trim(),
+      code: newSubjectCode.trim().toUpperCase(),
       lecturesAttended: 0,
-      lastUpdated: "Just created",
+      lecturesAbsent: 0,
+      lecturesCancelled: 0,
+      lastUpdated: "Just added",
+      isCustom: true,
     };
-    setSubjects((prev) => [...prev, newSub]);
+
+    const updated = [...subjects, newSub];
+    updateSubjectsState(updated);
     setNewSubjectName("");
     setNewSubjectCode("");
     setShowAddModal(false);
   };
 
-  // Calculate overall metrics
-  const totalConducted = subjects.reduce((sum, s) => sum + s.lecturesConducted, 0);
+  // Delete custom course
+  const handleDeleteCustom = (code: string) => {
+    const updated = subjects.filter((s) => s.code !== code);
+    updateSubjectsState(updated);
+  };
+
+  // Calculate overall semester stats
   const totalAttended = subjects.reduce((sum, s) => sum + s.lecturesAttended, 0);
-  const overallPct = totalConducted > 0 ? (totalAttended / totalConducted) * 100 : 0;
+  const totalAbsent = subjects.reduce((sum, s) => sum + s.lecturesAbsent, 0);
+  const totalCancelled = subjects.reduce((sum, s) => sum + s.lecturesCancelled, 0);
+  const totalConducted = totalAttended + totalAbsent;
+  const overallPct = totalConducted > 0 ? (totalAttended / totalConducted) * 100 : 100;
+
+  // Get Today's classes from timetable
+  const todaySchedule = timetable ? getTodaySchedule(timetable) : null;
+  const todayClasses = todaySchedule
+    ? todaySchedule.slots.filter((ts) => ts.slot && ts.slot.type !== "free" && ts.slot.type !== "lunch")
+    : [];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6 pb-28 md:pb-8">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 animate-fade-up">
+    <div className="mx-auto max-w-5xl space-y-8 p-6 pb-28 md:pb-8">
+      {/* Top Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 animate-fade-up">
         <div>
-          <h2 className="text-xl font-bold">Attendance Tracker</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Keep track of your classes and ensure you stay above the 75% limit
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-black tracking-tight">Attendance Tracker</h1>
+            {section && (
+              <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs font-bold text-primary">
+                Section {section}
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Auto-linked to your section timetable. Mark classes as Present, Absent, or Cancelled.
           </p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary"
-        >
-          <Plus className="h-4 w-4" /> Add Course
-        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary"
+          >
+            <Plus className="h-4 w-4" /> Add Course
+          </button>
+        </div>
       </div>
 
-      {/* Overview Card */}
-      <div className="rounded-2xl border border-border bg-yellow-500/5 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 animate-fade-up">
-        <div className="space-y-2">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-primary">
-            Overview
-          </span>
-          <h3 className="text-2xl font-black">Semester Attendance</h3>
-          <p className="text-sm text-muted-foreground">
-            You have attended <span className="font-semibold text-foreground">{totalAttended}</span>{" "}
-            out of <span className="font-semibold text-foreground">{totalConducted}</span> total
-            lectures conducted.
-          </p>
-          <div className="flex gap-4 pt-2">
-            <div className="text-xs text-muted-foreground">
-              Required: <span className="font-bold text-foreground">75.0%</span>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Current:{" "}
-              <span
-                className={`font-bold ${overallPct >= 75 ? "text-emerald-400" : "text-rose-400"}`}
-              >
+      {/* Main Overview Dashboard Banner */}
+      <div className="relative overflow-hidden rounded-3xl border border-border glass p-6 md:p-8 animate-fade-up">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+
+        <div className="grid gap-6 md:grid-cols-12 items-center">
+          {/* Left stats */}
+          <div className="md:col-span-8 space-y-3">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+              <Zap className="h-3.5 w-3.5" /> Semester Summary
+            </span>
+
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-4xl font-black tracking-tight">
                 {overallPct.toFixed(1)}%
+              </h2>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-bold ${
+                  overallPct >= 75
+                    ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+                    : "bg-rose-500/10 border border-rose-500/20 text-rose-400"
+                }`}
+              >
+                {overallPct >= 75 ? "Safe Zone (Above 75%)" : "Danger Zone (Below 75%)"}
               </span>
             </div>
-          </div>
-        </div>
 
-        {/* Large Circle Progress */}
-        <div className="relative h-28 w-28 shrink-0 flex items-center justify-center">
-          <svg className="-rotate-90 h-full w-full" viewBox="0 0 100 100">
-            <circle
-              cx="50"
-              cy="50"
-              r="42"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="6"
-              className="text-surface-elevated"
-            />
-            <circle
-              cx="50"
-              cy="50"
-              r="42"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="8"
-              strokeDasharray={2 * Math.PI * 42}
-              strokeDashoffset={2 * Math.PI * 42 * (1 - overallPct / 100)}
-              className={overallPct >= 75 ? "text-primary" : "text-rose-400"}
-              strokeLinecap="round"
-            />
-          </svg>
-          <div className="absolute text-center">
-            <span className="text-xl font-black">{overallPct.toFixed(0)}%</span>
-            <span className="block text-[8px] uppercase tracking-wider text-muted-foreground">
-              Overall
-            </span>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Attended <strong className="text-foreground">{totalAttended}</strong> out of{" "}
+              <strong className="text-foreground">{totalConducted}</strong> conducted lectures.
+              {totalCancelled > 0 && (
+                <>
+                  {" "}
+                  (<strong className="text-amber-400">{totalCancelled}</strong> classes cancelled by faculty — not counted in penalty).
+                </>
+              )}
+            </p>
+
+            <div className="flex flex-wrap gap-4 pt-2 text-xs">
+              <div className="flex items-center gap-2 rounded-xl bg-surface-elevated px-3 py-2 border border-border/60">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <span>Present: <strong className="text-foreground">{totalAttended}</strong></span>
+              </div>
+              <div className="flex items-center gap-2 rounded-xl bg-surface-elevated px-3 py-2 border border-border/60">
+                <XCircle className="h-4 w-4 text-rose-400" />
+                <span>Absent: <strong className="text-foreground">{totalAbsent}</strong></span>
+              </div>
+              <div className="flex items-center gap-2 rounded-xl bg-surface-elevated px-3 py-2 border border-border/60">
+                <Ban className="h-4 w-4 text-amber-400" />
+                <span>Cancelled: <strong className="text-foreground">{totalCancelled}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Progress Circle */}
+          <div className="md:col-span-4 flex items-center justify-center">
+            <div className="relative h-32 w-32 shrink-0 flex items-center justify-center">
+              <svg className="-rotate-90 h-full w-full" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  className="text-surface-elevated"
+                />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  strokeDasharray={2 * Math.PI * 40}
+                  strokeDashoffset={2 * Math.PI * 40 * (1 - overallPct / 100)}
+                  className={overallPct >= 75 ? "text-primary" : "text-rose-400"}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute text-center">
+                <span className="text-2xl font-black">{overallPct.toFixed(0)}%</span>
+                <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">
+                  Target 75%
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Grid of Subject Cards */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {subjects.map((sub, i) => {
-          const pct =
-            sub.lecturesConducted > 0 ? (sub.lecturesAttended / sub.lecturesConducted) * 100 : 100;
-          const isDanger = pct < 75;
+      {/* Today's Scheduled Classes Logger */}
+      {todayClasses.length > 0 && (
+        <section className="animate-fade-up">
+          <h2 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <Calendar className="h-4 w-4 text-primary" /> Today's Scheduled Classes
+          </h2>
 
-          // Calculate safe skips: number of future classes we can miss OR need to attend to reach 75%
-          let safeSkipsMsg = "";
-          if (sub.lecturesConducted > 0) {
-            if (pct >= 75) {
-              // safe to skip = floor((attended - 0.75 * conducted) / 0.75)
-              const maxSkip = Math.floor(
-                (sub.lecturesAttended - 0.75 * sub.lecturesConducted) / 0.75,
-              );
-              safeSkipsMsg =
-                maxSkip > 0 ? `Safe to skip ${maxSkip} next classes` : "Cannot skip next class";
-            } else {
-              // need to attend = ceiling((0.75 * conducted - attended) / 0.25)
-              const needAttend = Math.ceil(
-                (0.75 * sub.lecturesConducted - sub.lecturesAttended) / 0.25,
-              );
-              safeSkipsMsg = `Must attend next ${needAttend} classes`;
-            }
-          } else {
-            safeSkipsMsg = "No classes conducted yet";
-          }
-
-          return (
-            <div
-              key={sub.id}
-              id={`subject-${sub.id}`}
-              className={`rounded-2xl border glass p-5 flex flex-col justify-between animate-fade-up ${
-                isDanger ? "border-rose-500/20 bg-rose-500/5" : "border-border"
-              }`}
-              style={{ animationDelay: `${i * 60}ms` }}
-            >
-              <div>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <span className="font-mono text-[10px] text-muted-foreground">{sub.code}</span>
-                    <h4 className="font-bold text-sm leading-snug">{sub.name}</h4>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {todayClasses.map((ts, idx) => {
+              const slot = ts.slot!;
+              const code = slot.code || slot.subject;
+              return (
+                <div
+                  key={idx}
+                  className="group relative rounded-2xl border border-border/80 glass p-4 transition hover:border-primary/40"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-mono font-semibold text-primary">
+                        {ts.start} – {ts.end}
+                      </span>
+                      <h3 className="font-bold text-sm text-foreground mt-0.5">{slot.subject}</h3>
+                      <p className="text-xs text-muted-foreground font-mono">{code}</p>
+                    </div>
+                    {slot.type === "lab" && (
+                      <span className="rounded-full bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 text-[9px] font-semibold text-violet-400">
+                        Lab
+                      </span>
+                    )}
                   </div>
-                  <span
-                    className={`text-base font-black ${isDanger ? "text-rose-400" : "text-primary"}`}
-                  >
-                    {pct.toFixed(0)}%
-                  </span>
-                </div>
 
-                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>
-                    Attended:{" "}
-                    <strong className="text-foreground">
-                      {sub.lecturesAttended}/{sub.lecturesConducted}
-                    </strong>
-                  </span>
-                  <span className="text-[10px] flex items-center gap-1">
-                    <RefreshCw className="h-2.5 w-2.5" /> {sub.lastUpdated}
-                  </span>
+                  {/* Action Buttons for Today's Class */}
+                  <div className="mt-4 flex items-center justify-between gap-1.5 pt-2 border-t border-border/50">
+                    <button
+                      onClick={() => handleMarkAttendance(code, "present")}
+                      className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-1.5 text-xs font-semibold text-emerald-400 transition hover:bg-emerald-500/20"
+                      title="Mark Present"
+                    >
+                      <Check className="h-3.5 w-3.5" /> Present
+                    </button>
+                    <button
+                      onClick={() => handleMarkAttendance(code, "absent")}
+                      className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-rose-500/10 border border-rose-500/20 py-1.5 text-xs font-semibold text-rose-400 transition hover:bg-rose-500/20"
+                      title="Mark Absent"
+                    >
+                      <X className="h-3.5 w-3.5" /> Absent
+                    </button>
+                    <button
+                      onClick={() => handleMarkAttendance(code, "cancelled")}
+                      className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl bg-amber-500/10 border border-amber-500/20 py-1.5 text-xs font-semibold text-amber-400 transition hover:bg-amber-500/20"
+                      title="Class Cancelled by Faculty"
+                    >
+                      <Ban className="h-3.5 w-3.5" /> Cancelled
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Course-by-Course Attendance List */}
+      <section className="space-y-4 animate-fade-up">
+        <div className="flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <BookOpen className="h-4 w-4 text-primary" /> Course Attendance Breakdown
+          </h2>
+          <span className="text-xs text-muted-foreground">
+            {subjects.length} Course{subjects.length === 1 ? "" : "s"} Tracked
+          </span>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {subjects.map((sub) => {
+            const stats = calculateSubjectStats(sub);
+
+            return (
+              <article
+                key={sub.code}
+                className="group relative rounded-2xl border border-border/80 glass p-5 transition-all duration-300 hover:border-primary/40 hover:shadow-lg"
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-primary">{sub.code}</span>
+                      {sub.isCustom && (
+                        <span className="rounded-full bg-surface-elevated px-2 py-0.5 text-[9px] font-medium text-muted-foreground">
+                          Custom
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="mt-0.5 truncate text-base font-bold text-foreground">
+                      {sub.name}
+                    </h3>
+                  </div>
+
+                  {/* Percentage Badge */}
+                  <div className="text-right">
+                    <span
+                      className={`text-xl font-black ${
+                        stats.conducted === 0
+                          ? "text-muted-foreground"
+                          : stats.percentage >= 75
+                          ? "text-emerald-400"
+                          : "text-rose-400"
+                      }`}
+                    >
+                      {stats.conducted > 0 ? `${stats.percentage.toFixed(0)}%` : "N/A"}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Progress bar */}
-                <div className="mt-2 h-1.5 w-full rounded-full bg-surface-elevated overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${isDanger ? "bg-rose-500" : "bg-primary"}`}
-                    style={{ width: `${pct}%` }}
-                  />
+                <div className="mt-3">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-surface-elevated">
+                    <div
+                      className={`h-full transition-all duration-500 ${
+                        stats.percentage >= 75 ? "bg-primary" : "bg-rose-500"
+                      }`}
+                      style={{ width: `${Math.min(100, Math.max(0, stats.percentage))}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-4 pt-4 border-t border-border flex items-center justify-between flex-wrap gap-2">
-                <span
-                  className={`text-[10px] font-semibold flex items-center gap-1 ${isDanger ? "text-rose-400" : "text-emerald-400"}`}
-                >
-                  {isDanger ? (
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                  ) : (
-                    <Check className="h-3.5 w-3.5" />
+                {/* Stat numbers */}
+                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                  <div>
+                    Attended: <strong className="text-foreground">{sub.lecturesAttended}</strong> /{" "}
+                    <strong className="text-foreground">{stats.conducted}</strong>
+                  </div>
+                  {sub.lecturesCancelled > 0 && (
+                    <div className="text-amber-400 font-semibold">
+                      {sub.lecturesCancelled} Cancelled
+                    </div>
                   )}
-                  {safeSkipsMsg}
-                </span>
+                </div>
 
-                {/* Action buttons to quickly log attendance */}
-                <div className="flex gap-1.5">
+                {/* Advice banner */}
+                <div
+                  className={`mt-3 flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold ${
+                    stats.conducted === 0
+                      ? "bg-surface-elevated text-muted-foreground"
+                      : stats.percentage >= 75
+                      ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+                      : "bg-rose-500/10 border border-rose-500/20 text-rose-400"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    {stats.isDanger ? (
+                      <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    ) : (
+                      <Check className="h-3.5 w-3.5 shrink-0" />
+                    )}
+                    {stats.adviceMsg}
+                  </span>
+                </div>
+
+                {/* Main Action Buttons */}
+                <div className="mt-4 flex items-center gap-2 pt-2 border-t border-border/40">
                   <button
-                    id={`btn-absent-${sub.id}`}
-                    onClick={() => handleUpdate(sub.id, false)}
-                    className="flex h-7 px-2.5 items-center justify-center rounded-lg border border-border bg-surface-elevated text-[10px] font-bold text-rose-400 hover:bg-rose-500/10 transition"
+                    onClick={() => handleMarkAttendance(sub.code, "present")}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2 text-xs font-bold text-emerald-400 transition hover:bg-emerald-500/20"
+                    title="Add Attended Class (+1 Present)"
                   >
-                    Absent
+                    <Check className="h-3.5 w-3.5" /> Present
                   </button>
+
                   <button
-                    id={`btn-present-${sub.id}`}
-                    onClick={() => handleUpdate(sub.id, true)}
-                    className="flex h-7 px-2.5 items-center justify-center rounded-lg bg-primary text-primary-foreground text-[10px] font-bold transition hover:opacity-90"
+                    onClick={() => handleMarkAttendance(sub.code, "absent")}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 py-2 text-xs font-bold text-rose-400 transition hover:bg-rose-500/20"
+                    title="Add Bunked/Missed Class (+1 Absent)"
                   >
-                    Present
+                    <X className="h-3.5 w-3.5" /> Absent
+                  </button>
+
+                  <button
+                    onClick={() => handleMarkAttendance(sub.code, "cancelled")}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 py-2 text-xs font-bold text-amber-400 transition hover:bg-amber-500/20"
+                    title="Class Cancelled by Teacher/College (Doesn't affect attendance %)"
+                  >
+                    <Ban className="h-3.5 w-3.5" /> Cancelled
                   </button>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
 
-      {/* Add Course Modal */}
+                {/* Sub Action Undo Controls */}
+                {(sub.lecturesAttended > 0 || sub.lecturesAbsent > 0 || sub.lecturesCancelled > 0 || sub.isCustom) && (
+                  <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground pt-1">
+                    <div className="flex gap-2">
+                      {sub.lecturesAttended > 0 && (
+                        <button
+                          onClick={() => handleDecrement(sub.code, "attended")}
+                          className="hover:text-rose-400 transition underline"
+                        >
+                          -1 Present
+                        </button>
+                      )}
+                      {sub.lecturesAbsent > 0 && (
+                        <button
+                          onClick={() => handleDecrement(sub.code, "absent")}
+                          className="hover:text-emerald-400 transition underline"
+                        >
+                          -1 Absent
+                        </button>
+                      )}
+                      {sub.lecturesCancelled > 0 && (
+                        <button
+                          onClick={() => handleDecrement(sub.code, "cancelled")}
+                          className="hover:text-amber-400 transition underline"
+                        >
+                          -1 Cancelled
+                        </button>
+                      )}
+                    </div>
+
+                    {sub.isCustom && (
+                      <button
+                        onClick={() => handleDeleteCustom(sub.code)}
+                        className="text-rose-400 hover:underline flex items-center gap-0.5"
+                      >
+                        <Trash2 className="h-3 w-3" /> Remove
+                      </button>
+                    )}
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Add Custom Subject Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-3xl border border-border glass-strong p-6 animate-fade-up">
-            <h3 className="mb-4 text-base font-bold flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" /> Add New Course
-            </h3>
-            <form onSubmit={handleAddSubject} className="space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="relative w-full max-w-md rounded-3xl glass-strong border border-border/80 p-6 shadow-2xl animate-scale-up">
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border border-border/50 bg-surface/60 text-muted-foreground transition hover:bg-surface hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <h3 className="text-lg font-bold text-foreground">Add Custom Course</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Add extra electives, minor courses, or lab subjects not listed in your section timetable.
+            </p>
+
+            <form onSubmit={handleAddSubject} className="mt-4 space-y-4">
               <div>
-                <label
-                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
-                  htmlFor="add-code"
-                >
-                  Course Code
-                </label>
+                <label className="text-xs font-semibold text-foreground">Course Name</label>
                 <input
-                  id="add-code"
-                  required
-                  placeholder="e.g. CS301"
-                  value={newSubjectCode}
-                  onChange={(e) => setNewSubjectCode(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label
-                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
-                  htmlFor="add-name"
-                >
-                  Course Name
-                </label>
-                <input
-                  id="add-name"
-                  required
-                  placeholder="e.g. Design & Analysis of Algorithms"
+                  type="text"
+                  placeholder="e.g. Deep Learning Elective"
                   value={newSubjectName}
                   onChange={(e) => setNewSubjectName(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
+                  className="mt-1 w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  required
                 />
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div>
+                <label className="text-xs font-semibold text-foreground">Course Code</label>
+                <input
+                  type="text"
+                  placeholder="e.g. CSN3005"
+                  value={newSubjectCode}
+                  onChange={(e) => setNewSubjectCode(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 rounded-xl border border-border py-2.5 text-sm text-muted-foreground transition hover:text-foreground"
+                  className="flex-1 rounded-xl border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-surface-elevated"
                 >
                   Cancel
                 </button>
                 <button
-                  id="submit-add-course"
                   type="submit"
-                  className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary"
+                  className="flex-1 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 glow-primary"
                 >
                   Add Course
                 </button>

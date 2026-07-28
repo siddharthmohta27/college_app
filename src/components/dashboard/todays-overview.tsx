@@ -9,51 +9,15 @@ import {
   Zap,
 } from "lucide-react";
 
+import { useState, useEffect } from "react";
+import { loadLocalAttendance } from "@/lib/attendance";
+
 type OverviewItem = {
   icon: LucideIcon;
   title: string;
   value: string;
   subtitle: string;
 };
-
-const TODAY_OVERVIEW: OverviewItem[] = [
-  {
-    icon: BookOpen,
-    title: "Next Class",
-    value: "DBMS Lab",
-    subtitle: "10:00 AM · Room C204",
-  },
-  {
-    icon: FileText,
-    title: "Assignment Due",
-    value: "DSA Lab Report",
-    subtitle: "Due Today · 11:59 PM",
-  },
-  {
-    icon: UtensilsCrossed,
-    title: "Today's Meal",
-    value: "Paneer Butter Masala",
-    subtitle: "₹45 · 520 kcal",
-  },
-  {
-    icon: Calendar,
-    title: "Upcoming Event",
-    value: "AI Workshop",
-    subtitle: "5:00 PM · Auditorium",
-  },
-  {
-    icon: CheckSquare,
-    title: "Attendance Status",
-    value: "82%",
-    subtitle: "Safe Zone · 6 classes left",
-  },
-  {
-    icon: Clock,
-    title: "Study Room Booking",
-    value: "Room A",
-    subtitle: "Booked · 7:00 PM",
-  },
-];
 
 function OverviewCard({ item, index }: { item: OverviewItem; index: number }) {
   const Icon = item.icon;
@@ -80,6 +44,62 @@ function OverviewCard({ item, index }: { item: OverviewItem; index: number }) {
 }
 
 export function TodaysOverview() {
+  const [attendanceData, setAttendanceData] = useState({ pct: 82, msg: "Safe Zone" });
+
+  useEffect(() => {
+    const list = loadLocalAttendance();
+    if (list && list.length > 0) {
+      const conducted = list.reduce((s, a) => s + a.lecturesAttended + a.lecturesAbsent, 0);
+      const attended = list.reduce((s, a) => s + a.lecturesAttended, 0);
+      if (conducted > 0) {
+        const pct = (attended / conducted) * 100;
+        setAttendanceData({
+          pct: Math.round(pct),
+          msg: pct >= 75 ? "Above 75% Target" : "Below 75% Target",
+        });
+      }
+    }
+  }, []);
+
+  const TODAY_OVERVIEW: OverviewItem[] = [
+    {
+      icon: BookOpen,
+      title: "Next Class",
+      value: "DBMS Lab",
+      subtitle: "10:00 AM · Room C204",
+    },
+    {
+      icon: FileText,
+      title: "Assignment Due",
+      value: "DSA Lab Report",
+      subtitle: "Due Today · 11:59 PM",
+    },
+    {
+      icon: UtensilsCrossed,
+      title: "Today's Meal",
+      value: "Paneer Butter Masala",
+      subtitle: "₹45 · 520 kcal",
+    },
+    {
+      icon: Calendar,
+      title: "Upcoming Event",
+      value: "AI Workshop",
+      subtitle: "5:00 PM · Auditorium",
+    },
+    {
+      icon: CheckSquare,
+      title: "Attendance Status",
+      value: `${attendanceData.pct}%`,
+      subtitle: attendanceData.msg,
+    },
+    {
+      icon: Clock,
+      title: "Study Room Booking",
+      value: "Room A",
+      subtitle: "Booked · 7:00 PM",
+    },
+  ];
+
   return (
     <section className="relative z-10 animate-fade-up">
       <h2 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">

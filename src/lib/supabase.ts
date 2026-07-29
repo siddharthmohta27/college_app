@@ -112,9 +112,14 @@ export const supabaseHelpers = {
   },
 
   // ── Realtime Subscriptions ────────────────────────────────
-  subscribeToMessages(channelId: string, callback: (payload: unknown) => void) {
-    return supabase
-      .channel(`messages:${channelId}`)
+  // Returns an unsubscribed channel - caller must call .subscribe()
+  createMessagesChannel(channelId: string) {
+    return supabase.channel(`messages:${channelId}`);
+  },
+
+  subscribeToMessages(channelId: string, callback: (payload: { new: { id: string; channel_id: string; user_id: number; content: string; created_at: string } }) => void) {
+    const channel = this.createMessagesChannel(channelId);
+    channel
       .on(
         "postgres_changes",
         {
@@ -126,17 +131,19 @@ export const supabaseHelpers = {
         callback,
       )
       .subscribe();
+    return channel;
   },
 
   subscribeToMatches(userId: number, callback: (payload: unknown) => void) {
-    return supabase
-      .channel(`matches:${userId}`)
+    const channel = supabase.channel(`matches:${userId}`);
+    channel
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "matches", filter: `user1_id=eq.${userId}` },
         callback,
       )
       .subscribe();
+    return channel;
   },
 };
 

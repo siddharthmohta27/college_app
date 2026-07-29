@@ -4,24 +4,41 @@ const { initializeApp, cert, getApps } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 
 // ──────────────────────────────────────────────────────────────
-// PostgreSQL Connection Pool
+// PostgreSQL Connection Pool (Supabase Pooler)
 // ──────────────────────────────────────────────────────────────
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.error("❌ DATABASE_URL not set in .env");
+  process.exit(1);
+}
+
+console.log("🔌 Connecting to PostgreSQL pooler...");
+console.log("   Host:", new URL(connectionString).hostname);
+console.log("   Port:", new URL(connectionString).port || "5432 (default)");
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl:
-    process.env.DATABASE_URL && process.env.DATABASE_URL.includes("localhost")
-      ? false
-      : process.env.DATABASE_URL
-        ? { rejectUnauthorized: false }
-        : false,
+  connectionString,
+  ssl: { rejectUnauthorized: false },
+  connectionTimeoutMillis: 10000,
+  idleTimeoutMillis: 30000,
+  max: 10,
 });
 
 pool.on("connect", () => {
-  console.log("✅ PostgreSQL connected");
+  console.log("✅ PostgreSQL connected (pooler)");
 });
 
 pool.on("error", (err) => {
-  console.error("⚠️  PostgreSQL connection error:", err.message);
+  console.error("⚠️  PostgreSQL pool error:", err.message, err.code);
+});
+
+pool.on("acquire", () => {
+  // console.log("🔄 Client acquired from pool");
+});
+
+pool.on("remove", () => {
+  console.log("🔄 Client removed from pool");
 });
 
 // ──────────────────────────────────────────────────────────────
@@ -127,7 +144,7 @@ async function getOrCreateChatUser(authUserId, userData = {}) {
        status = 'online',
        last_seen = NOW()
      RETURNING id, username, avatar, role, color, status, auth_user_id`,
-    [username || "Anonymous", avatarShort, role, color, email, authUserId],
+    [username || "Student", avatarShort, role, color, email, authUserId],
   );
   console.log(
     `✅ [getOrCreateChatUser] Chat user ${res.rows[0] ? "created/updated" : "FAILED"}:`,

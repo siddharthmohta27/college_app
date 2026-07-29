@@ -10,21 +10,21 @@ export interface PecProfile {
   classRollNo?: string;
 }
 
-// 2-digit Branch Code mapping for PEC (e.g. 60 = DS, 11 = AI, 65 = AI, 30 = CS, 10 = Mechanical, 40 = Electrical, 20 = Civil, 50 = ECE)
+// 2-digit Branch Code mapping for PEC (Aero=10, Civil=20, CSE=30, EE=40, ECE=50, DS=60, AI=65/11, Mech=70, Meta=80, Production=90)
 const BRANCH_2DIGIT_MAP: Record<string, string> = {
+  "10": "Aerospace Engineering",
+  "20": "Civil Engineering",
+  "30": "Computer Science & Engineering",
+  "40": "Electrical Engineering",
+  "50": "Electronics & Communication Engineering",
   "60": "CSE (Data Science)",
   "11": "CSE (Artificial Intelligence)",
   "65": "CSE (Artificial Intelligence)",
   "61": "CSE (Artificial Intelligence)",
   "00": "CSE (Artificial Intelligence)",
-  "30": "Computer Science & Engineering",
-  "10": "Mechanical Engineering",
-  "50": "Electronics & Communication Engineering",
-  "40": "Electrical Engineering",
-  "20": "Civil Engineering",
-  "70": "Materials & Metallurgical Engineering",
-  "80": "Production & Industrial Engineering",
-  "90": "Aerospace Engineering",
+  "70": "Mechanical Engineering",
+  "80": "Materials & Metallurgical Engineering",
+  "90": "Production & Industrial Engineering",
 };
 
 // Alpha branch alias mapping to 2-digit branch code
@@ -34,11 +34,11 @@ const BRANCH_TO_2DIGIT_CODE: Record<string, string> = {
   cse: "30", cs: "30",
   ece: "50", ec: "50",
   ee: "40", ele: "40", elec: "40", electrical: "40",
-  me: "10", mech: "10", mechanical: "10",
-  ce: "20", civil: "20",
-  met: "70", meta: "70", mmt: "70", metallurgy: "70",
-  pie: "80", prod: "80", production: "80",
-  aero: "90", aer: "90", aerospace: "90",
+  me: "70", mech: "70", mecha: "70", mechanical: "70",
+  ce: "20", civil: "20", civi: "20",
+  met: "80", meta: "80", mmt: "80", metallurgy: "80",
+  pie: "90", prod: "90", production: "90",
+  aero: "10", aer: "10", aerospace: "10",
 };
 
 const BRANCH_MAP: Record<string, string> = {

@@ -10,11 +10,13 @@ export interface PecProfile {
   classRollNo?: string;
 }
 
-// 2-digit Branch Code mapping for PEC (e.g. 60 = DS, 30 = CS, 10 = Mechanical, 40 = Electrical, 20 = Civil, 50 = ECE)
+// 2-digit Branch Code mapping for PEC (e.g. 60 = DS, 11 = AI, 65 = AI, 30 = CS, 10 = Mechanical, 40 = Electrical, 20 = Civil, 50 = ECE)
 const BRANCH_2DIGIT_MAP: Record<string, string> = {
   "60": "CSE (Data Science)",
+  "11": "CSE (Artificial Intelligence)",
   "65": "CSE (Artificial Intelligence)",
   "61": "CSE (Artificial Intelligence)",
+  "00": "CSE (Artificial Intelligence)",
   "30": "Computer Science & Engineering",
   "10": "Mechanical Engineering",
   "50": "Electronics & Communication Engineering",
@@ -200,21 +202,24 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
   let classRollNo = "";
 
   if (!rollNo) {
-    // 1. Search for 8-digit numeric PEC Roll Number in handle, email, OR overrideDisplayName (e.g. "bt25104021" or "25104021" or "25106012")
+    // 1. Search for 8-digit numeric PEC Roll Number in handle, email, OR overrideDisplayName (e.g. "bt25104021" or "25110001" or "25106012")
     const fullSearch = `${handle} ${emailText} ${overrideDisplayName || ""}`;
-    const numericMatch = fullSearch.match(/(?:bt|mt|phd)?(\d{2})(10|20|30)(\d{2})(\d{2})/i);
+    const numericMatch = fullSearch.match(/(?:bt|mt|phd)?(\d{2})(10|20|30|11|65|61)(\d{2})(\d{2})/i)
+                       || fullSearch.match(/(?:bt|mt|phd)?(\d{2})(11)(00)(\d{2})/i);
 
     if (numericMatch) {
       const yearCode = numericMatch[1];   // "25"
-      const degCode = numericMatch[2];    // "10" (B.Tech)
-      const branchCode = numericMatch[3]; // "40" (EE), "60" (DS), "50" (ECE), "30" (CSE)
-      const classRoll = numericMatch[4];  // "21" or "47"
+      const degCode = numericMatch[2];    // "10" (B.Tech) or "11" (CSE AI)
+      const branchCode = numericMatch[3] === "00" ? "11" : numericMatch[3]; // "11" for AI
+      const classRoll = numericMatch[4];  // "01" .. "31"
 
       batch = `20${yearCode}`;
       if (DEGREE_CODE_MAP[degCode]) degree = DEGREE_CODE_MAP[degCode];
       if (BRANCH_2DIGIT_MAP[branchCode]) branch = BRANCH_2DIGIT_MAP[branchCode];
+      else if (degCode === "11") branch = "CSE (Artificial Intelligence)";
+
       classRollNo = classRoll;
-      rollNo = `${yearCode}${degCode}${branchCode}${classRoll}`;
+      rollNo = numericMatch[3] === "00" ? `${yearCode}1100${classRoll}` : `${yearCode}${degCode}${branchCode}${classRoll}`;
     } else {
       // 2. Parse alpha codePart e.g. "bt25ele" or "bt25ee" or "bt25cseds" or "bt25ece"
       const codeMatch = codePart.match(/^(bt|mt|phd|ar|barch)?(\d{2})([a-z]+)$/i);

@@ -53,7 +53,10 @@ const SECTION_RANGES: { section: string; min: number; max: number }[] = [
   { section: "CSE-4", min: 25101062, max: 25101083 },
   { section: "CSE-5", min: 25101084, max: 25101105 },
   { section: "CSE-6", min: 25101106, max: 25101128 },
-  // ── CSE AI (branch code 65 / 61) ──────────────────────────────────────────
+  // ── CSE AI (branch code 11 / 65 / 61: e.g. 25110001-25110031) ─────────────
+  { section: "AI-1", min: 25110001, max: 25110015 },
+  { section: "AI-2", min: 25110016, max: 25110031 },
+  { section: "AI-2", min: 25110032, max: 25110999 },
   { section: "AI-1", min: 25106501, max: 25106515 },
   { section: "AI-2", min: 25106516, max: 25106531 },
   { section: "AI-2", min: 25106532, max: 25106599 }, // Branch-change / higher roll

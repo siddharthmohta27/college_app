@@ -11,6 +11,14 @@ import {
 
 import { useState, useEffect } from "react";
 import { loadLocalAttendance } from "@/lib/attendance";
+import { firebaseAuth } from "@/lib/firebase";
+import { parsePecEmail } from "@/lib/pec-email";
+import {
+  getSectionFromRollNo,
+  getTimetableForSection,
+  getTodaySchedule,
+  getNextClass,
+} from "@/lib/pec-timetable";
 
 type OverviewItem = {
   icon: LucideIcon;
@@ -45,7 +53,12 @@ function OverviewCard({ item, index }: { item: OverviewItem; index: number }) {
 
 export function TodaysOverview() {
   const [attendanceData, setAttendanceData] = useState({ pct: 82, msg: "Safe Zone" });
+  const [nextClassInfo, setNextClassInfo] = useState<{ value: string; subtitle: string }>({
+    value: "Loading...",
+    subtitle: "Checking schedule",
+  });
 
+  // Calculate real attendance stats
   useEffect(() => {
     const list = loadLocalAttendance();
     if (list && list.length > 0) {
@@ -61,12 +74,52 @@ export function TodaysOverview() {
     }
   }, []);
 
+  // Detect real next class from PEC timetable & roll number
+  useEffect(() => {
+    const unsub = firebaseAuth.onAuthStateChanged((user) => {
+      const email = user?.email ?? null;
+      const displayName = user?.displayName ?? null;
+      const profile = parsePecEmail(email, displayName);
+      const section = getSectionFromRollNo(profile.rollNo);
+      const timetable = section ? getTimetableForSection(section) : null;
+      const todaySchedule = timetable ? getTodaySchedule(timetable) : null;
+      const nextInfo = todaySchedule ? getNextClass(todaySchedule) : null;
+      const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
+
+      if (isWeekend) {
+        setNextClassInfo({ value: "Weekend 🎉", subtitle: "No classes scheduled" });
+      } else if (!section) {
+        setNextClassInfo({ value: "Set Roll No", subtitle: "Update profile for timetable" });
+      } else if (!timetable) {
+        setNextClassInfo({ value: `Section ${section}`, subtitle: "Schedule coming soon" });
+      } else if (!nextInfo) {
+        setNextClassInfo({ value: "All Done 🎓", subtitle: "No more classes today" });
+      } else {
+        const slot = nextInfo.slot.slot;
+        const subject = slot?.subject || "Class";
+        const room = slot?.room ? `Room ${slot.room}` : "";
+        const [sh, sm] = nextInfo.slot.start.split(":").map(Number);
+        const suffix = sh < 12 ? "AM" : "PM";
+        const h12 = sh > 12 ? sh - 12 : sh === 0 ? 12 : sh;
+        const timeStr = `${h12}:${sm.toString().padStart(2, "0")} ${suffix}`;
+        const prefix = nextInfo.status === "ongoing" ? "🔴 Live · " : "";
+
+        setNextClassInfo({
+          value: subject,
+          subtitle: `${prefix}${timeStr}${room ? ` · ${room}` : ""}`,
+        });
+      }
+    });
+
+    return unsub;
+  }, []);
+
   const TODAY_OVERVIEW: OverviewItem[] = [
     {
       icon: BookOpen,
       title: "Next Class",
-      value: "DBMS Lab",
-      subtitle: "10:00 AM · Room C204",
+      value: nextClassInfo.value,
+      subtitle: nextClassInfo.subtitle,
     },
     {
       icon: FileText,

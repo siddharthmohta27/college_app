@@ -244,6 +244,21 @@ function Dashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
+  const [email, setEmail] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsub = firebaseAuth.onAuthStateChanged((user) => {
+      if (user) {
+        setEmail(user.email);
+        setDisplayName(user.displayName);
+      }
+    });
+    return unsub;
+  }, []);
+
+  const profile = parsePecEmail(email, displayName);
+
   return (
     <div className="mx-auto max-w-5xl space-y-8 p-6 pb-24 md:pb-8">
       {/* Welcome banner */}
@@ -254,16 +269,16 @@ function Dashboard() {
         </div>
         <div className="relative">
           <p className="text-sm text-muted-foreground">{greeting} 👋</p>
-          <h2 className="mt-1 text-2xl font-bold">Siddharth Mohta</h2>
+          <h2 className="mt-1 text-2xl font-bold">{profile.name}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            3rd Year · Computer Science · Roll No. CS21B027
+            {profile.yearLabel} · {profile.branch} · Roll No. {profile.rollNo}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs text-primary">
-              <Zap className="h-3 w-3" /> 8 days to exams
+              <Zap className="h-3 w-3" /> End Semester Exams Coming Up
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs text-primary">
-              <Star className="h-3 w-3" /> CGPA: 8.6
+              <Star className="h-3 w-3" /> Batch of {profile.batch} ({profile.degree})
             </span>
           </div>
         </div>

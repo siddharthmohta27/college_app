@@ -5,6 +5,7 @@ export interface PecProfile {
   degree: string;
   branch: string;
   batch: string;
+  yearLabel: string;
   college: string;
   classRollNo?: string;
 }
@@ -116,6 +117,33 @@ function formatNameFromEmail(namePart: string): string {
 }
 
 /**
+ * Calculate dynamic student year from batch e.g. Batch 2025 -> 2nd Year
+ */
+export function getStudentYearLabel(batchStr: string | number): string {
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth(); // 0-indexed, July is 6
+  // Academic year advances in July
+  const academicYear = currentMonth >= 6 ? currentYear : currentYear - 1;
+
+  let b = 2025;
+  if (typeof batchStr === "number") {
+    b = batchStr;
+  } else if (typeof batchStr === "string") {
+    const parsed = parseInt(batchStr.replace(/\D/g, ""), 10);
+    if (!isNaN(parsed) && parsed > 2000) b = parsed;
+  }
+
+  const yearsCompleted = academicYear - b;
+  const yearNum = yearsCompleted + 1;
+
+  if (yearNum <= 1) return "1st Year";
+  if (yearNum === 2) return "2nd Year";
+  if (yearNum === 3) return "3rd Year";
+  if (yearNum >= 4) return "4th Year";
+  return `${yearNum}th Year`;
+}
+
+/**
  * Save custom roll number to localStorage
  */
 export function setStoredRollNo(email: string, rollNo: string): void {
@@ -132,7 +160,6 @@ export function setStoredRollNo(email: string, rollNo: string): void {
  */
 export function parsePecEmail(email: string | null | undefined, overrideDisplayName?: string | null): PecProfile {
   const defaultCollege = "Punjab Engineering College (PEC)";
-  
 
   const emailText = (email || "").toLowerCase().trim();
   const handle = emailText.split("@")[0] || "";
@@ -180,7 +207,7 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
     if (numericMatch) {
       const yearCode = numericMatch[1];   // "25"
       const degCode = numericMatch[2];    // "10" (B.Tech)
-      const branchCode = numericMatch[3]; // "40" (EE), "60" (DS), "50" (ECE), "10" (CSE)
+      const branchCode = numericMatch[3]; // "40" (EE), "60" (DS), "50" (ECE), "30" (CSE)
       const classRoll = numericMatch[4];  // "21" or "47"
 
       batch = `20${yearCode}`;
@@ -247,6 +274,7 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
     : formatNameFromEmail(namePart);
 
   const name = rawName.replace(/^(?:bt|mt|phd)?\d{7,8}\s*/i, "").trim() || rawName;
+  const yearLabel = getStudentYearLabel(batch);
 
   return {
     email: email || "",
@@ -255,6 +283,7 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
     degree,
     branch,
     batch,
+    yearLabel,
     college: defaultCollege,
     classRollNo,
   };

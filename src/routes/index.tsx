@@ -144,13 +144,13 @@ function Landing() {
       </div>
 
       {/* Nav */}
-      <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-2.5">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 animate-pulse-glow">
+      <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 sm:py-6">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/20 animate-pulse-glow">
             <GraduationCap className="h-5 w-5 text-primary" />
           </div>
-          <span className="text-lg font-bold tracking-tight">Campus Connect</span>
-          <span className="ml-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-mono uppercase text-primary">
+          <span className="text-base font-bold tracking-tight sm:text-lg">Campus Connect</span>
+          <span className="hidden ml-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-mono uppercase text-primary sm:inline">
             beta
           </span>
         </div>
@@ -168,7 +168,7 @@ function Landing() {
             Community
           </a>
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <ThemeToggle />
           <button
             id="signin-btn"
@@ -176,7 +176,7 @@ function Landing() {
               setMode("login");
               setAuthError(null);
             }}
-            className="rounded-lg px-4 py-2 text-sm text-muted-foreground transition hover:text-foreground"
+            className="hidden rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:text-foreground sm:block"
           >
             Sign in
           </button>
@@ -186,7 +186,7 @@ function Landing() {
               setMode("signup");
               setAuthError(null);
             }}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 glow-primary"
+            className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 glow-primary sm:px-4"
           >
             Get started
           </button>
@@ -194,17 +194,17 @@ function Landing() {
       </header>
 
       {mode === "landing" ? (
-        <main className="relative z-10 mx-auto max-w-7xl px-6">
+        <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
           {/* Hero */}
-          <section className="pt-16 pb-24 text-center animate-fade-up">
+          <section className="pt-10 pb-16 text-center animate-fade-up sm:pt-16 sm:pb-24">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur">
               <Sparkles className="h-3.5 w-3.5 text-accent" />
               <span>Your entire college life, in one place</span>
             </div>
-            <h1 className="mt-6 text-5xl font-bold tracking-tight sm:text-7xl">
+            <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-7xl">
               Your campus, <span className="gradient-text">supercharged</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
+            <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground leading-relaxed sm:text-lg">
               Marketplace, canteen menus, real-time chat, club events and study rooms — everything
               your college life needs, beautifully unified.
             </p>
@@ -334,7 +334,7 @@ function Landing() {
             <div className="mb-8 text-center">
               <h2 className="text-xl font-bold">Trusted by students across campuses</h2>
             </div>
-            <div className="grid gap-8 text-center md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4 md:gap-8">
               {[
                 ["50+", "Colleges"],
                 ["12k+", "Students"],

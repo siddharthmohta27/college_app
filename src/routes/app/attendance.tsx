@@ -316,7 +316,7 @@ function AttendanceTracker() {
       <div className="relative overflow-hidden rounded-3xl border border-border glass p-6 md:p-8 animate-fade-up">
         <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
 
-        <div className="grid gap-6 md:grid-cols-12 items-center">
+        <div className="flex flex-col gap-6 md:grid md:grid-cols-12 md:items-center">
           {/* Left stats */}
           <div className="md:col-span-8 space-y-3">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">

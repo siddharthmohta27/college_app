@@ -191,8 +191,8 @@ function StudyRooms() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Room list — left 2/3 */}
-        <div className="space-y-4 lg:col-span-2">
+        {/* Room list — left 2/3 on desktop, bottom on mobile */}
+        <div className="space-y-4 lg:col-span-2 order-2 lg:order-1">
           {/* Availability legend */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground animate-fade-up">
             <span className="flex items-center gap-1.5">
@@ -316,8 +316,8 @@ function StudyRooms() {
           })}
         </div>
 
-        {/* Right column — Pomodoro + Active users */}
-        <div className="space-y-6">
+        {/* Right column — Pomodoro + Active users: first on mobile */}
+        <div className="space-y-6 order-1 lg:order-2">
           {/* Pomodoro Timer */}
           <div className="rounded-2xl glass-strong neon-border p-5 text-center animate-fade-up">
             <h3 className="mb-4 flex items-center justify-center gap-2 text-sm font-bold">

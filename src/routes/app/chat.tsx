@@ -97,6 +97,7 @@ function ChatApp() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [draft, setDraft] = useState("");
+  const [showChannelDrawer, setShowChannelDrawer] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const [currentUser, setCurrentUser] = useState<{
@@ -199,6 +200,7 @@ function ChatApp() {
     if (newChannelId === activeChannel) return;
     const oldChannelId = activeChannel;
     setActiveChannel(newChannelId);
+    setShowChannelDrawer(false); // close drawer on mobile after selecting
 
     if (socketRef.current) {
       socketRef.current.emit("change_channel", {
@@ -235,9 +237,17 @@ function ChatApp() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-57px)] w-full overflow-hidden">
+    <div className="flex h-[calc(100vh-57px-60px)] w-full overflow-hidden md:h-[calc(100vh-57px)]">
+      {/* Mobile channel drawer overlay */}
+      {showChannelDrawer && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+          onClick={() => setShowChannelDrawer(false)}
+        />
+      )}
+
       {/* Server rail */}
-      <aside className="flex w-[68px] flex-col items-center gap-3 border-r border-border bg-background/60 py-4">
+      <aside className="flex w-[52px] flex-col items-center gap-3 border-r border-border bg-background/60 py-4 md:w-[68px]">
         <div className="my-1 h-px w-8 bg-border" />
         {SERVERS.map((s) => {
           const active = s.id === activeServer;
@@ -260,8 +270,12 @@ function ChatApp() {
         </button>
       </aside>
 
-      {/* Channel sidebar */}
-      <aside className="hidden w-56 flex-col border-r border-border bg-surface/40 md:flex">
+      {/* Channel sidebar — drawer on mobile, static on md+ */}
+      <aside
+        className={`fixed inset-y-0 left-[52px] z-50 flex w-56 flex-col border-r border-border bg-surface/95 backdrop-blur-xl transition-transform duration-300 md:static md:left-auto md:z-auto md:flex md:translate-x-0 md:bg-surface/40 ${
+          showChannelDrawer ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4 text-primary" />
@@ -332,10 +346,17 @@ function ChatApp() {
 
       {/* Chat area */}
       <section className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-border bg-background/40 px-5 py-3 backdrop-blur">
-          <div className="flex min-w-0 items-center gap-3">
-            <Hash className="h-5 w-5 text-muted-foreground" />
-            <h2 className="truncate font-semibold">{activeChannel}</h2>
+        <header className="flex items-center justify-between border-b border-border bg-background/40 px-3 py-3 backdrop-blur md:px-5">
+          <div className="flex min-w-0 items-center gap-2 md:gap-3">
+            {/* Mobile: channel menu toggle */}
+            <button
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition hover:bg-surface hover:text-foreground md:hidden"
+              onClick={() => setShowChannelDrawer(true)}
+            >
+              <Hash className="h-4 w-4" />
+            </button>
+            <Hash className="hidden h-5 w-5 text-muted-foreground md:block" />
+            <h2 className="truncate font-semibold">#{activeChannel}</h2>
             <span className="hidden text-xs text-muted-foreground md:inline">
               | Ask questions, share memes, find study buddies
             </span>
@@ -375,7 +396,7 @@ function ChatApp() {
         </div>
 
         {/* Composer */}
-        <div className="px-4 pb-4 md:px-6">
+        <div className="px-3 pb-4 md:px-6" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 1rem))" }}>
           <div className="flex items-end gap-2 rounded-2xl border border-border bg-surface/70 p-2 backdrop-blur transition focus-within:border-primary focus-within:shadow-[0_0_30px_-8px_var(--primary)]">
             <button className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-muted-foreground hover:bg-surface-elevated hover:text-foreground">
               <Paperclip className="h-4 w-4" />

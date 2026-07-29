@@ -265,19 +265,19 @@ function AppShell() {
         />
 
         {/* Mobile bottom nav */}
-        <nav className="fixed bottom-0 left-0 right-0 z-30 flex border-t border-border bg-surface/90 backdrop-blur-xl md:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 z-30 flex overflow-x-auto scrollbar-hide border-t border-border bg-surface/90 backdrop-blur-xl md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
           {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => {
             const active = exact ? location.pathname === to : location.pathname.startsWith(to);
             return (
               <Link
                 key={to}
                 to={to}
-                className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[9px] transition ${
+                className={`flex shrink-0 flex-col items-center gap-0.5 px-3 py-2.5 text-[9px] transition ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <Icon className={`h-5 w-5 ${active ? "text-primary" : ""}`} />
-                <span className="font-medium">{label.split(" ")[0]}</span>
+                <span className="font-medium whitespace-nowrap">{label.split(" ")[0]}</span>
               </Link>
             );
           })}

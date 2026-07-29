@@ -108,7 +108,7 @@ function SlotCard({ ts, isNow }: { ts: TimeSlot; isNow?: boolean }) {
         </span>
       )}
       {/* Time */}
-      <div className="w-24 shrink-0 pt-0.5">
+      <div className="w-16 shrink-0 pt-0.5 sm:w-24">
         <div className="text-[10px] font-mono leading-tight">
           {formatTime(ts.start)}
         </div>

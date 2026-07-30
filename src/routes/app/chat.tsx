@@ -106,6 +106,42 @@ function ChatApp() {
     displayName: string | null;
   } | null>(null);
 
+  const [isConnected, setIsConnected] = useState(false);
+
+  // Demo initial messages when offline / backend not deployed
+  const DEMO_MESSAGES: Record<string, Msg[]> = {
+    general: [
+      {
+        id: "demo_1",
+        user: "Aarav Sharma",
+        color: "text-amber-400",
+        avatar: "AS",
+        time: "10:14 AM",
+        text: "Hey everyone! Welcome to #general campus chat 🚀",
+        reactions: [{ emoji: "🔥", count: 4 }],
+      },
+      {
+        id: "demo_2",
+        user: "Ananya Gupta",
+        color: "text-cyan-400",
+        avatar: "AG",
+        time: "10:16 AM",
+        text: "Has anyone solved Question 3 from the DS Assignment?",
+      },
+    ],
+    announcements: [
+      {
+        id: "demo_3",
+        user: "PEC Coordinator",
+        color: "text-red-400",
+        avatar: "PC",
+        time: "09:00 AM",
+        text: "📢 End-Sem Exam date sheet has been uploaded to academic portal.",
+        reactions: [{ emoji: "👍", count: 12 }],
+      },
+    ],
+  };
+
   // Get current user from Firebase auth
   useEffect(() => {
     const unsub = firebaseAuth.onAuthStateChanged(
@@ -124,9 +160,28 @@ function ChatApp() {
     return unsub;
   }, []);
 
+  // Set default demo messages for channel if empty
+  useEffect(() => {
+    if (!isConnected) {
+      setMessages(DEMO_MESSAGES[activeChannel] || []);
+    }
+  }, [activeChannel, isConnected]);
+
   // Connect to Socket.io server with Firebase JWT auth
   useEffect(() => {
     if (!currentUser) return;
+
+    const isLocal =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+    const configuredUrl = import.meta.env.VITE_CHAT_SERVER_URL || import.meta.env.VITE_BACKEND_URL;
+    const socketUrl = configuredUrl || (isLocal ? "http://localhost:3001" : "");
+
+    if (!socketUrl) {
+      setIsConnected(false);
+      return;
+    }
 
     const getToken = async () => {
       const user = firebaseAuth.currentUser;
@@ -139,59 +194,67 @@ function ChatApp() {
     getToken().then((token) => {
       if (!token) return;
 
-      const socketUrl =
-        typeof window !== "undefined"
-          ? `http://${window.location.hostname}:3001`
-          : "http://localhost:3001";
+      try {
+        const socket = io(socketUrl, {
+          auth: { token },
+          transports: ["websocket", "polling"],
+          timeout: 5000,
+        });
+        socketRef.current = socket;
 
-      const socket = io(socketUrl, {
-        auth: { token },
-        transports: ["websocket", "polling"],
-      });
-      socketRef.current = socket;
+        socket.on("connect", () => {
+          setIsConnected(true);
+        });
 
-      // Join default room with user info from auth
-      const displayName = currentUser.displayName || currentUser.email?.split("@")[0] || "Student";
-      const avatar =
-        displayName
-          .split(" ")
-          .map((n: string) => n[0])
-          .join("")
-          .toUpperCase()
-          .substring(0, 2) || "SM";
+        // Join default room with user info from auth
+        const displayName = currentUser.displayName || currentUser.email?.split("@")[0] || "Student";
+        const avatar =
+          displayName
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .toUpperCase()
+            .substring(0, 2) || "SM";
 
-      socket.emit("join", {
-        name: displayName,
-        avatar,
-        role: "Student",
-        color: "bg-primary",
-        channelId: activeChannel,
-      });
+        socket.emit("join", {
+          name: displayName,
+          avatar,
+          role: "Student",
+          color: "bg-primary",
+          channelId: activeChannel,
+        });
 
-      // Event listeners
-      socket.on("history", (history: Msg[]) => {
-        setMessages(history);
-      });
+        // Event listeners
+        socket.on("history", (history: Msg[]) => {
+          if (history && history.length > 0) {
+            setMessages(history);
+          }
+        });
 
-      socket.on("message", (newMsg: Msg) => {
-        setMessages((prev) => [...prev, newMsg]);
-      });
+        socket.on("message", (newMsg: Msg) => {
+          setMessages((prev) => [...prev, newMsg]);
+        });
 
-      socket.on("reactionUpdate", ({ msgId, reactions }) => {
-        setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, reactions } : m)));
-      });
+        socket.on("reactionUpdate", ({ msgId, reactions }) => {
+          setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, reactions } : m)));
+        });
 
-      socket.on("members", (updatedMembers: Member[]) => {
-        setMembers(updatedMembers);
-      });
+        socket.on("members", (updatedMembers: Member[]) => {
+          setMembers(updatedMembers);
+        });
 
-      socket.on("connect_error", (err) => {
-        console.error("Socket connection error:", err.message);
-      });
+        socket.on("connect_error", (err) => {
+          console.warn("Socket connection warning:", err.message);
+          setIsConnected(false);
+        });
 
-      return () => {
-        socket.disconnect();
-      };
+        return () => {
+          socket.disconnect();
+        };
+      } catch (e) {
+        console.warn("Socket connection fallback:", e);
+        setIsConnected(false);
+      }
     });
   }, [currentUser]);
 
@@ -202,7 +265,7 @@ function ChatApp() {
     setActiveChannel(newChannelId);
     setShowChannelDrawer(false); // close drawer on mobile after selecting
 
-    if (socketRef.current) {
+    if (socketRef.current && isConnected) {
       socketRef.current.emit("change_channel", {
         oldChannel: oldChannelId,
         newChannel: newChannelId,
@@ -217,22 +280,59 @@ function ChatApp() {
 
   const send = () => {
     if (!draft.trim()) return;
-    if (socketRef.current) {
+    const text = draft.trim();
+
+    if (socketRef.current && isConnected) {
       socketRef.current.emit("message", {
-        text: draft.trim(),
+        text,
         channelId: activeChannel,
       });
+    } else {
+      // Local fallback mode when server is offline or on Netlify without backend
+      const displayName = currentUser?.displayName || currentUser?.email?.split("@")[0] || "Student";
+      const avatar =
+        displayName
+          .split(" ")
+          .map((n: string) => n[0])
+          .join("")
+          .toUpperCase()
+          .substring(0, 2) || "SM";
+
+      const newMsg: Msg = {
+        id: `local_${Date.now()}`,
+        user: displayName,
+        color: "text-primary font-bold",
+        avatar,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        text,
+      };
+      setMessages((prev) => [...prev, newMsg]);
     }
     setDraft("");
   };
 
   const handleAddReaction = (msgId: string, emoji: string) => {
-    if (socketRef.current) {
+    if (socketRef.current && isConnected) {
       socketRef.current.emit("reaction", {
         msgId,
         emoji,
         channelId: activeChannel,
       });
+    } else {
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== msgId) return m;
+          const existing = m.reactions || [];
+          const idx = existing.findIndex((r) => r.emoji === emoji);
+          let updated = [...existing];
+          if (idx >= 0) {
+            updated[idx] = { ...updated[idx], count: updated[idx].count + 1 };
+          } else {
+            updated.push({ emoji, count: 1 });
+          }
+          return { ...m, reactions: updated };
+        })
+      );
     }
   };
 

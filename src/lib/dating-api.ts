@@ -3,10 +3,15 @@
 
 import { firebaseAuth } from "@/lib/firebase";
 
-const API_BASE =
-  typeof window !== "undefined"
-    ? `http://${window.location.hostname}:3001/api/dating`
-    : "http://localhost:3001/api/dating";
+const isLocal =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+const API_BASE = import.meta.env.VITE_BACKEND_URL
+  ? `${import.meta.env.VITE_BACKEND_URL}/api/dating`
+  : isLocal
+    ? "http://localhost:3001/api/dating"
+    : "/api/dating";
 
 async function getAuthHeaders(): Promise<HeadersInit> {
   const token = await firebaseAuth.getIdToken();

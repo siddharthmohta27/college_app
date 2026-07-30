@@ -18,8 +18,11 @@ import {
   Pin,
   Phone,
   Video,
+  Loader2,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
-import { io, Socket } from "socket.io-client";
+import { supabase } from "@/lib/supabase";
 import { firebaseAuth } from "@/lib/firebase";
 
 export const Route = createFileRoute("/app/chat")({
@@ -97,50 +100,15 @@ function ChatApp() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [draft, setDraft] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [showChannelDrawer, setShowChannelDrawer] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const socketRef = useRef<Socket | null>(null);
   const [currentUser, setCurrentUser] = useState<{
     id: string;
     email: string;
     displayName: string | null;
   } | null>(null);
-
-  const [isConnected, setIsConnected] = useState(false);
-
-  // Demo initial messages when offline / backend not deployed
-  const DEMO_MESSAGES: Record<string, Msg[]> = {
-    general: [
-      {
-        id: "demo_1",
-        user: "Aarav Sharma",
-        color: "text-amber-400",
-        avatar: "AS",
-        time: "10:14 AM",
-        text: "Hey everyone! Welcome to #general campus chat 🚀",
-        reactions: [{ emoji: "🔥", count: 4 }],
-      },
-      {
-        id: "demo_2",
-        user: "Ananya Gupta",
-        color: "text-cyan-400",
-        avatar: "AG",
-        time: "10:16 AM",
-        text: "Has anyone solved Question 3 from the DS Assignment?",
-      },
-    ],
-    announcements: [
-      {
-        id: "demo_3",
-        user: "PEC Coordinator",
-        color: "text-red-400",
-        avatar: "PC",
-        time: "09:00 AM",
-        text: "📢 End-Sem Exam date sheet has been uploaded to academic portal.",
-        reactions: [{ emoji: "👍", count: 12 }],
-      },
-    ],
-  };
 
   // Get current user from Firebase auth
   useEffect(() => {
@@ -160,179 +128,156 @@ function ChatApp() {
     return unsub;
   }, []);
 
-  // Set default demo messages for channel if empty
+  // Load history + subscribe to Supabase Realtime for the active channel
   useEffect(() => {
-    if (!isConnected) {
-      setMessages(DEMO_MESSAGES[activeChannel] || []);
-    }
-  }, [activeChannel, isConnected]);
+    setLoading(true);
+    setMessages([]);
 
-  // Connect to Socket.io server with Firebase JWT auth
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const isLocal =
-      typeof window !== "undefined" &&
-      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-
-    const configuredUrl = import.meta.env.VITE_CHAT_SERVER_URL || import.meta.env.VITE_BACKEND_URL;
-    const socketUrl = configuredUrl || (isLocal ? "http://localhost:3001" : "");
-
-    if (!socketUrl) {
-      setIsConnected(false);
-      return;
-    }
-
-    const getToken = async () => {
-      const user = firebaseAuth.currentUser;
-      if (user) {
-        return user.getIdToken();
-      }
-      return null;
-    };
-
-    getToken().then((token) => {
-      if (!token) return;
-
-      try {
-        const socket = io(socketUrl, {
-          auth: { token },
-          transports: ["websocket", "polling"],
-          timeout: 5000,
-        });
-        socketRef.current = socket;
-
-        socket.on("connect", () => {
-          setIsConnected(true);
-        });
-
-        // Join default room with user info from auth
-        const displayName = currentUser.displayName || currentUser.email?.split("@")[0] || "Student";
-        const avatar =
-          displayName
-            .split(" ")
-            .map((n: string) => n[0])
-            .join("")
-            .toUpperCase()
-            .substring(0, 2) || "SM";
-
-        socket.emit("join", {
-          name: displayName,
-          avatar,
-          role: "Student",
-          color: "bg-primary",
-          channelId: activeChannel,
-        });
-
-        // Event listeners
-        socket.on("history", (history: Msg[]) => {
-          if (history && history.length > 0) {
-            setMessages(history);
-          }
-        });
-
-        socket.on("message", (newMsg: Msg) => {
-          setMessages((prev) => [...prev, newMsg]);
-        });
-
-        socket.on("reactionUpdate", ({ msgId, reactions }) => {
-          setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, reactions } : m)));
-        });
-
-        socket.on("members", (updatedMembers: Member[]) => {
-          setMembers(updatedMembers);
-        });
-
-        socket.on("connect_error", (err) => {
-          console.warn("Socket connection warning:", err.message);
-          setIsConnected(false);
-        });
-
-        return () => {
-          socket.disconnect();
-        };
-      } catch (e) {
-        console.warn("Socket connection fallback:", e);
-        setIsConnected(false);
-      }
-    });
-  }, [currentUser]);
-
-  // Handle switching channels
-  const handleChannelChange = (newChannelId: string) => {
-    if (newChannelId === activeChannel) return;
-    const oldChannelId = activeChannel;
-    setActiveChannel(newChannelId);
-    setShowChannelDrawer(false); // close drawer on mobile after selecting
-
-    if (socketRef.current && isConnected) {
-      socketRef.current.emit("change_channel", {
-        oldChannel: oldChannelId,
-        newChannel: newChannelId,
+    // Fetch last 50 messages for channel
+    supabase
+      .from("chat_messages")
+      .select("*")
+      .eq("channel_id", activeChannel)
+      .order("created_at", { ascending: true })
+      .limit(50)
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setMessages(
+            data.map((row: any) => ({
+              id: row.id,
+              user: row.user_name || "Student",
+              avatar: row.user_avatar || "??",
+              color: "text-primary",
+              time: new Date(row.created_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              text: row.text,
+              reactions: row.reactions || [],
+            }))
+          );
+        }
+        setLoading(false);
       });
-    }
-  };
+
+    // Subscribe to new messages in real-time
+    const channel = supabase
+      .channel(`chat_messages:${activeChannel}`)
+      .on(
+        "postgres_changes" as any,
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_messages",
+          filter: `channel_id=eq.${activeChannel}`,
+        },
+        (payload: any) => {
+          const row = payload.new;
+          const newMsg: Msg = {
+            id: row.id,
+            user: row.user_name || "Student",
+            avatar: row.user_avatar || "??",
+            color: "text-primary",
+            time: new Date(row.created_at).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            text: row.text,
+            reactions: row.reactions || [],
+          };
+          setMessages((prev) => {
+            // Skip duplicate if already added optimistically
+            if (prev.some((m) => m.id === newMsg.id)) return prev;
+            return [...prev, newMsg];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeChannel]);
 
   // Scroll to bottom when messages update
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  const send = () => {
-    if (!draft.trim()) return;
-    const text = draft.trim();
-
-    if (socketRef.current && isConnected) {
-      socketRef.current.emit("message", {
-        text,
-        channelId: activeChannel,
-      });
-    } else {
-      // Local fallback mode when server is offline or on Netlify without backend
-      const displayName = currentUser?.displayName || currentUser?.email?.split("@")[0] || "Student";
-      const avatar =
-        displayName
-          .split(" ")
-          .map((n: string) => n[0])
-          .join("")
-          .toUpperCase()
-          .substring(0, 2) || "SM";
-
-      const newMsg: Msg = {
-        id: `local_${Date.now()}`,
-        user: displayName,
-        color: "text-primary font-bold",
-        avatar,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        text,
-      };
-      setMessages((prev) => [...prev, newMsg]);
-    }
-    setDraft("");
+  // Handle switching channels
+  const handleChannelChange = (newChannelId: string) => {
+    if (newChannelId === activeChannel) return;
+    setActiveChannel(newChannelId);
+    setShowChannelDrawer(false);
   };
 
-  const handleAddReaction = (msgId: string, emoji: string) => {
-    if (socketRef.current && isConnected) {
-      socketRef.current.emit("reaction", {
-        msgId,
-        emoji,
-        channelId: activeChannel,
-      });
-    } else {
-      setMessages((prev) =>
-        prev.map((m) => {
-          if (m.id !== msgId) return m;
-          const existing = m.reactions || [];
-          const idx = existing.findIndex((r) => r.emoji === emoji);
-          let updated = [...existing];
-          if (idx >= 0) {
-            updated[idx] = { ...updated[idx], count: updated[idx].count + 1 };
-          } else {
-            updated.push({ emoji, count: 1 });
-          }
-          return { ...m, reactions: updated };
-        })
+  const send = async () => {
+    if (!draft.trim() || !currentUser || sending) return;
+    const text = draft.trim();
+    setDraft("");
+    setSending(true);
+
+    const displayName = currentUser.displayName || currentUser.email?.split("@")[0] || "Student";
+    const avatar =
+      displayName
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2) || "?";
+
+    // Optimistic UI — add locally immediately
+    const tempId = `tmp_${Date.now()}`;
+    const optimistic: Msg = {
+      id: tempId,
+      user: displayName,
+      avatar,
+      color: "text-primary",
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      text,
+    };
+    setMessages((prev) => [...prev, optimistic]);
+
+    const { error } = await supabase.from("chat_messages").insert({
+      channel_id: activeChannel,
+      user_id: currentUser.id,
+      user_name: displayName,
+      user_avatar: avatar,
+      text,
+    });
+
+    if (error) {
+      console.error("Send failed:", error.message);
+      // Remove optimistic message on failure
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+    }
+    setSending(false);
+  };
+
+  const handleAddReaction = async (msgId: string, emoji: string) => {
+    // Optimistic update locally
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id !== msgId) return m;
+        const existing = m.reactions || [];
+        const idx = existing.findIndex((r) => r.emoji === emoji);
+        const updated = [...existing];
+        if (idx >= 0) {
+          updated[idx] = { ...updated[idx], count: updated[idx].count + 1 };
+        } else {
+          updated.push({ emoji, count: 1 });
+        }
+        return { ...m, reactions: updated };
+      })
+    );
+    // Persist to Supabase
+    const msg = messages.find((m) => m.id === msgId);
+    if (msg && !msgId.startsWith("tmp_")) {
+      const newReactions = (msg.reactions || []).map((r) =>
+        r.emoji === emoji ? { ...r, count: r.count + 1 } : r
       );
+      if (!newReactions.some((r) => r.emoji === emoji)) newReactions.push({ emoji, count: 1 });
+      await supabase.from("chat_messages").update({ reactions: newReactions }).eq("id", msgId);
     }
   };
 
@@ -488,11 +433,23 @@ function ChatApp() {
             </p>
           </div>
 
-          {messages.map((m, i) => {
-            const prev = messages[i - 1];
-            const grouped = prev && prev.user === m.user;
-            return <Message key={m.id} m={m} grouped={grouped} onAddReaction={handleAddReaction} />;
-          })}
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Loading messages...</span>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-10 text-muted-foreground">
+              <span className="text-3xl">💬</span>
+              <p className="text-sm">No messages yet. Be the first to say hi!</p>
+            </div>
+          ) : (
+            messages.map((m, i) => {
+              const prev = messages[i - 1];
+              const grouped = prev && prev.user === m.user;
+              return <Message key={m.id} m={m} grouped={grouped} onAddReaction={handleAddReaction} />;
+            })
+          )}
         </div>
 
         {/* Composer */}

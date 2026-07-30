@@ -186,9 +186,13 @@ function ChatApp() {
             reactions: row.reactions || [],
           };
           setMessages((prev) => {
-            // Skip duplicate if already added optimistically
-            if (prev.some((m) => m.id === newMsg.id)) return prev;
-            return [...prev, newMsg];
+            // Replace the optimistic tmp_ message with the real DB row
+            const withoutTmp = prev.filter(
+              (m) => !(m.id.startsWith("tmp_") && m.text === newMsg.text && m.user === newMsg.user)
+            );
+            // Also skip if exact ID already present
+            if (withoutTmp.some((m) => m.id === newMsg.id)) return withoutTmp;
+            return [...withoutTmp, newMsg];
           });
         }
       )

@@ -346,8 +346,8 @@ function ChatApp() {
         />
       )}
 
-      {/* Server rail */}
-      <aside className="flex w-[52px] flex-col items-center gap-3 border-r border-border bg-background/60 py-4 md:w-[68px]">
+      {/* Server rail - hidden on mobile, visible on md+ */}
+      <aside className="hidden md:flex w-[52px] flex-col items-center gap-3 border-r border-border bg-background/60 py-4 md:w-[68px]">
         <div className="my-1 h-px w-8 bg-border" />
         {SERVERS.map((s) => {
           const active = s.id === activeServer;
@@ -372,7 +372,7 @@ function ChatApp() {
 
       {/* Channel sidebar — drawer on mobile, static on md+ */}
       <aside
-        className={`fixed inset-y-0 left-[52px] z-50 flex w-56 flex-col border-r border-border bg-surface/95 backdrop-blur-xl transition-transform duration-300 md:static md:left-auto md:z-auto md:flex md:translate-x-0 md:bg-surface/40 ${
+        className={`fixed inset-y-0 left-0 md:left-[52px] z-50 flex w-56 flex-col border-r border-border bg-surface/95 backdrop-blur-xl transition-transform duration-300 md:static md:left-auto md:z-auto md:flex md:translate-x-0 md:bg-surface/40 ${
           showChannelDrawer ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >

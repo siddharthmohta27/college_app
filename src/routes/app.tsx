@@ -97,6 +97,8 @@ function AppShell() {
     n.exact ? location.pathname === n.to : location.pathname.startsWith(n.to),
   );
 
+  const isChatRoute = location.pathname.startsWith("/app/chat");
+
   const handleSignOut = async () => {
     await firebaseAuth.signOut();
     window.location.href = "/login";
@@ -284,7 +286,7 @@ function AppShell() {
         </nav>
       </div>
       <SearchOverlay />
-      <FloatingActionButton />
+      {!isChatRoute && <FloatingActionButton />}
     </SearchProvider>
   );
 }

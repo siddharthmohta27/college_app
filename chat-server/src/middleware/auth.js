@@ -29,10 +29,12 @@ function requireAuth(req, res, next) {
           message: "Only @pec.edu.in email domain is allowed",
         });
       }
+      const isAdmin = decoded.admin === true;
       req.user = {
         id: getUserIdFromToken(decoded),
         email: decoded.email,
-        role: decoded.role || "authenticated",
+        role: isAdmin ? "admin" : (decoded.role || "authenticated"),
+        isAdmin,
         ...decoded,
       };
       next();
@@ -65,10 +67,12 @@ function optionalAuth(req, res, next) {
         req.user = null;
         return next();
       }
+      const isAdmin = decoded.admin === true;
       req.user = {
         id: getUserIdFromToken(decoded),
         email: decoded.email,
-        role: decoded.role || "authenticated",
+        role: isAdmin ? "admin" : (decoded.role || "authenticated"),
+        isAdmin,
         ...decoded,
       };
       next();
@@ -113,10 +117,12 @@ function socketAuth(socket, next) {
       if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
         return next(new Error("Only @pec.edu.in email domain is allowed"));
       }
+      const isAdmin = decoded.admin === true;
       socket.user = {
         id: getUserIdFromToken(decoded),
         email: decoded.email,
-        role: decoded.role || "authenticated",
+        role: isAdmin ? "admin" : (decoded.role || "authenticated"),
+        isAdmin,
         ...decoded,
       };
       next();
@@ -131,4 +137,19 @@ module.exports = {
   requireAuth,
   optionalAuth,
   socketAuth,
+  requireAdmin,
 };
+
+/**
+ * requireAdmin - Protects admin-only endpoints
+ * Requires user to have admin custom claim in Firebase token
+ */
+function requireAdmin(req, res, next) {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({
+      error: "Forbidden",
+      message: "Admin access required",
+    });
+  }
+  next();
+}

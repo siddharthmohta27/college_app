@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { requireAuth, optionalAuth } = require("../middleware/auth");
+const { requireAuth, optionalAuth, requireAdmin } = require("../middleware/auth");
 const { pool } = require("../config/db");
 const {
   // Profile
@@ -1262,11 +1262,11 @@ router.post("/undo", requireAuth, async (req, res) => {
 });
 
 // ──────────────────────────────────────────────────────────────
-// ADMIN (require admin role - simplified for now)
+// ADMIN (require admin role)
 // ──────────────────────────────────────────────────────────────
 
 // GET /api/dating/admin/stats - Get admin dashboard stats
-router.get("/admin/stats", requireAuth, async (req, res) => {
+router.get("/admin/stats", requireAuth, requireAdmin, async (req, res) => {
   try {
     // TODO: Add admin role check
     const stats = await getAdminStats();
@@ -1278,7 +1278,7 @@ router.get("/admin/stats", requireAuth, async (req, res) => {
 });
 
 // GET /api/dating/admin/users - Get all users for admin
-router.get("/admin/users", requireAuth, async (req, res) => {
+router.get("/admin/users", requireAuth, requireAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -1292,7 +1292,7 @@ router.get("/admin/users", requireAuth, async (req, res) => {
 });
 
 // GET /api/dating/admin/reports - Get reports for admin
-router.get("/admin/reports", requireAuth, async (req, res) => {
+router.get("/admin/reports", requireAuth, requireAdmin, async (req, res) => {
   try {
     const status = req.query.status || "pending";
     const reports = await getReports(status);
@@ -1304,7 +1304,7 @@ router.get("/admin/reports", requireAuth, async (req, res) => {
 });
 
 // PUT /api/dating/admin/reports/:reportId - Update report status
-router.put("/admin/reports/:reportId", requireAuth, async (req, res) => {
+router.put("/admin/reports/:reportId", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { status, adminNotes } = req.body;
     const report = await updateReportStatus(req.params.reportId, status, adminNotes);
@@ -1316,7 +1316,7 @@ router.put("/admin/reports/:reportId", requireAuth, async (req, res) => {
 });
 
 // PUT /api/dating/admin/users/:profileId/suspend - Suspend user
-router.put("/admin/users/:profileId/suspend", requireAuth, async (req, res) => {
+router.put("/admin/users/:profileId/suspend", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { reason } = req.body;
     const user = await suspendUser(req.params.profileId, reason);
@@ -1328,7 +1328,7 @@ router.put("/admin/users/:profileId/suspend", requireAuth, async (req, res) => {
 });
 
 // PUT /api/dating/admin/users/:profileId/unsuspend - Unsuspend user
-router.put("/admin/users/:profileId/unsuspend", requireAuth, async (req, res) => {
+router.put("/api/dating/admin/users/:profileId/unsuspend", requireAuth, requireAdmin, async (req, res) => {
   try {
     const user = await unsuspendUser(req.params.profileId);
     res.json({ user });
@@ -1339,7 +1339,7 @@ router.put("/admin/users/:profileId/unsuspend", requireAuth, async (req, res) =>
 });
 
 // PUT /api/dating/admin/users/:profileId/verify - Verify user
-router.put("/admin/users/:profileId/verify", requireAuth, async (req, res) => {
+router.put("/api/dating/admin/users/:profileId/verify", requireAuth, requireAdmin, async (req, res) => {
   try {
     const user = await verifyUser(req.params.profileId);
     res.json({ user });

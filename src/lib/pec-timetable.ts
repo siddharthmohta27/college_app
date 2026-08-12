@@ -73,6 +73,20 @@ const SECTION_RANGES: { section: string; min: number; max: number }[] = [
   { section: "ECE-G5", min: 25105081, max: 25105100 },
   { section: "ECE-G6", min: 25105101, max: 25105120 },
   { section: "ECE-G6", min: 25105121, max: 25105999 }, // Branch-change students → same as G6
+  // ── Civil Engineering (branch code 20 / 40) ──────────────────────────────────
+  // Subgroups C1-C6; Section A = C1-C3 (001-060); Section B = C4-C6 (061-130+)
+  { section: "CIVIL-C1", min: 25102001, max: 25102020 },
+  { section: "CIVIL-C2", min: 25102021, max: 25102040 },
+  { section: "CIVIL-C3", min: 25102041, max: 25102060 },
+  { section: "CIVIL-C4", min: 25102061, max: 25102080 },
+  { section: "CIVIL-C5", min: 25102081, max: 25102100 },
+  { section: "CIVIL-C6", min: 25102101, max: 25102999 },
+  { section: "CIVIL-C1", min: 25104001, max: 25104020 },
+  { section: "CIVIL-C2", min: 25104021, max: 25104040 },
+  { section: "CIVIL-C3", min: 25104041, max: 25104060 },
+  { section: "CIVIL-C4", min: 25104061, max: 25104080 },
+  { section: "CIVIL-C5", min: 25104081, max: 25104100 },
+  { section: "CIVIL-C6", min: 25104101, max: 25104999 },
 ];
 
 export function getSectionFromRollNo(rollNo: string): string | null {
@@ -1019,6 +1033,78 @@ const ECE_LSG2_TIMETABLE: WeeklyTimetable = {
   ],
 };
 
+// ─── Civil Engineering Timetables (C1 to C6 — w.e.f 11.08.2026) ────────────────
+
+function civil(subject: string, code: string, room: string, faculty: string, type: ClassType = "lecture", groups?: string): ClassSlot {
+  return { subject, code, room, faculty, type, groups };
+}
+
+const CIVIL_C1_TIMETABLE: WeeklyTimetable = {
+  section: "CIVIL-C1", semester: "3rd Sem", branch: "B.Tech Civil Engineering", period: "Jul–Dec 2026", labSubgroup: "C1",
+  schedule: [
+    { day: "MON", slots: [ { start: "08:00", end: "09:00", slot: free() }, { start: "09:00", end: "10:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "10:00", end: "11:00", slot: civil("Structural Analysis-I", "CVN 302", "L-2", "Dr. Karan Moolchandani") }, { start: "11:00", end: "13:00", slot: civil("Fluid Mechanics Lab", "CVN 303 Lab", "FM Lab", "Prof. Yatindra Kumar", "lab", "C1") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("Structural Analysis Lab", "CVN 302 Lab", "SM Lab", "Prof. Kuldeep Soni", "lab", "C1") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "TUE", slots: [ { start: "08:00", end: "09:00", slot: civil("Building Materials & Const.", "CVN 304", "L-2", "Dr. Damodar Sharma") }, { start: "09:00", end: "10:00", slot: civil("Structural Analysis-I", "CVN 302", "L-2", "Dr. Karan Moolchandani") }, { start: "10:00", end: "11:00", slot: civil("Fluid Mechanics", "CVN 303", "L-16", "Dr. Mohit Kumar") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-2", "Dr. Badveeti Adinarayana") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "WED", slots: [ { start: "09:00", end: "10:00", slot: civil("Structural Analysis-I", "CVN 302", "L-2", "Dr. Karan Moolchandani") }, { start: "10:00", end: "11:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Dr. Mohit Kumar") }, { start: "11:00", end: "12:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-2", "Dr. Badveeti Adinarayana") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("Survey / TPT Lab", "CVN 301/305 Lab", "Survey/TPT Lab", "Dr. HASS / Dr. PKG", "lab", "C1") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "THU", slots: [ { start: "09:00", end: "10:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "10:00", end: "11:00", slot: civil("Building Materials & Const.", "CVN 304", "L-2", "Dr. Damodar Sharma") }, { start: "11:00", end: "12:00", slot: civil("Transportation Engg", "CVN 305", "L-2", "Dr. Badveeti Adinarayana") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("RCC Lab", "CVN 304 Lab", "RCC Lab", "Dr. Karan Moolchandani", "lab", "C1") } ] },
+    { day: "FRI", slots: [ { start: "11:00", end: "13:00", slot: civil("SM Lab", "CVN 302 Lab", "SM Lab", "Dr. Virajan Verma", "lab", "C1") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "15:00", slot: civil("Fluid Mechanics", "CVN 303", "L-2", "Dr. Mohit Kumar") }, { start: "15:00", end: "17:00", slot: civil("Minor Spec. Tut/Practical", "Minor Spec", "", "", "lab") } ] }
+  ]
+};
+
+const CIVIL_C2_TIMETABLE: WeeklyTimetable = {
+  section: "CIVIL-C2", semester: "3rd Sem", branch: "B.Tech Civil Engineering", period: "Jul–Dec 2026", labSubgroup: "C2",
+  schedule: [
+    { day: "MON", slots: [ { start: "09:00", end: "10:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "10:00", end: "11:00", slot: civil("Structural Analysis-I", "CVN 302", "L-2", "Dr. Karan Moolchandani") }, { start: "11:00", end: "13:00", slot: civil("RCC Lab", "CVN 304 Lab", "RCC Lab", "Dr. Karan Moolchandani", "lab", "C2") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("Survey Lab", "CVN 301 Lab", "Survey Lab", "Dr. Badveeti Adinarayana", "lab", "C2") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "TUE", slots: [ { start: "08:00", end: "09:00", slot: civil("Building Materials & Const.", "CVN 304", "L-2", "Dr. Damodar Sharma") }, { start: "09:00", end: "10:00", slot: civil("Structural Analysis-I", "CVN 302", "L-2", "Dr. Karan Moolchandani") }, { start: "10:00", end: "11:00", slot: civil("Fluid Mechanics", "CVN 303", "L-16", "Dr. Mohit Kumar") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-2", "Dr. Badveeti Adinarayana") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("SM Lab", "CVN 302 Lab", "SM Lab", "Dr. Arshdeep Singh", "lab", "C2") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "WED", slots: [ { start: "09:00", end: "10:00", slot: civil("Structural Analysis-I", "CVN 302", "L-2", "Dr. Karan Moolchandani") }, { start: "10:00", end: "11:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Dr. Mohit Kumar") }, { start: "11:00", end: "12:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-2", "Dr. Badveeti Adinarayana") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "THU", slots: [ { start: "09:00", end: "10:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "10:00", end: "11:00", slot: civil("Building Materials & Const.", "CVN 304", "L-2", "Dr. Damodar Sharma") }, { start: "11:00", end: "12:00", slot: civil("Transportation Engg", "CVN 305", "L-2", "Dr. Badveeti Adinarayana") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("TPT Lab", "CVN 305 Lab", "TPT Lab", "Dr. Nirpinder Jain", "lab", "C2") } ] },
+    { day: "FRI", slots: [ { start: "11:00", end: "13:00", slot: civil("FM Lab", "CVN 303 Lab", "FM Lab", "Prof. Yatindra Kumar", "lab", "C2") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "15:00", slot: civil("Fluid Mechanics", "CVN 303", "L-2", "Dr. Mohit Kumar") }, { start: "15:00", end: "17:00", slot: civil("Minor Spec. Tut/Practical", "Minor Spec", "", "", "lab") } ] }
+  ]
+};
+
+const CIVIL_C3_TIMETABLE: WeeklyTimetable = {
+  section: "CIVIL-C3", semester: "3rd Sem", branch: "B.Tech Civil Engineering", period: "Jul–Dec 2026", labSubgroup: "C3",
+  schedule: [
+    { day: "MON", slots: [ { start: "09:00", end: "10:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "10:00", end: "11:00", slot: civil("Structural Analysis-I", "CVN 302", "L-2", "Dr. Karan Moolchandani") }, { start: "11:00", end: "13:00", slot: civil("TPT Lab", "CVN 305 Lab", "TPT Lab", "Dr. Deepak Awasthi", "lab", "C3") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "TUE", slots: [ { start: "08:00", end: "09:00", slot: civil("Building Materials & Const.", "CVN 304", "L-2", "Dr. Damodar Sharma") }, { start: "09:00", end: "10:00", slot: civil("Structural Analysis-I", "CVN 302", "L-2", "Dr. Karan Moolchandani") }, { start: "10:00", end: "11:00", slot: civil("Fluid Mechanics", "CVN 303", "L-16", "Dr. Mohit Kumar") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-2", "Dr. Badveeti Adinarayana") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("Survey / FM Lab", "CVN 301/303 Lab", "Survey/FM Lab", "Dr. DA / Dr. MK", "lab", "C3") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "WED", slots: [ { start: "09:00", end: "10:00", slot: civil("Structural Analysis-I", "CVN 302", "L-2", "Dr. Karan Moolchandani") }, { start: "10:00", end: "11:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Dr. Mohit Kumar") }, { start: "11:00", end: "12:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-2", "Dr. Badveeti Adinarayana") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "THU", slots: [ { start: "09:00", end: "10:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "10:00", end: "11:00", slot: civil("Building Materials & Const.", "CVN 304", "L-2", "Dr. Damodar Sharma") }, { start: "11:00", end: "12:00", slot: civil("Transportation Engg", "CVN 305", "L-2", "Dr. Badveeti Adinarayana") }, { start: "13:00", end: "14:00", slot: lunch() } ] },
+    { day: "FRI", slots: [ { start: "11:00", end: "13:00", slot: civil("RCC Lab", "CVN 304 Lab", "RCC Lab", "Prof. Sovina Sood", "lab", "C3") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "15:00", slot: civil("Fluid Mechanics", "CVN 303", "L-2", "Dr. Mohit Kumar") }, { start: "15:00", end: "17:00", slot: civil("Minor Spec. Tut/Practical", "Minor Spec", "", "", "lab") } ] }
+  ]
+};
+
+const CIVIL_C4_TIMETABLE: WeeklyTimetable = {
+  section: "CIVIL-C4", semester: "3rd Sem", branch: "B.Tech Civil Engineering", period: "Jul–Dec 2026", labSubgroup: "C4",
+  schedule: [
+    { day: "MON", slots: [ { start: "09:00", end: "10:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Prof. Yatindra Kumar") }, { start: "10:00", end: "11:00", slot: civil("Structural Analysis-I", "CVN 302", "L-1", "Dr. Virajan Verma") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("FM Lab", "CVN 303 Lab", "FM Lab", "Dr. Kamal Kumar", "lab", "C4") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "TUE", slots: [ { start: "08:00", end: "09:00", slot: civil("Structural Analysis-I", "CVN 302", "L-1", "Dr. Virajan Verma") }, { start: "10:00", end: "11:00", slot: civil("Geo Informatics", "CVN 301", "L-3", "Dr. H A S Sandhu") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-1", "Dr. Nirpinder Jain") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("RCC Lab", "CVN 304 Lab", "RCC Lab", "Dr. Veena U", "lab", "C4") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "WED", slots: [ { start: "08:00", end: "09:00", slot: civil("Building Materials & Const.", "CVN 304", "L-1", "Dr. Deepak Awasthi") }, { start: "09:00", end: "10:00", slot: civil("Structural Analysis-I", "CVN 302", "L-1", "Dr. Virajan Verma") }, { start: "11:00", end: "12:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Prof. Yatindra Kumar") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-1", "Dr. Nirpinder Jain") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("SM Lab", "CVN 302 Lab", "SM Lab", "Dr. Virajan Verma", "lab", "C4") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "THU", slots: [ { start: "08:00", end: "09:00", slot: civil("Building Materials & Const.", "CVN 304", "L-1", "Dr. Deepak Awasthi") }, { start: "09:00", end: "10:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Prof. Yatindra Kumar") }, { start: "10:00", end: "11:00", slot: civil("Building Materials & Const.", "CVN 304", "L-1", "Dr. Deepak Awasthi") }, { start: "11:00", end: "12:00", slot: civil("Transportation Engg", "CVN 305", "L-1", "Dr. Nirpinder Jain") }, { start: "12:00", end: "13:00", slot: civil("Geo Informatics", "CVN 301", "L-1", "Dr. H A S Sandhu") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("Survey Lab", "CVN 301 Lab", "Survey Lab", "Dr. Geeta Arora", "lab", "C4") } ] },
+    { day: "FRI", slots: [ { start: "10:00", end: "11:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "11:00", end: "13:00", slot: civil("TPT Lab", "CVN 305 Lab", "TPT Lab", "Dr. Deepak Awasthi", "lab", "C4") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "15:00", end: "17:00", slot: civil("Minor Spec. Tut/Practical", "Minor Spec", "", "", "lab") } ] }
+  ]
+};
+
+const CIVIL_C5_TIMETABLE: WeeklyTimetable = {
+  section: "CIVIL-C5", semester: "3rd Sem", branch: "B.Tech Civil Engineering", period: "Jul–Dec 2026", labSubgroup: "C5",
+  schedule: [
+    { day: "MON", slots: [ { start: "09:00", end: "10:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Prof. Yatindra Kumar") }, { start: "10:00", end: "11:00", slot: civil("Structural Analysis-I", "CVN 302", "L-1", "Dr. Virajan Verma") }, { start: "11:00", end: "13:00", slot: civil("Survey Lab", "CVN 301 Lab", "Survey Lab", "Dr. Geeta Arora", "lab", "C5") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("RCC Lab", "CVN 304 Lab", "RCC Lab", "Dr. Karan Moolchandani", "lab", "C5") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "TUE", slots: [ { start: "08:00", end: "09:00", slot: civil("Structural Analysis-I", "CVN 302", "L-1", "Dr. Virajan Verma") }, { start: "10:00", end: "11:00", slot: civil("Geo Informatics", "CVN 301", "L-3", "Dr. H A S Sandhu") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-1", "Dr. Nirpinder Jain") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("TPT Lab", "CVN 305 Lab", "TPT Lab", "Dr. Badveeti Adinarayana", "lab", "C5") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "WED", slots: [ { start: "08:00", end: "09:00", slot: civil("Building Materials & Const.", "CVN 304", "L-1", "Dr. Deepak Awasthi") }, { start: "09:00", end: "10:00", slot: civil("Structural Analysis-I", "CVN 302", "L-1", "Dr. Virajan Verma") }, { start: "11:00", end: "12:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Prof. Yatindra Kumar") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-1", "Dr. Nirpinder Jain") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("FM Lab", "CVN 303 Lab", "FM Lab", "Dr. Mohit Kumar", "lab", "C5") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "THU", slots: [ { start: "08:00", end: "09:00", slot: civil("Building Materials & Const.", "CVN 304", "L-1", "Dr. Deepak Awasthi") }, { start: "09:00", end: "10:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Prof. Yatindra Kumar") }, { start: "10:00", end: "11:00", slot: civil("Building Materials & Const.", "CVN 304", "L-1", "Dr. Deepak Awasthi") }, { start: "11:00", end: "12:00", slot: civil("Transportation Engg", "CVN 305", "L-1", "Dr. Nirpinder Jain") }, { start: "12:00", end: "13:00", slot: civil("Geo Informatics", "CVN 301", "L-1", "Dr. H A S Sandhu") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("SM Lab", "CVN 302 Lab", "SM Lab", "Dr. Virajan Verma", "lab", "C5") } ] },
+    { day: "FRI", slots: [ { start: "10:00", end: "11:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "15:00", end: "17:00", slot: civil("Minor Spec. Tut/Practical", "Minor Spec", "", "", "lab") } ] }
+  ]
+};
+
+const CIVIL_C6_TIMETABLE: WeeklyTimetable = {
+  section: "CIVIL-C6", semester: "3rd Sem", branch: "B.Tech Civil Engineering", period: "Jul–Dec 2026", labSubgroup: "C6",
+  schedule: [
+    { day: "MON", slots: [ { start: "09:00", end: "10:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Prof. Yatindra Kumar") }, { start: "10:00", end: "11:00", slot: civil("Structural Analysis-I", "CVN 302", "L-1", "Dr. Virajan Verma") }, { start: "11:00", end: "13:00", slot: civil("SM Lab", "CVN 302 Lab", "SM Lab", "Dr. Damodar Sharma", "lab", "C6") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("TPT Lab", "CVN 305 Lab", "TPT Lab", "Dr. Pardeep K. Gupta", "lab", "C6") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "TUE", slots: [ { start: "08:00", end: "09:00", slot: civil("Structural Analysis-I", "CVN 302", "L-1", "Dr. Virajan Verma") }, { start: "10:00", end: "11:00", slot: civil("Geo Informatics", "CVN 301", "L-3", "Dr. H A S Sandhu") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-1", "Dr. Nirpinder Jain") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "WED", slots: [ { start: "08:00", end: "09:00", slot: civil("Building Materials & Const.", "CVN 304", "L-1", "Dr. Deepak Awasthi") }, { start: "09:00", end: "10:00", slot: civil("Structural Analysis-I", "CVN 302", "L-1", "Dr. Virajan Verma") }, { start: "11:00", end: "12:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Prof. Yatindra Kumar") }, { start: "12:00", end: "13:00", slot: civil("Transportation Engg", "CVN 305", "L-1", "Dr. Nirpinder Jain") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("RCC Lab", "CVN 304 Lab", "RCC Lab", "Dr. Arshdeep Singh", "lab", "C6") }, { start: "16:00", end: "17:00", slot: civil("Minor Specialization", "Minor Spec", "", "", "lecture") } ] },
+    { day: "THU", slots: [ { start: "08:00", end: "09:00", slot: civil("Building Materials & Const.", "CVN 304", "L-1", "Dr. Deepak Awasthi") }, { start: "09:00", end: "10:00", slot: civil("Fluid Mechanics", "CVN 303", "L-1", "Prof. Yatindra Kumar") }, { start: "10:00", end: "11:00", slot: civil("Building Materials & Const.", "CVN 304", "L-1", "Dr. Deepak Awasthi") }, { start: "11:00", end: "12:00", slot: civil("Transportation Engg", "CVN 305", "L-1", "Dr. Nirpinder Jain") }, { start: "12:00", end: "13:00", slot: civil("Geo Informatics", "CVN 301", "L-1", "Dr. H A S Sandhu") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "14:00", end: "16:00", slot: civil("FM Lab", "CVN 303 Lab", "FM Lab", "Dr. Kamal Kumar", "lab", "C6") } ] },
+    { day: "FRI", slots: [ { start: "10:00", end: "11:00", slot: civil("Geo Informatics", "CVN 301", "L-2", "Dr. H A S Sandhu") }, { start: "11:00", end: "13:00", slot: civil("Survey Lab", "CVN 301 Lab", "Survey Lab", "Dr. Nirpinder Jain", "lab", "C6") }, { start: "13:00", end: "14:00", slot: lunch() }, { start: "15:00", end: "17:00", slot: civil("Minor Spec. Tut/Practical", "Minor Spec", "", "", "lab") } ] }
+  ]
+};
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 const TIMETABLE_REGISTRY: Record<string, WeeklyTimetable> = {
@@ -1043,7 +1129,21 @@ const TIMETABLE_REGISTRY: Record<string, WeeklyTimetable> = {
   "ECE-G4": ECE_LSG2_TIMETABLE,
   "ECE-G5": ECE_LSG2_TIMETABLE,
   "ECE-G6": ECE_LSG2_TIMETABLE,
+  // Civil Engineering sections — C1-C6
+  "CIVIL-C1": CIVIL_C1_TIMETABLE,
+  "CIVIL-C2": CIVIL_C2_TIMETABLE,
+  "CIVIL-C3": CIVIL_C3_TIMETABLE,
+  "CIVIL-C4": CIVIL_C4_TIMETABLE,
+  "CIVIL-C5": CIVIL_C5_TIMETABLE,
+  "CIVIL-C6": CIVIL_C6_TIMETABLE,
+  "C1": CIVIL_C1_TIMETABLE,
+  "C2": CIVIL_C2_TIMETABLE,
+  "C3": CIVIL_C3_TIMETABLE,
+  "C4": CIVIL_C4_TIMETABLE,
+  "C5": CIVIL_C5_TIMETABLE,
+  "C6": CIVIL_C6_TIMETABLE,
 };
+
 
 export function getTimetableForSection(section: string): WeeklyTimetable | null {
   return TIMETABLE_REGISTRY[section] ?? null;

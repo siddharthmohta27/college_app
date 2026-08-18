@@ -3,13 +3,11 @@ import { useState, useMemo } from "react";
 import {
   Clock,
   MapPin,
-  Zap,
   Coffee,
   UtensilsCrossed,
   Sparkles,
   Calendar,
   Info,
-  Flame,
   ShieldCheck,
   Building,
 } from "lucide-react";
@@ -28,8 +26,6 @@ interface MealSlot {
   time: string;
   items: string[];
   specialItem?: string;
-  calories?: string;
-  protein?: string;
   diet: DietType;
   tags?: string[];
 }
@@ -102,18 +98,14 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 AM – 9:30 AM",
       items: ["Aloo Onion Stuffed Paratha", "Fresh Curd (Dahi)", "Mixed Pickle & Butter", "Boiled Eggs (2 pcs) / Banana", "Hot Adrak Chai / Filter Coffee / Warm Milk"],
       specialItem: "Stuffed Aloo Paratha with Butter",
-      calories: "450 kcal",
-      protein: "14g",
       diet: "veg",
-      tags: ["Chef Special", "High Energy"],
+      tags: ["Chef Special", "Breakfast"],
     },
     lunch: {
       name: "Lunch",
       time: "12:30 PM – 2:30 PM",
       items: ["Special Punjabi Rajma Masala", "Steamed Basmati Rice", "Mix Veg Sabzi (Carrot, Beans, Peas)", "Fresh Tawa Butter Roti", "Boondi Raita", "Green Salad & Lemon"],
       specialItem: "Punjabi Rajma Chawal",
-      calories: "620 kcal",
-      protein: "22g",
       diet: "veg",
       tags: ["Popular"],
     },
@@ -122,18 +114,14 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "5:00 PM – 6:30 PM",
       items: ["Crispy Samosa with Mint & Saunth Chutney", "Special Masala Chai", "Hot Filter Coffee", "Glucose Biscuits"],
       specialItem: "Halwai Style Samosa",
-      calories: "280 kcal",
-      protein: "5g",
       diet: "veg",
-      tags: ["Evening Favorite"],
+      tags: ["Evening Snacks"],
     },
     dinner: {
       name: "Dinner",
       time: "7:30 PM – 9:45 PM",
       items: ["Kadhai Paneer Gravy", "Yellow Moong Dal Tadka", "Jeera Basmati Rice", "Tawa Phulka Roti", "Sirka Onion & Tomato Salad", "Hot Gulab Jamun (2 pcs)"],
       specialItem: "Kadhai Paneer & Gulab Jamun",
-      calories: "680 kcal",
-      protein: "24g",
       diet: "veg",
       tags: ["Sweet Included"],
     },
@@ -145,18 +133,14 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 AM – 9:30 AM",
       items: ["Indori Poha with Roasted Peanuts & Sev", "Crispy Veg Cutlet", "Brown / White Bread Toast with Butter & Jam", "Boiled Egg / Fresh Apple", "Hot Tea & Milk"],
       specialItem: "Indori Poha with Sev",
-      calories: "390 kcal",
-      protein: "12g",
       diet: "veg",
-      tags: ["Light & Healthy"],
+      tags: ["Light Breakfast"],
     },
     lunch: {
       name: "Lunch",
       time: "12:30 PM – 2:30 PM",
       items: ["Authentic Punjabi Kadi Pakora", "Steamed Rice", "Aloo Gobhi Dry Sabzi", "Tawa Butter Roti", "Crisp Roasted Papad", "Kachumber Salad"],
       specialItem: "Punjabi Kadi Chawal with Papad",
-      calories: "580 kcal",
-      protein: "18g",
       diet: "veg",
       tags: ["Comfort Food"],
     },
@@ -165,8 +149,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "5:00 PM – 6:30 PM",
       items: ["Stuffed Veg Bread Roll with Tomato Ketchup", "Cardamom Masala Tea", "Black Coffee"],
       specialItem: "Golden Bread Roll",
-      calories: "240 kcal",
-      protein: "6g",
       diet: "veg",
     },
     dinner: {
@@ -174,8 +156,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 PM – 9:45 PM",
       items: ["Shahi Paneer Creamy Gravy", "Dal Makhani (Slow cooked)", "Veg Pulao Rice", "Butter Roti", "Cucumber & Beetroot Salad", "Chilled Fruit Custard"],
       specialItem: "Dal Makhani & Fruit Custard",
-      calories: "710 kcal",
-      protein: "26g",
       diet: "veg",
       tags: ["Deluxe Dinner"],
     },
@@ -187,8 +167,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 AM – 9:30 AM",
       items: ["Steamed Idli (4 pcs) & Medu Vada", "Hot Vegetable Sambhar", "Fresh Coconut & Tomato Chutney", "Omelette (2 eggs) / Fruit", "South Indian Filter Coffee & Tea"],
       specialItem: "South Indian Idli Sambhar & Vada Feast",
-      calories: "420 kcal",
-      protein: "15g",
       diet: "veg",
       tags: ["South Indian Special"],
     },
@@ -197,8 +175,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "12:30 PM – 2:30 PM",
       items: ["Amritsari Chana Masala (Chole)", "Hot Poori & Jeera Rice", "Bhindi Do Pyaza", "Mix Veg Raita", "Sirka Onion Salad"],
       specialItem: "Chole Poori & Jeera Rice",
-      calories: "690 kcal",
-      protein: "20g",
       diet: "veg",
     },
     snacks: {
@@ -206,18 +182,14 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "5:00 PM – 6:30 PM",
       items: ["Assorted Veg Pakoras (Paneer, Pyaz, Gobhi)", "Pudina & Imli Chutneys", "Ginger Chai"],
       specialItem: "Mix Pakora Platter",
-      calories: "310 kcal",
-      protein: "8g",
       diet: "veg",
-      tags: ["Rainy Day Special"],
+      tags: ["Hot Pakoras"],
     },
     dinner: {
       name: "Dinner",
       time: "7:30 PM – 9:45 PM",
       items: ["Matar Paneer / Egg Curry (Optional)", "Chana Dal Fry", "Steamed Basmati Rice", "Tawa Butter Roti", "Green Salad", "Warm Sewaiyan Kheer"],
       specialItem: "Matar Paneer & Kheer",
-      calories: "670 kcal",
-      protein: "25g",
       diet: "veg",
     },
   },
@@ -228,18 +200,14 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 AM – 9:30 AM",
       items: ["Paneer & Gobhi Stuffed Paratha", "Pudina Dahi", "Butter & Mixed Pickle", "Sprouted Moong Salad", "Hot Tea & Milk"],
       specialItem: "Paneer Paratha with Mint Curd",
-      calories: "460 kcal",
-      protein: "18g",
       diet: "veg",
-      tags: ["High Protein"],
+      tags: ["Paratha Special"],
     },
     lunch: {
       name: "Lunch",
       time: "12:30 PM – 2:30 PM",
       items: ["Dal Tadka with Ghee", "Louki Kofta Curry", "Steamed Basmati Rice", "Fresh Phulka Roti", "Cucumber Tomato Raita", "Green Salad"],
       specialItem: "Louki Kofta & Dal Tadka",
-      calories: "560 kcal",
-      protein: "17g",
       diet: "veg",
     },
     snacks: {
@@ -247,8 +215,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "5:00 PM – 6:30 PM",
       items: ["Veg Coleslaw Sandwich / Grilled Sandwich", "Green Chutney", "Lemon Tea / Masala Chai"],
       specialItem: "Grilled Veg Sandwich",
-      calories: "220 kcal",
-      protein: "6g",
       diet: "veg",
     },
     dinner: {
@@ -256,8 +222,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 PM – 9:45 PM",
       items: ["Palak Paneer", "Masoor Dal Tadka", "Veg Peas Pulao", "Butter Roti", "Radish & Onion Salad", "Spongy Bengali Rasgulla (2 pcs)"],
       specialItem: "Palak Paneer & Rasgulla",
-      calories: "640 kcal",
-      protein: "23g",
       diet: "veg",
     },
   },
@@ -268,8 +232,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 AM – 9:30 AM",
       items: ["Vegetable Rava Upma with Coconut Chutney", "Pav Bhaji (Fresh Butter Pav)", "Boiled Eggs / Banana", "Toast Butter Jam", "Adrak Chai & Milk"],
       specialItem: "Bombay Pav Bhaji & Upma",
-      calories: "430 kcal",
-      protein: "13g",
       diet: "veg",
     },
     lunch: {
@@ -277,8 +239,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "12:30 PM – 2:30 PM",
       items: ["Dal Panchmel (5 Dals mix)", "Dum Aloo Kashmiri", "Jeera Rice", "Tawa Butter Roti", "Roasted Papad", "Plain Dahi & Salad"],
       specialItem: "Kashmiri Dum Aloo & Panchmel Dal",
-      calories: "600 kcal",
-      protein: "19g",
       diet: "veg",
     },
     snacks: {
@@ -286,8 +246,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "5:00 PM – 6:30 PM",
       items: ["Masala Maggi Noodles / Red Sauce Pasta", "Hot Coffee", "Ginger Tea"],
       specialItem: "Campus Masala Maggi",
-      calories: "290 kcal",
-      protein: "7g",
       diet: "veg",
       tags: ["Student Craving"],
     },
@@ -296,8 +254,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 PM – 9:45 PM",
       items: ["Paneer Butter Masala", "Palak Chana Dal", "Steamed Rice", "Butter Roti", "Lachha Onion Salad", "Desi Ghee Suji Halwa"],
       specialItem: "Paneer Butter Masala & Suji Halwa",
-      calories: "700 kcal",
-      protein: "25g",
       diet: "veg",
       tags: ["Friday Treat"],
     },
@@ -309,8 +265,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 AM – 9:30 AM",
       items: ["Methi Thepla / Onion Uttapam with Sambar", "White Butter & Pickle", "Boiled Egg / Fresh Fruit", "Tea & Coffee"],
       specialItem: "Methi Thepla with White Butter",
-      calories: "410 kcal",
-      protein: "14g",
       diet: "veg",
     },
     lunch: {
@@ -318,8 +272,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "12:30 PM – 2:30 PM",
       items: ["Mix Veg Dum Biryani Pulao", "Moong Dal Dhuli Tadka", "Aloo Jeera Dry", "Tawa Phulka", "Boondi Raita", "Pickle & Papad"],
       specialItem: "Veg Dum Biryani with Raita",
-      calories: "620 kcal",
-      protein: "18g",
       diet: "veg",
     },
     snacks: {
@@ -327,8 +279,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "5:00 PM – 6:30 PM",
       items: ["Mumbai Bhel Puri & Sev Puri / Pao Bhaji", "Cutting Chai", "Cold Coffee"],
       specialItem: "Mumbai Bhel Puri",
-      calories: "230 kcal",
-      protein: "5g",
       diet: "veg",
     },
     dinner: {
@@ -336,8 +286,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 PM – 9:45 PM",
       items: ["Malai Kofta Gravy", "Dal Makhani", "Veg Fried Rice", "Butter Naan / Roti", "Green Salad", "Ice Cream Scoop"],
       specialItem: "Malai Kofta & Ice Cream",
-      calories: "730 kcal",
-      protein: "22g",
       diet: "veg",
       tags: ["Weekend Special"],
     },
@@ -349,8 +297,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 AM – 10:00 AM",
       items: ["Amritsari Chole Bhature (Unlimited)", "Crispy Hot Jalebi", "Sweet Patiala Lassi / Cold Milk", "Pickle & Fried Green Chillies"],
       specialItem: "Amritsari Chole Bhature & Jalebi Feast",
-      calories: "650 kcal",
-      protein: "18g",
       diet: "veg",
       tags: ["Sunday Super Feast", "Special"],
     },
@@ -359,8 +305,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "12:30 PM – 2:30 PM",
       items: ["Paneer Do Pyaza", "Dal Maharani", "Hyderabadi Veg Biryani with Mirchi Ka Salan", "Butter Naan & Roti", "Boondi Raita & Salad"],
       specialItem: "Hyderabadi Biryani with Salan",
-      calories: "720 kcal",
-      protein: "24g",
       diet: "veg",
     },
     snacks: {
@@ -368,8 +312,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "5:00 PM – 6:30 PM",
       items: ["Kachori with Aloo Sabzi / Sweet Treats", "Masala Chai", "Filter Coffee"],
       specialItem: "Crispy Khasta Kachori",
-      calories: "280 kcal",
-      protein: "6g",
       diet: "veg",
     },
     dinner: {
@@ -377,8 +319,6 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
       time: "7:30 PM – 10:00 PM",
       items: ["Shahi Paneer / Special Chicken (Optional)", "Dal Tadka", "Kashmiri Pulao", "Butter Paratha / Naan", "Sirka Pyaz Salad", "Royal Shahi Tukda"],
       specialItem: "Grand Sunday Shahi Feast & Shahi Tukda",
-      calories: "790 kcal",
-      protein: "28g",
       diet: "veg",
       tags: ["Grand Feast"],
     },
@@ -688,36 +628,19 @@ export default function MessAndCanteenPage() {
                         </ul>
                       </div>
 
-                      {/* Nutrition & Tags Footer */}
-                      <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60 text-[11px] text-muted-foreground">
-                        <div className="flex items-center gap-3">
-                          {slot.calories && (
-                            <span className="flex items-center gap-1">
-                              <Flame className="h-3 w-3 text-rose-500" />
-                              <span>{slot.calories}</span>
+                      {/* Special Tags Footer */}
+                      {slot.tags && slot.tags.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 pt-3 border-t border-border/60 text-[11px]">
+                          {slot.tags.map((t, i) => (
+                            <span
+                              key={i}
+                              className="rounded-md border border-border/80 bg-surface px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
+                            >
+                              {t}
                             </span>
-                          )}
-                          {slot.protein && (
-                            <span className="flex items-center gap-1">
-                              <Zap className="h-3 w-3 text-amber-500" />
-                              <span>{slot.protein} protein</span>
-                            </span>
-                          )}
+                          ))}
                         </div>
-
-                        {slot.tags && (
-                          <div className="flex items-center gap-1.5">
-                            {slot.tags.map((t, i) => (
-                              <span
-                                key={i}
-                                className="rounded-md border border-border/80 bg-surface px-1.5 py-0.5 text-[9px] font-medium"
-                              >
-                                {t}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      )}
                     </div>
                   );
                 })}

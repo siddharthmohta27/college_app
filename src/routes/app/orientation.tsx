@@ -293,29 +293,25 @@ const REPORTING_BRANCHES: ReportingBranch[] = [
 ];
 
 export const ORIENTATION_DAYS = [
-  { day: 1, label: "Day 1", date: "19 Aug (Wed)", title: "Inaugural, Director Keynote & Dept Visits", status: "confirmed" },
-  { day: 2, label: "Day 2", date: "20 Aug (Thu)", title: "Science HODs, Clubs (1–4), Tech/Sports/Music", status: "confirmed" },
-  { day: 3, label: "Day 3", date: "21 Aug (Fri)", title: "SCC, Library, CDGC, Speaker Sessions, Clubs (5–6), Displays", status: "confirmed" },
-  { day: 4, label: "Day 4", date: "22 Aug (Sat)", title: "Official Timetable Pending Announcement", status: "pending" },
-  { day: 5, label: "Day 5", date: "23 Aug (Sun)", title: "Official Timetable Pending Announcement", status: "pending" },
-  { day: 6, label: "Day 6", date: "24 Aug (Mon)", title: "Official Timetable Pending Announcement", status: "pending" },
-  { day: 7, label: "Day 7", date: "25 Aug (Tue)", title: "Official Timetable Pending Announcement", status: "pending" },
+  { day: 1, label: "Day 1", date: "19 Aug (Wed)", title: "Inaugural, Director Keynote & Dept Visits" },
+  { day: 2, label: "Day 2", date: "20 Aug (Thu)", title: "Science HODs, Clubs (1–4), Tech/Sports/Music" },
+  { day: 3, label: "Day 3", date: "21 Aug (Fri)", title: "SCC, Library, CDGC, Speaker Sessions, Clubs (5–6), Displays" },
 ];
 
 export const ATTENDANCE_VENUES_BY_DAY: Record<string, Record<number, string>> = {
-  CSE: { 1: "Auditorium", 2: "L-26", 3: "L-26", 4: "L-26", 5: "L-26", 6: "L-26", 7: "L-26" },
-  ECE: { 1: "Auditorium", 2: "L-27", 3: "L-27", 4: "L-27", 5: "L-27", 6: "L-27", 7: "L-27" },
-  VLSI: { 1: "Auditorium", 2: "L-28", 3: "L-28", 4: "L-28", 5: "L-28", 6: "L-28", 7: "L-28" },
-  "B.Design": { 1: "L-26", 2: "L-28", 3: "L-28", 4: "L-28", 5: "L-28", 6: "L-28", 7: "L-28" },
-  AERO: { 1: "L-26", 2: "L-28", 3: "L-28", 4: "L-28", 5: "L-28", 6: "L-28", 7: "L-28" },
-  Electrical: { 1: "L-27", 2: "L-29", 3: "L-29", 4: "L-29", 5: "L-29", 6: "L-29", 7: "L-29" },
-  Civil: { 1: "L-28", 2: "L-30", 3: "L-30", 4: "L-30", 5: "L-30", 6: "L-30", 7: "L-30" },
-  AI: { 1: "L-29", 2: "L-31", 3: "L-31", 4: "L-31", 5: "L-31", 6: "L-31", 7: "L-31" },
-  DS: { 1: "L-29", 2: "L-31", 3: "L-31", 4: "L-31", 5: "L-31", 6: "L-31", 7: "L-31" },
-  "M&C": { 1: "L-29", 2: "L-31", 3: "L-31", 4: "L-31", 5: "L-31", 6: "L-31", 7: "L-31" },
-  Mechanical: { 1: "L-30", 2: "Aero Audi", 3: "Aero Audi", 4: "Aero Audi", 5: "Aero Audi", 6: "Aero Audi", 7: "Aero Audi" },
-  Metallurgy: { 1: "L-31", 2: "Auditorium", 3: "Auditorium", 4: "Auditorium", 5: "Auditorium", 6: "Auditorium", 7: "Auditorium" },
-  Production: { 1: "L-31", 2: "Auditorium", 3: "Auditorium", 4: "Auditorium", 5: "Auditorium", 6: "Auditorium", 7: "Auditorium" },
+  CSE: { 1: "Auditorium", 2: "L-26", 3: "L-26" },
+  ECE: { 1: "Auditorium", 2: "L-27", 3: "L-27" },
+  VLSI: { 1: "Auditorium", 2: "L-28", 3: "L-28" },
+  "B.Design": { 1: "L-26", 2: "L-28", 3: "L-28" },
+  AERO: { 1: "L-26", 2: "L-28", 3: "L-28" },
+  Electrical: { 1: "L-27", 2: "L-29", 3: "L-29" },
+  Civil: { 1: "L-28", 2: "L-30", 3: "L-30" },
+  AI: { 1: "L-29", 2: "L-31", 3: "L-31" },
+  DS: { 1: "L-29", 2: "L-31", 3: "L-31" },
+  "M&C": { 1: "L-29", 2: "L-31", 3: "L-31" },
+  Mechanical: { 1: "L-30", 2: "Aero Audi", 3: "Aero Audi" },
+  Metallurgy: { 1: "L-31", 2: "Auditorium", 3: "Auditorium" },
+  Production: { 1: "L-31", 2: "Auditorium", 3: "Auditorium" },
 };
 
 export const SPECIAL_GROUPINGS = {
@@ -1017,82 +1013,60 @@ function OrientationPage() {
                 </div>
               </div>
 
-              {/* 7-DAY TABS SELECTOR */}
-              <div className="flex overflow-x-auto gap-2 py-1 scrollbar-none">
+              {/* 3-DAY OFFICIAL TABS SELECTOR */}
+              <div className="flex flex-wrap items-center gap-2 py-1">
                 {ORIENTATION_DAYS.map((item) => (
                   <button
                     key={item.day}
                     onClick={() => setSelectedDay(item.day)}
-                    className={`shrink-0 rounded-2xl px-4 py-2.5 text-left border transition relative ${
+                    className={`rounded-2xl px-5 py-2.5 text-left border transition ${
                       selectedDay === item.day
                         ? "border-primary bg-primary text-primary-foreground shadow-md glow-primary"
                         : "border-border/80 bg-surface/70 text-muted-foreground hover:bg-surface hover:text-foreground"
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] uppercase font-bold opacity-80 block">
-                        {item.label}
-                      </span>
-                      {item.day > 3 && (
-                        <span
-                          className={`text-[9px] font-semibold px-1.5 py-0.2 rounded-md ${
-                            selectedDay === item.day
-                              ? "bg-white/20 text-white"
-                              : "bg-amber-500/15 text-amber-500 border border-amber-500/20"
-                          }`}
-                        >
-                          Pending
-                        </span>
-                      )}
-                    </div>
+                    <span className="text-[10px] uppercase font-bold opacity-80 block">
+                      {item.label}
+                    </span>
                     <span className="text-xs font-extrabold block">
                       {item.date}
                     </span>
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* If Day 4 to 7 is selected: Show Official Announcement Pending notice */}
-            {selectedDay > 3 ? (
-              <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-surface to-background p-8 sm:p-10 text-center space-y-4 shadow-lg animate-in fade-in duration-200">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-3xl bg-amber-500/20 text-amber-500 shadow-inner mx-auto">
-                  <Clock className="h-8 w-8" />
+              {/* Official Schedule Status Notice */}
+              <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-3.5 sm:p-4 text-xs">
+                <div className="grid h-8 w-8 place-items-center rounded-xl bg-primary/15 text-primary shrink-0">
+                  <Info className="h-4 w-4" />
                 </div>
-                <div className="space-y-2 max-w-lg mx-auto">
-                  <h3 className="text-xl font-extrabold tracking-tight text-foreground">
-                    Day {selectedDay} Schedule Pending Official Announcement
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Further days timetable will be uploaded after official announcement by college administration.
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground text-xs sm:text-sm">
+                    Official Schedule (Days 1 – 3)
+                  </p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                    Other days will be added after official confirmation by college administration.
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/15 px-4 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Days 1 – 3 Schedules Confirmed
-                  </div>
-                  <button
-                    onClick={() => setSelectedDay(1)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-medium text-foreground hover:bg-surface-elevated transition"
-                  >
-                    View Day 1 Schedule &rarr;
-                  </button>
-                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary shrink-0">
+                  <Sparkles className="h-3 w-3" />
+                  Official PDF
+                </span>
               </div>
-            ) : (
-              /* Schedule Table Component for Confirmed Days (Days 1 to 3) */
-              <div className="rounded-2xl border border-border glass overflow-hidden shadow-lg">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="border-b border-border bg-surface-elevated/70 text-[11px] uppercase font-bold text-muted-foreground tracking-wider">
-                      <tr>
-                        <th className="py-3.5 px-4 sm:px-6 w-36 sm:w-44">Time</th>
-                        <th className="py-3.5 px-4 sm:px-6">Activity / Event</th>
-                        <th className="py-3.5 px-4 sm:px-6 w-44 sm:w-56">Venue</th>
-                        <th className="py-3.5 px-4 sm:px-6 w-48 sm:w-64">Coordinator / Details</th>
-                      </tr>
-                    </thead>
+            </div>
+
+            {/* Schedule Table Component for Days 1 to 3 */}
+            <div className="rounded-2xl border border-border glass overflow-hidden shadow-lg">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="border-b border-border bg-surface-elevated/70 text-[11px] uppercase font-bold text-muted-foreground tracking-wider">
+                    <tr>
+                      <th className="py-3.5 px-4 sm:px-6 w-36 sm:w-44">Time</th>
+                      <th className="py-3.5 px-4 sm:px-6">Activity / Event</th>
+                      <th className="py-3.5 px-4 sm:px-6 w-44 sm:w-56">Venue</th>
+                      <th className="py-3.5 px-4 sm:px-6 w-48 sm:w-64">Coordinator / Details</th>
+                    </tr>
+                  </thead>
                     <tbody className="divide-y divide-border/60">
                       {filteredSchedule.map((item) => (
                         <tr
@@ -1148,7 +1122,6 @@ function OrientationPage() {
                   </table>
                 </div>
               </div>
-            )}
 
             {/* Annexures Interactive Accordions */}
             <div className="space-y-4 pt-4">
@@ -1283,31 +1256,26 @@ function OrientationPage() {
                         <tr>
                           <th className="py-2.5 px-3">Branch</th>
                           <th className="py-2.5 px-3">Group</th>
-                          <th className="py-2.5 px-3">Day 1 (19th)</th>
-                          <th className="py-2.5 px-3">Day 2 (20th)</th>
-                          <th className="py-2.5 px-3">Day 3 (21st)</th>
-                          <th className="py-2.5 px-3">Day 4 (22nd)</th>
-                          <th className="py-2.5 px-3">Day 5 (23rd)</th>
-                          <th className="py-2.5 px-3">Day 6 (24th)</th>
-                          <th className="py-2.5 px-3">Day 7 (25th)</th>
+                          <th className="py-2.5 px-3">Day 1 (19th Aug)</th>
+                          <th className="py-2.5 px-3">Day 2 (20th Aug)</th>
+                          <th className="py-2.5 px-3">Day 3 (21st Aug)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/60">
                         {REPORTING_BRANCHES.map((b) => (
                           <tr key={b.code} className="hover:bg-surface-elevated/40">
                             <td className="py-2 px-3 font-semibold text-foreground">{b.name}</td>
-                            <td className="py-2 px-3 font-mono text-primary">{b.group}</td>
-                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[1]}</td>
-                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[2]}</td>
-                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[3]}</td>
-                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[4]}</td>
-                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[5]}</td>
-                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[6]}</td>
-                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[7]}</td>
+                            <td className="py-2 px-3 font-mono text-primary font-bold">{b.group}</td>
+                            <td className="py-2 px-3 font-mono font-medium">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[1]}</td>
+                            <td className="py-2 px-3 font-mono font-medium">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[2]}</td>
+                            <td className="py-2 px-3 font-mono font-medium">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[3]}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
+                    <p className="text-[11px] text-muted-foreground italic">
+                      * Attendance venues for further days will be updated after official confirmation.
+                    </p>
                   </div>
                 </div>
               )}

@@ -82,82 +82,13 @@ const DEFAULT_SCHEDULE_DAY3 = [
   { id: 56, day: 3, time_slot: "4:15 PM – 5:45 PM", activity: "Parallel Displays: Tech Display (T2) in Centenary Hall | Sports (S2) in Athletic Ground | Dramatics (A1) in Auditorium", venue: "Centenary Hall / Athletic Ground / Auditorium", coordinator: "Respective P/Is of Club, Societies, Cells & Sports", category: "afternoon", sort_order: 56 },
 ];
 
-const DEFAULT_SCHEDULE_DAY4 = [
-  { id: 57, day: 4, time_slot: "9:00 AM – 9:30 AM", activity: "Attendance in respective rooms/venue mentioned in Annexure 1 (Day 4)", venue: "Annexure 1 (Day 4)", coordinator: "Respective Faculty Incharges & Student Branch Incharges", category: "morning", sort_order: 57 },
-  { id: 58, day: 4, time_slot: "9:30 AM – 10:30 AM", activity: "Mental Health Speaker Session & Nasha Mukti Speaker Session", venue: "Auditorium", coordinator: "Guest Speakers & Faculty", category: "morning", sort_order: 58 },
-  { id: 59, day: 4, time_slot: "10:30 AM – 11:00 AM", activity: "Club Slot: Group A (SME in L-31), Group B (CIM in L-26), Group C (IGS in L-30), Group D (ES in L-31)", venue: "Respective Lecture Halls", coordinator: "Respective Club Faculty & Student Leads", category: "morning", sort_order: 59 },
-  { id: 60, day: 4, time_slot: "11:00 AM – 11:30 AM", activity: "Club Slot: Group A (ATS in L-31), Group B (IIM in L-26), Group C (APC in L-30), Group D (SESI in L-31)", venue: "Respective Lecture Halls", coordinator: "Respective Club Faculty & Student Leads", category: "morning", sort_order: 60 },
-  { id: 61, day: 4, time_slot: "11:30 AM – 12:00 PM", activity: "Club Slot: Group A (EEB in L-31), Group B (IEEE in L-26), Group C (HEB in L-29)", venue: "Respective Lecture Halls", coordinator: "Respective Club Faculty & Student Leads", category: "morning", sort_order: 61 },
-  { id: 62, day: 4, time_slot: "10:30 AM – 12:00 PM", activity: "PEB Session (Group A2)", venue: "Auditorium", coordinator: "Physical Education Board Coordinators", category: "morning", sort_order: 62 },
-  { id: 63, day: 4, time_slot: "12:00 PM – 12:15 PM", activity: "Movement of Students to Respective Hostels", venue: "Hostels / Campus", coordinator: "Student Branch Incharges", category: "lunch", sort_order: 63 },
-  { id: 64, day: 4, time_slot: "12:15 PM – 1:45 PM", activity: "Lunch", venue: "Annexure 3", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch", sort_order: 64 },
-  { id: 65, day: 4, time_slot: "1:15 PM – 2:45 PM", activity: "Music Session (Group A3)", venue: "Auditorium", coordinator: "Music Club Coordinators", category: "afternoon", sort_order: 65 },
-  { id: 66, day: 4, time_slot: "2:45 PM – 4:15 PM", activity: "PEB Session (Group A3)", venue: "Auditorium", coordinator: "Physical Education Board Coordinators", category: "afternoon", sort_order: 66 },
-  { id: 67, day: 4, time_slot: "2:00 PM – 2:30 PM", activity: "Club Slot: Group A (IIM in L-31), Group B (SME in L-26), Group E (WEC in L-27), Group G (PDC in Auditorium)", venue: "Respective Venues", coordinator: "Club Incharges", category: "afternoon", sort_order: 67 },
-  { id: 68, day: 4, time_slot: "2:30 PM – 3:00 PM", activity: "Club Slot: Group A (NSS in L-31), Group B (IGS in L-26), Group E (PDC in Auditorium), Group G (Robotics in L-28)", venue: "Respective Venues", coordinator: "Club Incharges", category: "afternoon", sort_order: 68 },
-  { id: 69, day: 4, time_slot: "3:00 PM – 3:30 PM", activity: "Club Slot: Group A (ASCE in L-31), Group B (ACM in L-26), Group E (NCC in L-29), Group G (HEB in L-30)", venue: "Respective Venues", coordinator: "Club Incharges", category: "afternoon", sort_order: 69 },
-  { id: 70, day: 4, time_slot: "3:30 PM – 4:00 PM", activity: "Club Slot: Group A (ASPS in L-31), Group B (ATS in L-26), Group E (HEB in L-29), Group G (ELC in L-30)", venue: "Respective Venues", coordinator: "Club Incharges", category: "afternoon", sort_order: 70 },
-  { id: 71, day: 4, time_slot: "4:00 PM – 4:30 PM", activity: "Evening Refreshments & SNACKS", venue: "Campus Locations", coordinator: "Organizing Committee", category: "afternoon", sort_order: 71 },
-  { id: 72, day: 4, time_slot: "4:40 PM – 5:10 PM", activity: "Rotaract Club Session (Group B)", venue: "L-26", coordinator: "Rotaract Club Coordinators", category: "afternoon", sort_order: 72 },
-  { id: 73, day: 4, time_slot: "4:40 PM – 6:00 PM", activity: "Parallel Evening Displays: Drams (A2 in Auditorium) | Technical Display (T4 in Centenary Hall) | Sports (S4 in Athletics Ground)", venue: "Auditorium / Centenary Hall / Athletic Ground", coordinator: "Respective Club P/Is & Coordinators", category: "afternoon", sort_order: 73 },
-];
-
-const DEFAULT_SCHEDULE_DAY5 = [
-  { id: 74, day: 5, time_slot: "8:30 AM – 9:00 AM", activity: "Attendance in respective rooms/venue mentioned in Annexure 1 (Day 5)", venue: "Annexure 1 (Day 5)", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", sort_order: 74 },
-  { id: 75, day: 5, time_slot: "9:00 AM – 9:45 AM", activity: "Dhyan Kendra Session", venue: "Auditorium", coordinator: "Dhyan Kendra Incharges & Yoga Mentors", category: "morning", sort_order: 75 },
-  { id: 76, day: 5, time_slot: "9:45 AM – 11:00 AM", activity: "Music Session (Group A1)", venue: "Auditorium", coordinator: "Music Club Coordinators", category: "morning", sort_order: 76 },
-  { id: 77, day: 5, time_slot: "9:45 AM – 10:15 AM", activity: "Club Slot: Group C (CIM in Aero Audi), Group D (ASCE in L-27), Group E (APC in L-27), Group F (NCC in L-28), Group G (Rotaract in L-28), Group H (SAASC in L-29)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 77 },
-  { id: 78, day: 5, time_slot: "10:15 AM – 10:45 AM", activity: "Club Slot: Group C (ES in Aero Audi), Group D (ASME in L-27), Group E (IGS in L-27), Group F (ELC), Group G (SCC in L-28), Group H (HEB)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 78 },
-  { id: 79, day: 5, time_slot: "11:00 AM – 12:15 PM", activity: "Music Session (Group A2)", venue: "Auditorium", coordinator: "Music Club Coordinators", category: "morning", sort_order: 79 },
-  { id: 80, day: 5, time_slot: "10:45 AM – 11:15 AM", activity: "Club Slot: Group A (EIC in L-28), Group B (WEC in L-29), Group C (IIM in Aero Audi), Group D (EIC in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 80 },
-  { id: 81, day: 5, time_slot: "11:15 AM – 11:45 AM", activity: "Club Slot: Group A (SAASC in L-28), Group B (ASME in L-29), Group C (NCC in L-30), Group D (Robotics in L-31)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 81 },
-  { id: 82, day: 5, time_slot: "11:45 AM – 12:15 PM", activity: "Club Slot: Group A (IEEE in L-28), Group B (NSS in L-29)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 82 },
-  { id: 83, day: 5, time_slot: "12:15 PM – 1:45 PM", activity: "PEB Session (Group A2)", venue: "Auditorium", coordinator: "Physical Education Board Coordinators", category: "lunch", sort_order: 83 },
-];
-
-const DEFAULT_SCHEDULE_DAY6 = [
-  { id: 84, day: 6, time_slot: "9:00 AM – 9:30 AM", activity: "Attendance in respective rooms/venue mentioned in Annexure 1 (Day 6)", venue: "Annexure 1 (Day 6)", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", sort_order: 84 },
-  { id: 85, day: 6, time_slot: "9:30 AM – 10:30 AM", activity: "Career Guidance Speaker Session", venue: "Auditorium", coordinator: "CDGC & Guest Speakers", category: "morning", sort_order: 85 },
-  { id: 86, day: 6, time_slot: "10:30 AM – 11:00 AM", activity: "Club Slot: Group A (ES in L-29), Group B (SCC in L-30), Group C (ACM in L-31), Group D (EEB in Auditorium), Group E (SAASC in Aero Audi), Group F (CIM in L-26), Group G (EIC in L-27), Group H (WEC in L-28)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 86 },
-  { id: 87, day: 6, time_slot: "11:00 AM – 11:30 AM", activity: "Club Slot: Group A (NCC in L-29), Group B (Robotics in L-30), Group C (SAE in L-31), Group D (PDC in Auditorium), Group E (SME in Aero Audi), Group F (ES in L-26), Group G (ASCE in L-27), Group H (ASME in L-28)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 87 },
-  { id: 88, day: 6, time_slot: "11:30 AM – 12:00 PM", activity: "Club Slot: Group A (APC in L-29), Group B (SESI in L-30), Group C (Rotaract in L-31), Group D (ELC in Auditorium), Group E (ASPS in Aero Audi), Group F (ATS in L-26), Group G (IIM in L-27), Group H (IEEE in L-28)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 88 },
-  { id: 89, day: 6, time_slot: "12:00 PM – 12:30 PM", activity: "Club Slot: Group C (ASCE in L-31), Group G (EEB in L-27), Group E (SCC in Aero Audi), Group F (PDC in L-26), Group H (ACM in L-28)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 89 },
-  { id: 90, day: 6, time_slot: "12:45 PM – 2:15 PM", activity: "Lunch", venue: "Annexure 3", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch", sort_order: 90 },
-  { id: 91, day: 6, time_slot: "2:30 PM – 3:00 PM", activity: "Club Slot: Group A (IGS in L-29), Group B (ES in L-30), Group C (SCC in L-31), Group D (HEB in Auditorium), Group E (ASCE in Aero Audi), Group F (SAASC in L-26), Group G (ACM in L-27), Group H (EIC in L-28)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "afternoon", sort_order: 91 },
-  { id: 92, day: 6, time_slot: "3:00 PM – 3:30 PM", activity: "Club Slot: Group A (WEC in L-29), Group B (NCC in L-30), Group C (Robotics in L-31), Group D (SAE in Auditorium), Group E (ASME in Aero Audi), Group F (SME in L-26), Group G (CIM in L-27), Group H (ASCE in L-28)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "afternoon", sort_order: 92 },
-  { id: 93, day: 6, time_slot: "3:30 PM – 4:00 PM", activity: "Club Slot: Group A (ASME in L-29), Group B (APC in L-30), Group C (SESI in L-31), Group D (Rotaract in Auditorium), Group E (ELC in Aero Audi), Group F (ASPS in L-26), Group G (ATS in L-27), Group H (IIM in L-28)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "afternoon", sort_order: 93 },
-  { id: 94, day: 6, time_slot: "4:00 PM – 4:30 PM", activity: "Evening Refreshments & Snacks", venue: "Campus", coordinator: "Organizing Committee", category: "afternoon", sort_order: 94 },
-  { id: 95, day: 6, time_slot: "4:40 PM – 6:00 PM", activity: "Parallel Evening Displays: Technical Display (T3 in Centenary Hall) | Sports (S3 in Athletics Ground) | PEB (A3 in Auditorium)", venue: "Centenary Hall / Athletic Ground / Auditorium", coordinator: "Respective Club P/Is & Sports Coaches", category: "afternoon", sort_order: 95 },
-];
-
-const DEFAULT_SCHEDULE_DAY7 = [
-  { id: 96, day: 7, time_slot: "8:30 AM – 9:00 AM", activity: "Attendance in respective rooms/venue mentioned in Annexure 1 (Day 7)", venue: "Annexure 1 (Day 7)", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", sort_order: 96 },
-  { id: 97, day: 7, time_slot: "9:00 AM – 9:30 AM", activity: "Club Slot: Group A (ACM in Auditorium), Group B (EIC in L-28), Group C (WEC in L-29), Group D (NCC in L-30), Group E (Robotics in L-31), Group F (SAE in L-26), Group G (SESI in Aero Audi), Group H (SME in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 97 },
-  { id: 98, day: 7, time_slot: "9:30 AM – 10:00 AM", activity: "Club Slot: Group A (CIM in Auditorium), Group B (SAASC in L-28), Group C (IEEE in L-29), Group D (APC in L-30), Group E (SESI in L-31), Group F (Rotaract in L-26), Group G (SAASC in Aero Audi), Group H (ASPS in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 98 },
-  { id: 99, day: 7, time_slot: "10:00 AM – 10:30 AM", activity: "Club Slot: Group D (IGS in L-30), Group E (ES in L-31), Group F (SCC in L-26), Group G (SAE in Aero Audi), Group H (EEB in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 99 },
-  { id: 100, day: 7, time_slot: "10:30 AM – 11:00 AM", activity: "Club Slot: Group A (SESI in Auditorium), Group C (ASME in L-29), Group D (SCC in L-30), Group E (Rotaract in L-31), Group F (IIM in L-26), Group G (ASPS in Aero Audi), Group H (NSS in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 100 },
-  { id: 101, day: 7, time_slot: "11:00 AM – 11:30 AM", activity: "Club Slot: Group D (IEEE in L-30), Group E (ATS in L-31), Group F (EEB in L-26), Group G (ES in Aero Audi), Group H (SCC in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 101 },
-  { id: 102, day: 7, time_slot: "11:30 AM – 12:00 PM", activity: "Club Slot: Group D (WEC in L-30), Group E (NSS in L-31), Group F (Robotics in L-26), Group G (IEEE in Aero Audi), Group H (Rotaract in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "morning", sort_order: 102 },
-  { id: 103, day: 7, time_slot: "11:00 AM – 12:30 PM", activity: "Music Session (Group A1)", venue: "Auditorium", coordinator: "Music Club Coordinators", category: "morning", sort_order: 103 },
-  { id: 104, day: 7, time_slot: "12:45 PM – 2:15 PM", activity: "Lunch", venue: "Annexure 3", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch", sort_order: 104 },
-  { id: 105, day: 7, time_slot: "1:45 PM – 2:15 PM", activity: "Club Slot: Group A (PDC in Audi), Group B (PDC in Audi), Group C (NSS in L-29), Group D (ASPS in L-30), Group E (Rotaract in L-31), Group F (IGS in L-26), Group G (SME in Aero Audi), Group H (SAE in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "afternoon", sort_order: 105 },
-  { id: 106, day: 7, time_slot: "2:15 PM – 2:45 PM", activity: "Club Slot: Group F (APC in L-26), Group H (PDC in L-27), Group E (SAE in L-31), Group C (ELC in L-29)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "afternoon", sort_order: 106 },
-  { id: 107, day: 7, time_slot: "2:45 PM – 3:15 PM", activity: "Club Slot: Group F (ACM in L-26), Group H (ATS in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "afternoon", sort_order: 107 },
-  { id: 108, day: 7, time_slot: "3:15 PM – 3:45 PM", activity: "Club Slot: Group F (SESI in L-26), Group H (CIM in L-27)", venue: "Respective Venues", coordinator: "Club Coordinators", category: "afternoon", sort_order: 108 },
-  { id: 109, day: 7, time_slot: "4:15 PM onwards", activity: "Grand Finale & FUN Event", venue: "Campus / Auditorium", coordinator: "Student Branch Incharges & Cultural Council", category: "afternoon", sort_order: 109 },
-];
-
 const DEFAULT_SCHEDULE = [
   ...DEFAULT_SCHEDULE_DAY1,
   ...DEFAULT_SCHEDULE_DAY2,
   ...DEFAULT_SCHEDULE_DAY3,
-  ...DEFAULT_SCHEDULE_DAY4,
-  ...DEFAULT_SCHEDULE_DAY5,
-  ...DEFAULT_SCHEDULE_DAY6,
-  ...DEFAULT_SCHEDULE_DAY7,
 ];
 
-// In-memory runtime cache for orientation content
+// In-memory runtime cache for orientation content (Days 1 to 3)
 let cachedOrientationData = {
   map: DEFAULT_MAP,
   venue: DEFAULT_VENUE,
@@ -165,10 +96,7 @@ let cachedOrientationData = {
   day1: DEFAULT_SCHEDULE_DAY1,
   day2: DEFAULT_SCHEDULE_DAY2,
   day3: DEFAULT_SCHEDULE_DAY3,
-  day4: DEFAULT_SCHEDULE_DAY4,
-  day5: DEFAULT_SCHEDULE_DAY5,
-  day6: DEFAULT_SCHEDULE_DAY6,
-  day7: DEFAULT_SCHEDULE_DAY7,
+  notice: "Other days timetable will be added after official confirmation.",
   updated_at: new Date().toISOString(),
 };
 

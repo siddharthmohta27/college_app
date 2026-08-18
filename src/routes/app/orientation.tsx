@@ -1013,86 +1013,200 @@ function OrientationPage() {
                   onClick={() => setActiveAnnexure(activeAnnexure === "3" ? "none" : "3")}
                   className={`cursor-pointer rounded-2xl border p-4 transition ${
                     activeAnnexure === "3"
-                              <span className="font-mono text-[10px] text-primary">{b.group}</span>
-                            </div>
-                            <div className="text-muted-foreground text-[11px]">
-                              {b.name}
-                            </div>
-                            <div className="font-semibold text-foreground pt-1">
-                              Venue: {b.venueName} ({b.building})
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                      ? "border-amber-500 bg-amber-500/5 shadow-md"
+                      : "border-border bg-surface hover:border-amber-500/40"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="grid h-6 w-6 place-items-center rounded-lg bg-amber-500/20 text-xs font-bold text-amber-500">
+                      3
+                    </span>
+                    <ChevronRight
+                      className={`h-4 w-4 text-muted-foreground transition-transform ${
+                        activeAnnexure === "3" ? "rotate-90 text-amber-500" : ""
+                      }`}
+                    />
+                  </div>
+                  <strong className="text-xs font-bold text-foreground block mt-2">
+                    Annexure 3: Dept Visits
+                  </strong>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Day 1 department lab venues & student counts.
+                  </p>
+                </div>
 
-                  {activeAnnexure === "2" && (
-                    <div className="space-y-4">
-                      <h4 className="font-bold text-sm text-emerald-500 flex items-center gap-2">
-                        <Utensils className="h-4 w-4" />
-                        <span>Annexure 2: Lunch Group Distribution (12:45 PM – 2:00 PM)</span>
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                        <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
-                          <span className="text-[11px] font-bold text-muted-foreground uppercase">
-                            Day Scholars
-                          </span>
-                          <p className="text-sm font-bold text-foreground">
-                            Centenary Hall & Kalpana Chawla Hostel
-                          </p>
-                          <p className="text-muted-foreground text-[11px]">
-                            Day scholar students proceed to Centenary Hall for lunch catering.
-                          </p>
-                        </div>
-                        <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
-                          <span className="text-[11px] font-bold text-muted-foreground uppercase">
-                            Hostellers
-                          </span>
-                          <p className="text-sm font-bold text-foreground">
-                            Shivalik Hostels & Kalpana Chawla Hostel
-                          </p>
-                          <p className="text-muted-foreground text-[11px]">
-                            Hosteller boys at Shivalik Hostel mess; all girls at Kalpana Chawla Hostel.
-                          </p>
-                        </div>
-                      </div>
-                      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-500 font-medium">
-                        ⚠️ <strong>Important Note:</strong> All Girls will have their lunch at Kalpana Chawla Hostel & All Hosteller Boys will have their lunch at Shivalik Hostel.
-                      </div>
-                    </div>
-                  )}
+                {/* Activity Groups */}
+                <div
+                  onClick={() => setActiveAnnexure(activeAnnexure === "groupings" ? "none" : "groupings")}
+                  className={`cursor-pointer rounded-2xl border p-4 transition ${
+                    activeAnnexure === "groupings"
+                      ? "border-violet-500 bg-violet-500/5 shadow-md"
+                      : "border-border bg-surface hover:border-violet-500/40"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="grid h-6 w-6 place-items-center rounded-lg bg-violet-500/20 text-xs font-bold text-violet-400">
+                      ★
+                    </span>
+                    <ChevronRight
+                      className={`h-4 w-4 text-muted-foreground transition-transform ${
+                        activeAnnexure === "groupings" ? "rotate-90 text-violet-400" : ""
+                      }`}
+                    />
+                  </div>
+                  <strong className="text-xs font-bold text-foreground block mt-2">
+                    Tech, Sports & Culture
+                  </strong>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    T1–T4, S1–S4, and A1–A3 group distributions.
+                  </p>
+                </div>
+              </div>
 
-                  {activeAnnexure === "3" && (
-                    <div className="space-y-3">
-                      <h4 className="font-bold text-sm text-amber-500 flex items-center gap-2">
-                        <GraduationCap className="h-4 w-4" />
-                        <span>Annexure 3: Department Visits on Day 1 (2:00 PM – 4:00 PM)</span>
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
+              {/* Annexure 1 Details Panel */}
+              {activeAnnexure === "1" && (
+                <div className="rounded-3xl border border-primary/20 bg-surface/90 p-6 space-y-4 animate-in fade-in duration-200">
+                  <h4 className="text-sm font-bold text-primary flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span>Annexure 1: Daily Morning Attendance Venues for all 13 Branches</span>
+                  </h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border border-border/80 rounded-xl overflow-hidden">
+                      <thead className="bg-surface-elevated text-muted-foreground uppercase font-bold text-[10px]">
+                        <tr>
+                          <th className="py-2.5 px-3">Branch</th>
+                          <th className="py-2.5 px-3">Group</th>
+                          <th className="py-2.5 px-3">Day 1 (19th)</th>
+                          <th className="py-2.5 px-3">Day 2 (20th)</th>
+                          <th className="py-2.5 px-3">Day 3 (21st)</th>
+                          <th className="py-2.5 px-3">Day 4 (22nd)</th>
+                          <th className="py-2.5 px-3">Day 5 (23rd)</th>
+                          <th className="py-2.5 px-3">Day 6 (24th)</th>
+                          <th className="py-2.5 px-3">Day 7 (25th)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/60">
                         {REPORTING_BRANCHES.map((b) => (
-                          <div key={b.code} className="rounded-xl border border-border bg-surface p-3 space-y-1">
-                            <div className="flex items-center justify-between">
-                              <strong className="text-foreground">{b.code}</strong>
-                              <span className="font-mono text-[10px] bg-surface-elevated px-2 py-0.5 rounded border border-border">
-                                {b.studentsCount} Students · {b.group}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground">
-                              Visit Venue: <strong className="text-foreground">{b.deptVisitVenue}</strong>
-                            </p>
-                          </div>
+                          <tr key={b.code} className="hover:bg-surface-elevated/40">
+                            <td className="py-2 px-3 font-semibold text-foreground">{b.name}</td>
+                            <td className="py-2 px-3 font-mono text-primary">{b.group}</td>
+                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[1]}</td>
+                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[2]}</td>
+                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[3]}</td>
+                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[4]}</td>
+                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[5]}</td>
+                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[6]}</td>
+                            <td className="py-2 px-3 font-mono">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[7]}</td>
+                          </tr>
                         ))}
-                      </div>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Annexure 2 Details Panel */}
+              {activeAnnexure === "2" && (
+                <div className="rounded-3xl border border-emerald-500/20 bg-surface/90 p-6 space-y-4 animate-in fade-in duration-200">
+                  <h4 className="text-sm font-bold text-emerald-500 flex items-center gap-2">
+                    <Utensils className="h-4 w-4" />
+                    <span>Annexure 2: Lunch Group Distribution Rules</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="rounded-2xl border border-border bg-surface p-4 space-y-2">
+                      <span className="font-bold text-foreground block">Day Scholars (Boys & Girls):</span>
+                      <p className="text-muted-foreground leading-relaxed">
+                        • <strong>Centenary Hall</strong> (Directly across from Central Library).
+                      </p>
                     </div>
-                  )}
+                    <div className="rounded-2xl border border-border bg-surface p-4 space-y-2">
+                      <span className="font-bold text-foreground block">Hostellers:</span>
+                      <p className="text-muted-foreground leading-relaxed">
+                        • <strong>All Girls</strong>: Kalpana Chawla (KC) Hostel Dining Hall.<br />
+                        • <strong>All Hosteller Boys</strong>: Shivalik Hostel Dining Hall.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Annexure 3 Details Panel */}
+              {activeAnnexure === "3" && (
+                <div className="rounded-3xl border border-amber-500/20 bg-surface/90 p-6 space-y-4 animate-in fade-in duration-200">
+                  <h4 className="text-sm font-bold text-amber-500 flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4" />
+                    <span>Annexure 3: Department Visits (Day 1 at 2:00 PM) & Student Capacities</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                    {REPORTING_BRANCHES.map((b) => (
+                      <div key={b.code} className="rounded-xl border border-border bg-surface p-3 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <strong className="text-foreground">{b.name}</strong>
+                          <span className="text-[11px] font-mono text-muted-foreground">{b.studentsCount} Students</span>
+                        </div>
+                        <p className="text-primary font-medium text-[11px]">
+                          Venue: {b.deptVisitVenue || "Respective Dept"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Special Groupings Panel */}
+              {activeAnnexure === "groupings" && (
+                <div className="rounded-3xl border border-violet-500/20 bg-surface/90 p-6 space-y-6 animate-in fade-in duration-200">
+                  <h4 className="text-sm font-bold text-violet-400 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    <span>Official Activity Groups for Tech Displays, Sports, and Cultural Shows</span>
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    {/* Tech Displays */}
+                    <div className="rounded-2xl border border-border bg-surface p-4 space-y-2">
+                      <span className="font-bold text-foreground uppercase tracking-wider text-[11px] block text-primary">
+                        Technical Display (Centenary Hall)
+                      </span>
+                      {SPECIAL_GROUPINGS.tech.map((g) => (
+                        <div key={g.code} className="flex justify-between border-b border-border/40 py-1 text-[11px]">
+                          <strong>{g.code}</strong>
+                          <span className="text-muted-foreground">{g.branches.join(", ")}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Sports */}
+                    <div className="rounded-2xl border border-border bg-surface p-4 space-y-2">
+                      <span className="font-bold text-foreground uppercase tracking-wider text-[11px] block text-emerald-400">
+                        Sports (Athletics Ground)
+                      </span>
+                      {SPECIAL_GROUPINGS.sports.map((g) => (
+                        <div key={g.code} className="flex justify-between border-b border-border/40 py-1 text-[11px]">
+                          <strong>{g.code}</strong>
+                          <span className="text-muted-foreground">{g.branches.join(", ")}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Cultural / PEB / Music */}
+                    <div className="rounded-2xl border border-border bg-surface p-4 space-y-2">
+                      <span className="font-bold text-foreground uppercase tracking-wider text-[11px] block text-amber-400">
+                        Cultural / PEB / Music (Auditorium)
+                      </span>
+                      {SPECIAL_GROUPINGS.cultural.map((g) => (
+                        <div key={g.code} className="flex justify-between border-b border-border/40 py-1 text-[11px]">
+                          <strong>{g.code}</strong>
+                          <span className="text-muted-foreground">{g.branches.join(", ")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </section>
         )}
-
-      </main>
+      </div>
     </div>
   );
 }

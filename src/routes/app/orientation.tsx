@@ -509,7 +509,7 @@ function OrientationPage() {
                 className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition shadow-sm glow-primary"
               >
                 <Calendar className="h-4 w-4" />
-                <span>7-Day Schedule</span>
+                <span>Orientation Schedule</span>
               </a>
             </div>
           </div>
@@ -520,7 +520,7 @@ function OrientationPage() {
               { id: "all", label: "Full Overview", icon: Layers },
               { id: "venues", label: "Reporting Venues & Routes", icon: Building },
               { id: "map", label: "Interactive Campus Map", icon: MapPin },
-              { id: "schedule", label: "Day-by-Day Schedule (7 Days)", icon: Clock },
+              { id: "schedule", label: "Day-by-Day Schedule", icon: Clock },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -559,9 +559,9 @@ function OrientationPage() {
                 </p>
               </div>
 
-              {/* Branch Selector Dropdown */}
-              <div className="flex items-center gap-2">
-                <label htmlFor="branch-select" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+              {/* Branch Selector Dropdown - Mobile Responsive */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto">
+                <label htmlFor="branch-select" className="text-xs font-semibold text-muted-foreground shrink-0">
                   Select Your Branch:
                 </label>
                 <select
@@ -572,7 +572,7 @@ function OrientationPage() {
                     const b = REPORTING_BRANCHES.find((item) => item.code === e.target.value);
                     if (b) setVenueRouteTab(b.routeType);
                   }}
-                  className="rounded-xl border border-border bg-surface px-3 py-2 text-xs font-semibold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 shadow-sm"
+                  className="w-full sm:w-auto min-w-0 max-w-full truncate rounded-xl border border-border bg-surface px-3 py-2 text-xs font-semibold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 shadow-sm"
                 >
                   {REPORTING_BRANCHES.map((b) => (
                     <option key={b.code} value={b.code}>
@@ -968,28 +968,9 @@ function OrientationPage() {
                   </p>
                 </div>
 
-                {/* Schedule Search & Category Filters */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={scheduleSearch}
-                      onChange={(e) => setScheduleSearch(e.target.value)}
-                      placeholder="Search event, venue..."
-                      className="w-48 sm:w-60 rounded-xl border border-border bg-surface py-2 pl-9 pr-3 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
-                    />
-                    {scheduleSearch && (
-                      <button
-                        onClick={() => setScheduleSearch("")}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="flex rounded-xl border border-border bg-surface p-1">
+                {/* Category Filters */}
+                <div className="flex items-center">
+                  <div className="flex flex-wrap items-center gap-1 rounded-xl border border-border bg-surface p-1">
                     {[
                       { id: "all", label: "All" },
                       { id: "morning", label: "Morning" },
@@ -1000,7 +981,7 @@ function OrientationPage() {
                       <button
                         key={cat.id}
                         onClick={() => setScheduleCategory(cat.id)}
-                        className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                        className={`rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition ${
                           scheduleCategory === cat.id
                             ? "bg-primary text-primary-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground"

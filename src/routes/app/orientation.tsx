@@ -608,167 +608,332 @@ function OrientationPage() {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 sm:px-8 py-8 space-y-12">
-        {/* ─── SECTION 1: REPORTING VENUES & DIRECTIONS ────────────────── */}
+        {/* ─── SECTION 1: REPORTING VENUES & HOW TO REACH (2 ROUTE PHOTOS) ─── */}
         {(activeTab === "all" || activeTab === "venues") && (
-          <section id="reporting-venues" className="space-y-6 animate-fade-up">
+          <section id="reporting-venues" className="space-y-8 animate-fade-up">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
+                  <div className="grid h-8 w-8 place-items-center rounded-lg bg-amber-500/10 text-amber-500">
                     <Building className="h-4 w-4" />
                   </div>
-                  <h2 className="text-xl font-bold tracking-tight">Branch Reporting Venues & Gate 2 Routes</h2>
+                  <h2 className="text-xl font-bold tracking-tight">Day 1 Reporting Venues & How to Reach</h2>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Select your engineering branch to view assigned venue, group, route directions from Gate 2, and student count.
+                  Mandatory attendance reporting at <strong>8:30 AM – 9:30 AM</strong> on Wednesday, 19th August 2026.
                 </p>
               </div>
 
-              {/* Branch Quick Selector */}
+              {/* Branch Selector Dropdown */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-muted-foreground">Branch:</span>
+                <label htmlFor="branch-select" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+                  Select Your Branch:
+                </label>
                 <select
+                  id="branch-select"
                   value={selectedBranchCode}
-                  onChange={(e) => setSelectedBranchCode(e.target.value)}
-                  className="rounded-xl border border-border bg-surface px-3 py-2 text-xs font-semibold outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+                  onChange={(e) => {
+                    setSelectedBranchCode(e.target.value);
+                    const b = REPORTING_BRANCHES.find((item) => item.code === e.target.value);
+                    if (b) setVenueRouteTab(b.routeType);
+                  }}
+                  className="rounded-xl border border-border bg-surface px-3 py-2 text-xs font-semibold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 shadow-sm"
                 >
                   {REPORTING_BRANCHES.map((b) => (
                     <option key={b.code} value={b.code}>
-                      {b.name} ({b.code})
+                      {b.code} — {b.name}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* Branch Highlight Card */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 via-surface to-background p-6 space-y-6 shadow-md relative overflow-hidden">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-primary/15 px-2.5 py-0.5 text-xs font-bold text-primary font-mono">
-                        {selectedBranch.group}
-                      </span>
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {selectedBranch.studentsCount ? `${selectedBranch.studentsCount} Students` : ""}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl font-black tracking-tight mt-1 text-foreground">
-                      {selectedBranch.name}
-                    </h3>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-[11px] uppercase font-bold text-muted-foreground tracking-wider block">
-                      Day 1 Morning Venue
+            {/* Personalized Branch Fast Card */}
+            <div className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 via-surface to-background p-5 sm:p-6 shadow-md relative overflow-hidden space-y-5">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border/60 pb-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-lg bg-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-sm">
+                      {selectedBranch.code}
                     </span>
-                    <strong className="text-lg font-extrabold text-primary font-mono">
-                      {ATTENDANCE_VENUES_BY_DAY[selectedBranch.code]?.[1] || selectedBranch.venueName}
-                    </strong>
+                    <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-xs font-mono font-semibold text-muted-foreground">
+                      {selectedBranch.group}
+                    </span>
+                    {selectedBranch.studentsCount && (
+                      <span className="rounded-lg bg-surface border border-border px-2.5 py-1 text-xs font-mono font-semibold text-muted-foreground">
+                        {selectedBranch.studentsCount} Students
+                      </span>
+                    )}
+                    <span className="rounded-lg bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 text-xs font-semibold text-emerald-500">
+                      Day 1 Reporting: 8:30 AM – 9:30 AM
+                    </span>
                   </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-foreground mt-2">
+                    {selectedBranch.name}
+                  </h3>
                 </div>
 
-                {/* Day-by-Day Attendance Venue Badges */}
-                <div className="rounded-2xl border border-border/80 bg-surface/70 p-4 space-y-2.5">
-                  <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
-                    Daily Morning Attendance Venue Plan (Annexure 1):
+                <div className="text-left lg:text-right">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block">
+                    Day 1 Morning Venue
                   </span>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center">
-                    {[1, 2, 3, 4, 5, 6, 7].map((d) => (
-                      <div
-                        key={d}
-                        onClick={() => setSelectedDay(d)}
-                        className={`cursor-pointer rounded-xl border p-2 text-xs transition ${
-                          selectedDay === d
-                            ? "border-primary bg-primary/10 shadow-sm"
-                            : "border-border bg-surface-elevated/50 hover:border-primary/40"
-                        }`}
-                      >
-                        <span className="text-[10px] font-bold text-muted-foreground block">Day {d}</span>
-                        <span className="font-semibold text-foreground truncate block font-mono">
-                          {ATTENDANCE_VENUES_BY_DAY[selectedBranch.code]?.[d] || "—"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Gate 2 Turn-by-Turn Directions */}
-                <div className="rounded-2xl border border-border bg-surface p-4 space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                    <Navigation className="h-4 w-4 text-emerald-500" />
-                    <span>Turn-by-Turn Navigation from Gate 2 (Main Campus Gate):</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {selectedBranch.gateDirections}
-                  </p>
-                </div>
-
-                {/* Dept Visit Info */}
-                <div className="flex items-center justify-between text-xs border-t border-border/60 pt-4">
-                  <span className="text-muted-foreground">Day 1 Department Visit (2:00 PM):</span>
-                  <span className="font-semibold text-foreground bg-surface border border-border px-2.5 py-1 rounded-lg">
-                    {selectedBranch.deptVisitVenue || "Respective Department"}
+                  <strong className="text-xl font-extrabold text-primary font-mono block mt-0.5">
+                    {ATTENDANCE_VENUES_BY_DAY[selectedBranch.code]?.[1] || selectedBranch.venueName}
+                  </strong>
+                  <span className="text-xs text-muted-foreground">
+                    {selectedBranch.building} ({selectedBranch.floor})
                   </span>
                 </div>
               </div>
 
-              {/* Route Type Quick Switcher */}
-              <div className="rounded-3xl border border-border bg-surface p-5 space-y-4 shadow-sm">
-                <div className="flex items-center justify-between border-b border-border/60 pb-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Reporting Buildings
-                  </h4>
-                  <span className="text-[11px] text-primary font-semibold">
-                    {venueRouteTab === "audi" ? "Auditorium Complex" : "New Academic Block"}
-                  </span>
+              {/* Day-by-Day Morning Attendance Plan (Annexure 1) */}
+              <div className="space-y-2">
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
+                  7-Day Morning Attendance Plan (Annexure 1):
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center">
+                  {[1, 2, 3, 4, 5, 6, 7].map((d) => (
+                    <div
+                      key={d}
+                      onClick={() => setSelectedDay(d)}
+                      className={`cursor-pointer rounded-xl border p-2 text-xs transition ${
+                        selectedDay === d
+                          ? "border-primary bg-primary/10 shadow-sm"
+                          : "border-border bg-surface-elevated/50 hover:border-primary/40"
+                      }`}
+                    >
+                      <span className="text-[10px] font-bold text-muted-foreground block">Day {d}</span>
+                      <span className="font-semibold text-foreground truncate block font-mono">
+                        {ATTENDANCE_VENUES_BY_DAY[selectedBranch.code]?.[d] || "—"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Gate 2 Turn-by-Turn Navigation */}
+              <div className="rounded-2xl border border-border bg-surface/80 p-4 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                  <Navigation className="h-4 w-4 text-emerald-500" />
+                  <span>Turn-by-Turn Directions from Gate 2 (Main Campus Gate):</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {selectedBranch.gateDirections}
+                </p>
+              </div>
+
+              {/* Dept Visit Venue */}
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs pt-1">
+                <span className="text-muted-foreground">Day 1 Department Visit (2:00 PM – 4:00 PM):</span>
+                <span className="font-semibold text-foreground bg-surface border border-border px-3 py-1 rounded-lg">
+                  {selectedBranch.deptVisitVenue || "Respective Department"}
+                </span>
+              </div>
+            </div>
+
+            {/* ─── DUAL PHOTO DISPLAY: AUDITORIUM & NAB HOW TO REACH ─── */}
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    <span>How to Reach Reporting Buildings (Visual Route Maps)</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Switch between the Auditorium and NAB routes to view the official photographic directions from Gate 2.
+                  </p>
                 </div>
 
-                <div className="flex rounded-xl border border-border bg-surface-elevated p-1">
+                {/* Route Switcher Tabs */}
+                <div className="flex rounded-xl border border-border bg-surface p-1 self-start sm:self-auto">
                   <button
                     onClick={() => setVenueRouteTab("audi")}
-                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
+                    className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
                       venueRouteTab === "audi"
-                        ? "bg-primary text-primary-foreground shadow-sm"
+                        ? "bg-primary text-primary-foreground shadow-sm glow-primary"
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    Main Auditorium
+                    Auditorium Route (CSE, ECE, VLSI)
                   </button>
                   <button
                     onClick={() => setVenueRouteTab("nab")}
-                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
+                    className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
                       venueRouteTab === "nab"
-                        ? "bg-primary text-primary-foreground shadow-sm"
+                        ? "bg-primary text-primary-foreground shadow-sm glow-primary"
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    NAB Lecture Halls
+                    NAB Route (Aero, Elec, Civil, AI, DS, Mech, etc.)
                   </button>
                 </div>
+              </div>
 
-                {venueRouteTab === "audi" ? (
-                  <div className="space-y-2 text-xs text-muted-foreground">
-                    <p className="font-semibold text-foreground">Auditorium Branches (Day 1):</p>
-                    <p>• Computer Science (CSE) — Group A</p>
-                    <p>• Electronics & Comm (ECE) — Group B</p>
-                    <p>• VLSI Design & Tech — Group C</p>
-                    <p className="text-[11px] text-primary font-medium pt-2">
-                      Location: Right side after passing central roundabout from Gate 2.
-                    </p>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left 7 cols: Image Display Card with Lightbox Trigger */}
+                <div className="lg:col-span-7 rounded-3xl border border-border bg-surface/50 overflow-hidden shadow-xl group">
+                  <div className="relative">
+                    <div className="absolute top-3 right-3 z-10">
+                      <button
+                        onClick={() =>
+                          setLightboxImage({
+                            src:
+                              venueRouteTab === "audi"
+                                ? "/orientation/reporting-venue-audi.png"
+                                : "/orientation/reporting-venue-nab.png",
+                            title:
+                              venueRouteTab === "audi"
+                                ? "Auditorium Reporting Route Map"
+                                : "New Academic Block (NAB) Reporting Route Map",
+                          })
+                        }
+                        className="flex items-center gap-1.5 rounded-xl bg-black/70 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-white hover:bg-black/90 transition shadow-md"
+                      >
+                        <Maximize2 className="h-3.5 w-3.5" />
+                        <span>Expand / Zoom</span>
+                      </button>
+                    </div>
+
+                    <img
+                      src={
+                        venueRouteTab === "audi"
+                          ? "/orientation/reporting-venue-audi.png"
+                          : "/orientation/reporting-venue-nab.png"
+                      }
+                      alt={
+                        venueRouteTab === "audi"
+                          ? "Reporting on Day 1 for CSE, ECE, VLSI"
+                          : "Reporting on Day 1 for NAB Branches"
+                      }
+                      className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-[1.01] cursor-pointer"
+                      onClick={() =>
+                        setLightboxImage({
+                          src:
+                            venueRouteTab === "audi"
+                              ? "/orientation/reporting-venue-audi.png"
+                              : "/orientation/reporting-venue-nab.png",
+                          title:
+                            venueRouteTab === "audi"
+                              ? "Auditorium Reporting Route Map"
+                              : "New Academic Block (NAB) Reporting Route Map",
+                        })
+                      }
+                    />
                   </div>
-                ) : (
-                  <div className="space-y-2 text-xs text-muted-foreground">
-                    <p className="font-semibold text-foreground">NAB Lecture Halls (Day 1):</p>
-                    <p>• <strong>L-26</strong>: Civil (Group E)</p>
-                    <p>• <strong>L-27</strong>: Electrical (Group D)</p>
-                    <p>• <strong>L-28</strong>: Mechanical (Group G)</p>
-                    <p>• <strong>L-29</strong>: AI, DS, M&C (Group F)</p>
-                    <p>• <strong>L-30</strong>: Metallurgy, Production (Group H)</p>
-                    <p>• <strong>L-31</strong>: B.Design, Aerospace (Group C)</p>
+
+                  <div className="border-t border-border/60 bg-surface px-4 py-3 text-xs text-muted-foreground flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="font-medium text-foreground">
+                      {venueRouteTab === "audi"
+                        ? "📌 Route: Enter Gate 2 ➔ PEC Roundabout ➔ Turn RIGHT to Auditorium"
+                        : "📌 Route: Enter Gate 2 ➔ Roundabout ➔ Go past Library ➔ Turn RIGHT past CSRC & Nescafe to NAB"}
+                    </span>
+                    <span className="text-[11px] font-mono text-primary shrink-0">Tap image to zoom in modal</span>
                   </div>
-                )}
+                </div>
+
+                {/* Right 5 cols: Structured Venue Breakdown */}
+                <div className="lg:col-span-5 space-y-4">
+                  <div className="rounded-3xl border border-border bg-surface p-5 space-y-4 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                      <h4 className="text-sm font-bold tracking-tight flex items-center gap-2">
+                        <Building className="h-4 w-4 text-primary" />
+                        <span>
+                          {venueRouteTab === "audi"
+                            ? "Auditorium Venue Breakdown"
+                            : "New Academic Block (NAB) Floor Guide"}
+                        </span>
+                      </h4>
+                      <span className="text-[10px] font-mono uppercase bg-surface-elevated px-2 py-0.5 rounded border border-border text-primary font-bold">
+                        {venueRouteTab === "audi" ? "3 Branches" : "10 Branches"}
+                      </span>
+                    </div>
+
+                    {venueRouteTab === "audi" ? (
+                      <div className="space-y-3">
+                        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-xs text-primary">Main Auditorium</span>
+                            <span className="text-[10px] font-mono bg-primary/20 text-primary px-2 py-0.5 rounded font-semibold">
+                              Stage & Main Seating
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            Primary reporting hall for <strong>CSE (Group A)</strong>, <strong>ECE (Group B)</strong>, and <strong>VLSI (Group C)</strong>.
+                          </p>
+                        </div>
+
+                        <div className="space-y-2 text-xs">
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border">
+                            <div>
+                              <strong className="text-foreground block">Computer Science (CSE)</strong>
+                              <span className="text-[11px] text-muted-foreground">Group A · 137 Students</span>
+                            </div>
+                            <span className="font-mono text-primary font-bold">Ground Floor</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border">
+                            <div>
+                              <strong className="text-foreground block">Electronics & Comm (ECE)</strong>
+                              <span className="text-[11px] text-muted-foreground">Group B · 137 Students</span>
+                            </div>
+                            <span className="font-mono text-primary font-bold">Ground Floor</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border">
+                            <div>
+                              <strong className="text-foreground block">VLSI Design & Technology</strong>
+                              <span className="text-[11px] text-muted-foreground">Group C · 36 Students</span>
+                            </div>
+                            <span className="font-mono text-primary font-bold">Ground Floor</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 text-xs">
+                        <div className="p-3 rounded-xl bg-surface border border-border flex items-center justify-between">
+                          <div>
+                            <strong className="text-foreground block">Lecture Hall L-26</strong>
+                            <span className="text-[11px] text-muted-foreground">B.Design (25) & Aerospace (36)</span>
+                          </div>
+                          <span className="font-mono text-primary font-bold">Ground Floor</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-surface border border-border flex items-center justify-between">
+                          <div>
+                            <strong className="text-foreground block">Lecture Hall L-27</strong>
+                            <span className="text-[11px] text-muted-foreground">Electrical Engineering (136)</span>
+                          </div>
+                          <span className="font-mono text-primary font-bold">Ground Floor</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-surface border border-border flex items-center justify-between">
+                          <div>
+                            <strong className="text-foreground block">Lecture Hall L-28</strong>
+                            <span className="text-[11px] text-muted-foreground">Civil Engineering (136)</span>
+                          </div>
+                          <span className="font-mono text-primary font-bold">1st Floor</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-surface border border-border flex items-center justify-between">
+                          <div>
+                            <strong className="text-foreground block">Lecture Hall L-29</strong>
+                            <span className="text-[11px] text-muted-foreground">AI (36), DS (67), M&C (36)</span>
+                          </div>
+                          <span className="font-mono text-primary font-bold">1st Floor</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-surface border border-border flex items-center justify-between">
+                          <div>
+                            <strong className="text-foreground block">Lecture Hall L-30</strong>
+                            <span className="text-[11px] text-muted-foreground">Mechanical Engineering (137)</span>
+                          </div>
+                          <span className="font-mono text-primary font-bold">2nd Floor</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-surface border border-border flex items-center justify-between">
+                          <div>
+                            <strong className="text-foreground block">Lecture Hall L-31</strong>
+                            <span className="text-[11px] text-muted-foreground">Metallurgy (69) & Production (46)</span>
+                          </div>
+                          <span className="font-mono text-primary font-bold">2nd Floor</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </section>

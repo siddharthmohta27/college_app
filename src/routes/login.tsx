@@ -1,13 +1,25 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { GraduationCap, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
-import { firebaseAuth } from "@/lib/firebase";
+import {
+  GraduationCap,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  AlertCircle,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Compass,
+} from "lucide-react";
+import { firebaseAuth, isValidPecEmail, isValidAnyEmail } from "@/lib/firebase";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign In — Campus Connect" },
-      { name: "description", content: "Sign in to Campus Connect with your college email." },
+      { name: "description", content: "Sign in to Campus Connect with your college or fresher email." },
     ],
   }),
   component: LoginPage,
@@ -16,6 +28,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [isFresherMode, setIsFresherMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -52,12 +65,24 @@ function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const cleanEmail = email.trim();
+    if (!isFresherMode && !isValidPecEmail(cleanEmail)) {
+      setError("Please enter a valid @pec.edu.in email ID, or click below if you are a Fresher without a PEC ID.");
+      return;
+    }
+
+    if (isFresherMode && !isValidAnyEmail(cleanEmail)) {
+      setError("Please enter a valid email address (e.g. name@gmail.com).");
+      return;
+    }
+
     setLoading(true);
     try {
       if (mode === "signup") {
-        await firebaseAuth.signUp(email, password, name);
+        await firebaseAuth.signUp(cleanEmail, password, name, isFresherMode);
       } else {
-        await firebaseAuth.signIn(email, password);
+        await firebaseAuth.signIn(cleanEmail, password, isFresherMode);
       }
       navigate({ to: "/app" });
     } catch (err: unknown) {
@@ -73,7 +98,7 @@ function LoginPage() {
     setError(null);
     setGoogleLoading(true);
     try {
-      await firebaseAuth.signInWithGoogle();
+      await firebaseAuth.signInWithGoogle(true);
       navigate({ to: "/app" });
     } catch (err: unknown) {
       const code = (err as { code?: string }).code ?? "";
@@ -85,58 +110,97 @@ function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
-      {/* Background glow */}
+    <div className="relative flex min-h-screen w-full items-center justify-center bg-background p-4 overflow-x-hidden">
+      {/* Background ambient lighting */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute left-1/4 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
+        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-emerald-500/5 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-md animate-fade-up">
-        {/* Logo */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-primary/20">
+        {/* Logo & Header */}
+        <div className="mb-6 text-center">
+          <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 border border-primary/25 shadow-sm">
             <GraduationCap className="h-7 w-7 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold">Campus Connect</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Your college, all in one place</p>
+          <h1 className="text-2xl font-bold tracking-tight">Campus Connect</h1>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Punjab Engineering College · Student Portal & Community
+          </p>
         </div>
 
-        {/* Card */}
-        <div className="rounded-2xl border border-border glass p-8">
+        {/* Auth Card */}
+        <div className="rounded-2xl border border-border glass p-6 sm:p-8 shadow-xl">
           {/* Tab toggle */}
-          <div className="mb-6 flex rounded-xl border border-border bg-surface p-1">
+          <div className="mb-5 flex rounded-xl border border-border bg-surface p-1">
             <button
               id="signin-tab"
+              type="button"
               onClick={() => {
                 setMode("signin");
                 setError(null);
               }}
-              className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${mode === "signin" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`flex-1 rounded-lg py-2 text-xs sm:text-sm font-semibold transition ${
+                mode === "signin"
+                  ? "bg-primary text-primary-foreground shadow-sm glow-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               Sign In
             </button>
             <button
               id="signup-tab"
+              type="button"
               onClick={() => {
                 setMode("signup");
                 setError(null);
               }}
-              className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${mode === "signup" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`flex-1 rounded-lg py-2 text-xs sm:text-sm font-semibold transition ${
+                mode === "signup"
+                  ? "bg-primary text-primary-foreground shadow-sm glow-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               Sign Up
             </button>
           </div>
 
-          {/* Error */}
+          {/* Mode banner indicator */}
+          <div className="mb-4">
+            {isFresherMode ? (
+              <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-2 text-xs text-amber-500">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 shrink-0" />
+                  <span className="font-semibold">Fresher Mode (Any Email)</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsFresherMode(false);
+                    setError(null);
+                  }}
+                  className="text-[11px] underline hover:text-amber-400 font-medium"
+                >
+                  Use PEC ID
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2 text-xs text-primary">
+                <ShieldCheck className="h-4 w-4 shrink-0" />
+                <span className="font-medium">Primary: Punjab Engineering College ID</span>
+              </div>
+            )}
+          </div>
+
+          {/* Error notice */}
           {error && (
-            <div className="mb-4 flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+            <div className="mb-4 flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs sm:text-sm text-rose-400 animate-in fade-in duration-200">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Form */}
+          {/* Main Auth Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <div>
@@ -151,20 +215,26 @@ function LoginPage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Siddharth Mohta"
+                  placeholder="e.g. Siddharth Mohta"
                   required
                   className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary/30"
                 />
               </div>
             )}
 
+            {/* Email Field */}
             <div>
-              <label
-                htmlFor="email"
-                className="mb-1.5 block text-xs font-semibold text-muted-foreground"
-              >
-                College Email
-              </label>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label
+                  htmlFor="email"
+                  className="block text-xs font-semibold text-muted-foreground"
+                >
+                  {isFresherMode ? "Personal / Any Email ID" : "PEC Email ID"}
+                </label>
+                {!isFresherMode && (
+                  <span className="text-[10px] font-mono text-primary font-medium">@pec.edu.in</span>
+                )}
+              </div>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -172,13 +242,27 @@ function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@pec.edu.in"
+                  placeholder={
+                    isFresherMode
+                      ? "yourname@gmail.com"
+                      : "xxxx@pec.edu.in"
+                  }
                   required
-                  className="w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary/30"
+                  className={`w-full rounded-xl border bg-surface py-2.5 pl-10 pr-4 text-sm outline-none transition focus:ring-1 ${
+                    isFresherMode
+                      ? "border-amber-500/40 focus:border-amber-500 focus:ring-amber-500/30"
+                      : "border-border focus:border-primary focus:ring-primary/30 font-medium"
+                  }`}
                 />
               </div>
+              {!isFresherMode && (
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Default primary flow: Enter your official PEC email ID.
+                </p>
+              )}
             </div>
 
+            {/* Password */}
             <div>
               <label
                 htmlFor="password"
@@ -208,6 +292,7 @@ function LoginPage() {
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               id="submit-btn"
               type="submit"
@@ -215,9 +300,58 @@ function LoginPage() {
               className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50 glow-primary flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {mode === "signin" ? "Sign In" : "Create Account"}
+              {mode === "signin"
+                ? isFresherMode
+                  ? "Sign In (Fresher Access)"
+                  : "Sign In with PEC ID"
+                : isFresherMode
+                  ? "Create Fresher Account"
+                  : "Create Account with PEC ID"}
             </button>
           </form>
+
+          {/* Secondary Fresher Option (Prominent yet visually lighter) */}
+          {!isFresherMode ? (
+            <div className="mt-4 pt-3 border-t border-border/60">
+              <button
+                type="button"
+                id="fresher-toggle-btn"
+                onClick={() => {
+                  setIsFresherMode(true);
+                  setError(null);
+                }}
+                className="w-full text-left group p-3 rounded-xl border border-dashed border-border hover:border-primary/40 bg-surface/50 hover:bg-surface-elevated transition duration-200"
+              >
+                <div className="flex items-start gap-2.5">
+                  <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-amber-500/10 text-amber-500 group-hover:scale-105 transition-transform mt-0.5">
+                    <Compass className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-1.5">
+                      New / Fresher and don't have your PEC ID yet?
+                      <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                      Continue with any email to access the unofficial college dashboard & Orientation guide.
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          ) : (
+            <div className="mt-4 pt-3 border-t border-border/60 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsFresherMode(false);
+                  setError(null);
+                }}
+                className="text-xs text-muted-foreground hover:text-primary transition-colors underline font-medium"
+              >
+                ← Already have an official @pec.edu.in ID? Switch back
+              </button>
+            </div>
+          )}
 
           {/* Divider */}
           <div className="my-5 flex items-center gap-3">
@@ -226,7 +360,7 @@ function LoginPage() {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          {/* Google */}
+          {/* Google Sign In */}
           <button
             id="google-signin-btn"
             onClick={handleGoogle}

@@ -19,6 +19,7 @@ import {
   Globe,
   Hash,
   GraduationCap,
+  Compass,
   type LucideIcon,
 } from "lucide-react";
 
@@ -45,6 +46,15 @@ export const SEARCH_DATA: SearchResult[] = [
     icon: LayoutDashboard,
     href: "/app",
     keywords: ["home", "overview", "stats"],
+  },
+  {
+    id: "page-orientation",
+    title: "Orientation 2026",
+    subtitle: "Freshers Guide, Reporting Venues, Schedule & Maps",
+    category: "Pages",
+    icon: Compass,
+    href: "/app/orientation",
+    keywords: ["orientation", "fresher", "freshers", "map", "day 1", "reporting", "venue", "schedule", "auditorium", "nab"],
   },
   {
     id: "page-marketplace",

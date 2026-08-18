@@ -68,6 +68,7 @@ function Landing() {
     e: React.FormEvent,
     type: "login" | "signup",
     formData: { email: string; password: string; name?: string; college?: string },
+    isFresherMode = false,
   ) => {
     e.preventDefault();
     setAuthLoading(true);
@@ -75,9 +76,9 @@ function Landing() {
 
     try {
       if (type === "signup") {
-        await firebaseAuth.signUp(formData.email, formData.password, formData.name);
+        await firebaseAuth.signUp(formData.email, formData.password, formData.name, isFresherMode);
       } else {
-        await firebaseAuth.signIn(formData.email, formData.password);
+        await firebaseAuth.signIn(formData.email, formData.password, isFresherMode);
       }
 
       if (auth.currentUser) {
@@ -95,7 +96,7 @@ function Landing() {
     setAuthError(null);
 
     try {
-      await firebaseAuth.signInWithGoogle();
+      await firebaseAuth.signInWithGoogle(true);
       if (auth.currentUser) {
         navigate({ to: "/app" });
       }
@@ -395,24 +396,29 @@ function AuthCard({
   authError: string | null;
   setAuthError: (e: string | null) => void;
   authLoading: boolean;
-  handleSignupSubmit: (e: React.FormEvent) => void;
-  handleLoginSubmit: (e: React.FormEvent) => void;
+  handleSignupSubmit: (e: React.FormEvent, isFresher?: boolean) => void;
+  handleLoginSubmit: (e: React.FormEvent, isFresher?: boolean) => void;
   handleGoogleSignIn: () => void;
 }) {
   const isSignup = mode === "signup";
+  const [isFresherMode, setIsFresherMode] = useState(false);
 
   return (
     <main className="relative z-10 mx-auto flex max-w-md flex-col items-center px-6 pt-8 pb-16">
       <div className="w-full rounded-3xl glass-strong neon-border p-8 shadow-elevated animate-fade-up">
-        <div className="mb-8 flex flex-col items-center text-center">
+        <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 animate-pulse-glow">
             <GraduationCap className="h-7 w-7 text-primary" />
           </div>
           <h2 className="text-2xl font-bold">
             {isSignup ? "Join Campus Connect" : "Welcome back"}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {isSignup ? "Create your student account" : "Sign in to your campus"}
+          <p className="mt-1 text-xs text-muted-foreground">
+            {isFresherMode
+              ? "Fresher Access · Any email format accepted"
+              : isSignup
+                ? "Create your student account"
+                : "Sign in to your college dashboard"}
           </p>
         </div>
 
@@ -422,7 +428,12 @@ function AuthCard({
           </div>
         )}
 
-        <form onSubmit={isSignup ? handleSignupSubmit : handleLoginSubmit} className="space-y-4">
+        <form
+          onSubmit={(e) =>
+            isSignup ? handleSignupSubmit(e, isFresherMode) : handleLoginSubmit(e, isFresherMode)
+          }
+          className="space-y-4"
+        >
           {isSignup && (
             <Field
               label="Full name"
@@ -442,18 +453,18 @@ function AuthCard({
               type="text"
               id="signup-college"
               name="college"
-              placeholder="e.g. IIT Delhi, Delhi University"
+              placeholder="Punjab Engineering College"
               value={formData.college}
               onChange={handleChange}
             />
           )}
           <Field
-            label="College email"
+            label={isFresherMode ? "Personal / Any Email Address" : "Enter your PEC email ID"}
             icon={<Mail className="h-4 w-4" />}
             type="email"
             id="auth-email"
             name="email"
-            placeholder="you@pec.edu.in"
+            placeholder={isFresherMode ? "yourname@gmail.com" : "xxxx@pec.edu.in"}
             value={formData.email}
             onChange={handleChange}
           />
@@ -481,12 +492,57 @@ function AuthCard({
               </>
             ) : (
               <>
-                {isSignup ? "Create account" : "Sign in"}
+                {isSignup
+                  ? isFresherMode
+                    ? "Create Fresher Account"
+                    : "Create Account"
+                  : isFresherMode
+                    ? "Sign In (Fresher)"
+                    : "Sign In"}
                 <ArrowRight className="h-4 w-4" />
               </>
             )}
           </button>
         </form>
+
+        {/* Secondary Fresher Option */}
+        {!isFresherMode ? (
+          <div className="mt-4 pt-3 border-t border-border/60">
+            <button
+              type="button"
+              onClick={() => {
+                setIsFresherMode(true);
+                setAuthError(null);
+              }}
+              className="w-full text-left p-3 rounded-xl border border-dashed border-border hover:border-primary/40 bg-surface/50 hover:bg-surface-elevated transition duration-200"
+            >
+              <div className="flex items-start gap-2.5">
+                <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-foreground hover:text-primary transition-colors">
+                    New / Fresher and don't have your PEC ID yet?
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                    Continue with any email to access the unofficial college dashboard & Orientation.
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
+        ) : (
+          <div className="mt-3 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setIsFresherMode(false);
+                setAuthError(null);
+              }}
+              className="text-xs text-muted-foreground hover:text-primary underline"
+            >
+              ← Have a PEC ID? Use @pec.edu.in
+            </button>
+          </div>
+        )}
 
         <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
           <div className="h-px flex-1 bg-border" />

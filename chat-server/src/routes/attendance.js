@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { pool } = require("../config/db");
+const { requireAuth } = require("../middleware/auth");
 
 let isTableInitialized = false;
 
@@ -27,15 +28,11 @@ async function initAttendanceTable() {
   }
 }
 
-// Run immediately and also ensure table exists on routes
 setTimeout(initAttendanceTable, 1000);
 
-// GET /api/attendance?userId=xyz
-router.get("/", async (req, res) => {
-  const { userId } = req.query;
-  if (!userId) {
-    return res.status(400).json({ error: "userId query parameter required" });
-  }
+// GET /api/attendance - Get current user's attendance
+router.get("/", requireAuth, async (req, res) => {
+  const firebaseUid = req.user.id;
 
   try {
     const result = await pool.query(
@@ -43,7 +40,7 @@ router.get("/", async (req, res) => {
          FROM user_attendance
         WHERE user_id = $1
         ORDER BY subject_code ASC`,
-      [userId]
+      [firebaseUid]
     );
 
     return res.json({ data: result.rows });
@@ -53,11 +50,13 @@ router.get("/", async (req, res) => {
   }
 });
 
-// POST /api/attendance
-router.post("/", async (req, res) => {
-  const { userId, records } = req.body;
-  if (!userId || !Array.isArray(records)) {
-    return res.status(400).json({ error: "userId and records array required" });
+// POST /api/attendance - Sync current user's attendance
+router.post("/", requireAuth, async (req, res) => {
+  const firebaseUid = req.user.id;
+  const { records } = req.body;
+
+  if (!Array.isArray(records)) {
+    return res.status(400).json({ error: "records array required" });
   }
 
   try {
@@ -72,7 +71,7 @@ router.post("/", async (req, res) => {
            absent = EXCLUDED.absent,
            cancelled = EXCLUDED.cancelled,
            updated_at = CURRENT_TIMESTAMP`,
-        [userId, r.code || r.subject_code, r.name || r.subject_name, r.lecturesAttended || r.attended || 0, r.lecturesAbsent || r.absent || 0, r.lecturesCancelled || r.cancelled || 0]
+        [firebaseUid, r.code || r.subject_code, r.name || r.subject_name, r.lecturesAttended || r.attended || 0, r.lecturesAbsent || r.absent || 0, r.lecturesCancelled || r.cancelled || 0]
       );
     }
 

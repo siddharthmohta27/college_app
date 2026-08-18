@@ -3,6 +3,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 const datingRouter = require("./src/routes/dating");
 const datingV3Router = require("./src/routes/dating-v3");
 const chatRouter = require("./src/routes/chat");
@@ -17,8 +18,44 @@ const {
 } = require("./src/config/db");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+
+// CORS configuration - use environment variable for production domains
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+  : ["http://localhost:8080", "http://localhost:8081", "http://localhost:3000"];
+
+app.use(cors({ origin: corsOrigins, credentials: true }));
+app.use(express.json({ limit: "10kb" }));
+
+// ─── Rate Limiting ──────────────────────────────────────────────────
+// General API rate limit
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // limit each IP to 300 requests per windowMs
+  message: { error: "Too many requests, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Stricter rate limit for auth-sensitive endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // limit each IP to 50 requests per windowMs
+  message: { error: "Too many requests, please try again later" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Very strict rate limit for write operations (swipes, likes, messages)
+const writeLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // limit each IP to 30 write requests per minute
+  message: { error: "Too many requests, please slow down" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use("/api/", apiLimiter);
 
 // ─── REST Routes ──────────────────────────────────────────────────
 app.use("/api/dating", datingRouter);
@@ -30,8 +67,9 @@ app.use("/api/attendance", attendanceRouter);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:8080", "http://localhost:8081", "http://localhost:3000", "*"],
+    origin: corsOrigins,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 

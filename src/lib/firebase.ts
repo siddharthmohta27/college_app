@@ -41,14 +41,23 @@ export const isValidPecEmail = (email: string | null | undefined): boolean => {
   return email.trim().toLowerCase().endsWith("@pec.edu.in");
 };
 
+export const isValidAnyEmail = (email: string | null | undefined): boolean => {
+  if (!email) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+};
+
 // ─── Auth Helpers ──────────────────────────────────────────────
 export const firebaseAuth = {
   // Sign up with email + password
-  async signUp(email: string, password: string, displayName?: string) {
-    if (!isValidPecEmail(email)) {
-      throw new Error("Only @pec.edu.in email addresses are allowed.");
+  async signUp(email: string, password: string, displayName?: string, allowAnyEmail = false) {
+    const trimmed = (email || "").trim();
+    if (!isValidAnyEmail(trimmed)) {
+      throw new Error("Please enter a valid email address.");
     }
-    const { user } = await createUserWithEmailAndPassword(auth, email, password);
+    if (!allowAnyEmail && !isValidPecEmail(trimmed)) {
+      throw new Error("Only @pec.edu.in email addresses are allowed in standard mode.");
+    }
+    const { user } = await createUserWithEmailAndPassword(auth, trimmed, password);
     if (displayName) {
       await updateProfile(user, { displayName });
     }
@@ -56,18 +65,22 @@ export const firebaseAuth = {
   },
 
   // Sign in with email + password
-  async signIn(email: string, password: string) {
-    if (!isValidPecEmail(email)) {
-      throw new Error("Only @pec.edu.in email addresses are allowed.");
+  async signIn(email: string, password: string, allowAnyEmail = false) {
+    const trimmed = (email || "").trim();
+    if (!isValidAnyEmail(trimmed)) {
+      throw new Error("Please enter a valid email address.");
     }
-    const { user } = await signInWithEmailAndPassword(auth, email, password);
+    if (!allowAnyEmail && !isValidPecEmail(trimmed)) {
+      // In sign-in, if user typed a valid email we let firebase check credentials
+    }
+    const { user } = await signInWithEmailAndPassword(auth, trimmed, password);
     return user;
   },
 
   // Sign in with Google popup
-  async signInWithGoogle() {
+  async signInWithGoogle(allowAnyEmail = true) {
     const { user } = await signInWithPopup(auth, googleProvider);
-    if (!isValidPecEmail(user.email)) {
+    if (!allowAnyEmail && !isValidPecEmail(user.email)) {
       await signOut(auth);
       throw new Error("Only @pec.edu.in email addresses are allowed.");
     }

@@ -20,6 +20,7 @@ import {
   MapPin,
   User,
   FlaskConical,
+  Compass,
 } from "lucide-react";
 import { TodaysOverview } from "@/components/dashboard/todays-overview";
 import { useState, useEffect } from "react";
@@ -35,6 +36,14 @@ export const Route = createFileRoute("/app/")({
 });
 
 const ANNOUNCEMENTS = [
+  {
+    id: 0,
+    badge: "Orientation",
+    badgeColor: "bg-primary/10 text-primary border border-primary/20",
+    title: "Freshers Orientation 2026 — Day 1 Schedule & Venues Live!",
+    time: "Latest",
+    urgent: true,
+  },
   {
     id: 1,
     badge: "Exam",
@@ -70,6 +79,13 @@ const ANNOUNCEMENTS = [
 ];
 
 const QUICK_LINKS = [
+  {
+    to: "/app/orientation",
+    label: "Orientation 2026",
+    icon: Compass,
+    iconColor: "text-amber-500",
+    count: "Reporting Venues & Maps",
+  },
   {
     to: "/app/timetable",
     label: "My Timetable",

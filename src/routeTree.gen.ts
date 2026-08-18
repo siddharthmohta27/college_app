@@ -14,9 +14,11 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as DashboardOrientationRouteImport } from './routes/dashboard/orientation'
 import { Route as AppTimetableRouteImport } from './routes/app/timetable'
 import { Route as AppStudyRouteImport } from './routes/app/study'
 import { Route as AppResourcesRouteImport } from './routes/app/resources'
+import { Route as AppOrientationRouteImport } from './routes/app/orientation'
 import { Route as AppMarketplaceRouteImport } from './routes/app/marketplace'
 import { Route as AppDatingRouteImport } from './routes/app/dating'
 import { Route as AppClubsRouteImport } from './routes/app/clubs'
@@ -61,6 +63,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const DashboardOrientationRoute = DashboardOrientationRouteImport.update({
+  id: '/dashboard/orientation',
+  path: '/dashboard/orientation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppTimetableRoute = AppTimetableRouteImport.update({
   id: '/timetable',
   path: '/timetable',
@@ -74,6 +81,11 @@ const AppStudyRoute = AppStudyRouteImport.update({
 const AppResourcesRoute = AppResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrientationRoute = AppOrientationRouteImport.update({
+  id: '/orientation',
+  path: '/orientation',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMarketplaceRoute = AppMarketplaceRouteImport.update({
@@ -178,9 +190,11 @@ export interface FileRoutesByFullPath {
   '/app/clubs': typeof AppClubsRoute
   '/app/dating': typeof AppDatingRouteWithChildren
   '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/orientation': typeof AppOrientationRoute
   '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
   '/app/timetable': typeof AppTimetableRoute
+  '/dashboard/orientation': typeof DashboardOrientationRoute
   '/app/': typeof AppIndexRoute
   '/app/admin/dating': typeof AppAdminDatingRoute
   '/app/dating/chat': typeof AppDatingChatRoute
@@ -205,9 +219,11 @@ export interface FileRoutesByTo {
   '/app/clubs': typeof AppClubsRoute
   '/app/dating': typeof AppDatingRouteWithChildren
   '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/orientation': typeof AppOrientationRoute
   '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
   '/app/timetable': typeof AppTimetableRoute
+  '/dashboard/orientation': typeof DashboardOrientationRoute
   '/app': typeof AppIndexRoute
   '/app/admin/dating': typeof AppAdminDatingRoute
   '/app/dating/chat': typeof AppDatingChatRoute
@@ -234,9 +250,11 @@ export interface FileRoutesById {
   '/app/clubs': typeof AppClubsRoute
   '/app/dating': typeof AppDatingRouteWithChildren
   '/app/marketplace': typeof AppMarketplaceRoute
+  '/app/orientation': typeof AppOrientationRoute
   '/app/resources': typeof AppResourcesRoute
   '/app/study': typeof AppStudyRoute
   '/app/timetable': typeof AppTimetableRoute
+  '/dashboard/orientation': typeof DashboardOrientationRoute
   '/app/': typeof AppIndexRoute
   '/app/admin/dating': typeof AppAdminDatingRoute
   '/app/dating/chat': typeof AppDatingChatRoute
@@ -264,9 +282,11 @@ export interface FileRouteTypes {
     | '/app/clubs'
     | '/app/dating'
     | '/app/marketplace'
+    | '/app/orientation'
     | '/app/resources'
     | '/app/study'
     | '/app/timetable'
+    | '/dashboard/orientation'
     | '/app/'
     | '/app/admin/dating'
     | '/app/dating/chat'
@@ -291,9 +311,11 @@ export interface FileRouteTypes {
     | '/app/clubs'
     | '/app/dating'
     | '/app/marketplace'
+    | '/app/orientation'
     | '/app/resources'
     | '/app/study'
     | '/app/timetable'
+    | '/dashboard/orientation'
     | '/app'
     | '/app/admin/dating'
     | '/app/dating/chat'
@@ -319,9 +341,11 @@ export interface FileRouteTypes {
     | '/app/clubs'
     | '/app/dating'
     | '/app/marketplace'
+    | '/app/orientation'
     | '/app/resources'
     | '/app/study'
     | '/app/timetable'
+    | '/dashboard/orientation'
     | '/app/'
     | '/app/admin/dating'
     | '/app/dating/chat'
@@ -342,6 +366,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   ChatRoute: typeof ChatRoute
   LoginRoute: typeof LoginRoute
+  DashboardOrientationRoute: typeof DashboardOrientationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -381,6 +406,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/dashboard/orientation': {
+      id: '/dashboard/orientation'
+      path: '/dashboard/orientation'
+      fullPath: '/dashboard/orientation'
+      preLoaderRoute: typeof DashboardOrientationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/timetable': {
       id: '/app/timetable'
       path: '/timetable'
@@ -400,6 +432,13 @@ declare module '@tanstack/react-router' {
       path: '/resources'
       fullPath: '/app/resources'
       preLoaderRoute: typeof AppResourcesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/orientation': {
+      id: '/app/orientation'
+      path: '/orientation'
+      fullPath: '/app/orientation'
+      preLoaderRoute: typeof AppOrientationRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/marketplace': {
@@ -570,6 +609,7 @@ interface AppRouteChildren {
   AppClubsRoute: typeof AppClubsRoute
   AppDatingRoute: typeof AppDatingRouteWithChildren
   AppMarketplaceRoute: typeof AppMarketplaceRoute
+  AppOrientationRoute: typeof AppOrientationRoute
   AppResourcesRoute: typeof AppResourcesRoute
   AppStudyRoute: typeof AppStudyRoute
   AppTimetableRoute: typeof AppTimetableRoute
@@ -584,6 +624,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppClubsRoute: AppClubsRoute,
   AppDatingRoute: AppDatingRouteWithChildren,
   AppMarketplaceRoute: AppMarketplaceRoute,
+  AppOrientationRoute: AppOrientationRoute,
   AppResourcesRoute: AppResourcesRoute,
   AppStudyRoute: AppStudyRoute,
   AppTimetableRoute: AppTimetableRoute,
@@ -598,6 +639,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   ChatRoute: ChatRoute,
   LoginRoute: LoginRoute,
+  DashboardOrientationRoute: DashboardOrientationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

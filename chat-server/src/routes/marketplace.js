@@ -1,46 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const { pool, verifyFirebaseToken } = require("../config/db");
-
-// ─── Auth Middleware ─────────────────────────────────────────────
-async function requireAuth(req, res, next) {
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  try {
-    const token = auth.split("Bearer ")[1];
-    const decoded = await verifyFirebaseToken(token);
-    if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
-      return res.status(403).json({ error: "Only @pec.edu.in email domain is allowed" });
-    }
-    req.firebaseUid = decoded.uid;
-    req.firebaseEmail = decoded.email || null;
-    req.firebaseName = decoded.name || decoded.email?.split("@")[0] || "Student";
-    next();
-  } catch (err) {
-    return res.status(401).json({ error: "Invalid token" });
-  }
-}
+const { pool } = require("../config/db");
+const { requireAuth, optionalAuth } = require("../middleware/auth");
 
 // ─── GET /api/marketplace/listings ─────────────────────────────
 // Returns all active listings with save status for the requesting user
-router.get("/listings", async (req, res) => {
+router.get("/listings", optionalAuth, async (req, res) => {
   try {
     // Optionally read auth for save status
-    let uid = null;
-    const auth = req.headers.authorization;
-    if (auth && auth.startsWith("Bearer ")) {
-      try {
-        const decoded = await verifyFirebaseToken(auth.split("Bearer ")[1]);
-        uid = decoded.uid;
-      } catch (_) {}
-    }
+    const uid = req.user?.id || null;
 
     const result = await pool.query(
       `
       SELECT
-        l.*,
+        l.id, l.title, l.description, l.price, l.category, l.condition, l.location, l.emoji,
+        l.seller_auth_id, l.seller_name, l.seller_initials, l.seller_color,
+        l.is_sold, l.created_at,
         CASE WHEN s.id IS NOT NULL THEN true ELSE false END AS saved
       FROM marketplace_listings l
       LEFT JOIN marketplace_saves s
@@ -64,7 +39,7 @@ router.get("/listings/my", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT * FROM marketplace_listings WHERE seller_auth_id = $1 ORDER BY created_at DESC`,
-      [req.firebaseUid],
+      [req.user.id],
     );
     res.json({ listings: result.rows });
   } catch (err) {
@@ -83,7 +58,7 @@ router.post("/listings", requireAuth, async (req, res) => {
   }
 
   // Build seller initials and a gradient color from UID
-  const name = req.firebaseName;
+  const name = req.user.name || req.user.email?.split("@")[0] || "Student";
   const parts = name.split(" ");
   const initials =
     parts.length >= 2
@@ -100,7 +75,7 @@ router.post("/listings", requireAuth, async (req, res) => {
     "from-sky-400 to-indigo-600",
     "from-rose-400 to-pink-600",
   ];
-  const colorIndex = req.firebaseUid.charCodeAt(0) % COLORS.length;
+  const colorIndex = req.user.id.charCodeAt(0) % COLORS.length;
   const sellerColor = COLORS[colorIndex];
 
   try {
@@ -108,8 +83,8 @@ router.post("/listings", requireAuth, async (req, res) => {
       `INSERT INTO marketplace_listings
         (title, description, price, category, condition, location, emoji,
          seller_auth_id, seller_name, seller_initials, seller_color, seller_email)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-       RETURNING *`,
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      RETURNING *`,
       [
         title,
         description || "",
@@ -118,11 +93,11 @@ router.post("/listings", requireAuth, async (req, res) => {
         condition || "Good",
         location || "",
         emoji || "📦",
-        req.firebaseUid,
+        req.user.id,
         name,
         initials,
         sellerColor,
-        req.firebaseEmail,
+        req.user.email,
       ],
     );
     res.status(201).json({ listing: result.rows[0] });
@@ -144,7 +119,7 @@ router.delete("/listings/:id", requireAuth, async (req, res) => {
     if (!check.rows.length) {
       return res.status(404).json({ error: "Listing not found" });
     }
-    if (check.rows[0].seller_auth_id !== req.firebaseUid) {
+    if (check.rows[0].seller_auth_id !== req.user.id) {
       return res.status(403).json({ error: "You can only delete your own listings" });
     }
     await pool.query(`DELETE FROM marketplace_listings WHERE id = $1`, [id]);
@@ -162,18 +137,18 @@ router.post("/listings/:id/save", requireAuth, async (req, res) => {
   try {
     const existing = await pool.query(
       `SELECT id FROM marketplace_saves WHERE listing_id = $1 AND saver_auth_id = $2`,
-      [id, req.firebaseUid],
+      [id, req.user.id],
     );
     if (existing.rows.length > 0) {
       await pool.query(
         `DELETE FROM marketplace_saves WHERE listing_id = $1 AND saver_auth_id = $2`,
-        [id, req.firebaseUid],
+        [id, req.user.id],
       );
       res.json({ saved: false });
     } else {
       await pool.query(
         `INSERT INTO marketplace_saves (listing_id, saver_auth_id) VALUES ($1, $2)`,
-        [id, req.firebaseUid],
+        [id, req.user.id],
       );
       res.json({ saved: true });
     }
@@ -193,7 +168,7 @@ router.patch("/listings/:id/sold", requireAuth, async (req, res) => {
       [id],
     );
     if (!check.rows.length) return res.status(404).json({ error: "Listing not found" });
-    if (check.rows[0].seller_auth_id !== req.firebaseUid) {
+    if (check.rows[0].seller_auth_id !== req.user.id) {
       return res.status(403).json({ error: "Forbidden" });
     }
     await pool.query(`UPDATE marketplace_listings SET is_sold = true WHERE id = $1`, [id]);

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { requireAuth, optionalAuth, requireAdmin } = require("../middleware/auth");
 const { pool } = require("../config/db");
+const { writeLimiter, readLimiter, sensitiveLimiter } = require("../middleware/rateLimit");
 const {
   // Profile
   getDatingProfileByAuthId,
@@ -118,7 +119,7 @@ router.get("/profile/me", requireAuth, async (req, res) => {
 });
 
 // PUT /api/dating/profile/me - Update current user's profile
-router.put("/profile/me", requireAuth, async (req, res) => {
+router.put("/profile/me", requireAuth, writeLimiter, async (req, res) => {
   try {
     const firebaseUid = req.user.id;
     const profile = await getDatingProfileByAuthId(firebaseUid);
@@ -167,7 +168,7 @@ router.get("/profile/:id", requireAuth, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 
 // POST /api/dating/photos - Upload photo (max 3)
-router.post("/photos", requireAuth, async (req, res) => {
+router.post("/photos", requireAuth, writeLimiter, async (req, res) => {
   try {
     const profile = await getDatingProfileByAuthId(req.user.id);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
@@ -214,7 +215,7 @@ router.get("/photos", requireAuth, async (req, res) => {
 });
 
 // PUT /api/dating/photos/:id - Update photo (main, order)
-router.put("/photos/:id", requireAuth, async (req, res) => {
+router.put("/photos/:id", requireAuth, writeLimiter, async (req, res) => {
   try {
     const profile = await getDatingProfileByAuthId(req.user.id);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
@@ -232,7 +233,7 @@ router.put("/photos/:id", requireAuth, async (req, res) => {
 });
 
 // DELETE /api/dating/photos/:id - Delete photo
-router.delete("/photos/:id", requireAuth, async (req, res) => {
+router.delete("/photos/:id", requireAuth, writeLimiter, async (req, res) => {
   try {
     const profile = await getDatingProfileByAuthId(req.user.id);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
@@ -250,7 +251,7 @@ router.delete("/photos/:id", requireAuth, async (req, res) => {
 });
 
 // PUT /api/dating/photos/reorder - Reorder photos
-router.put("/photos/reorder", requireAuth, async (req, res) => {
+router.put("/photos/reorder", requireAuth, writeLimiter, async (req, res) => {
   try {
     const profile = await getDatingProfileByAuthId(req.user.id);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
@@ -297,7 +298,7 @@ router.get("/prompts/me", requireAuth, async (req, res) => {
 });
 
 // POST /api/dating/prompts/me - Create/update prompt answer (max 3)
-router.post("/prompts/me", requireAuth, async (req, res) => {
+router.post("/prompts/me", requireAuth, writeLimiter, async (req, res) => {
   try {
     const profile = await getDatingProfileByAuthId(req.user.id);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
@@ -321,7 +322,7 @@ router.post("/prompts/me", requireAuth, async (req, res) => {
 });
 
 // DELETE /api/dating/prompts/me/:promptId - Delete prompt answer
-router.delete("/prompts/me/:promptId", requireAuth, async (req, res) => {
+router.delete("/prompts/me/:promptId", requireAuth, writeLimiter, async (req, res) => {
   try {
     const profile = await getDatingProfileByAuthId(req.user.id);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
@@ -339,7 +340,7 @@ router.delete("/prompts/me/:promptId", requireAuth, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 
 // POST /api/dating/prompts/:promptId/like - Like a specific prompt
-router.post("/prompts/:promptId/like", requireAuth, async (req, res) => {
+router.post("/prompts/:promptId/like", requireAuth, writeLimiter, async (req, res) => {
   try {
     const likerProfile = await getDatingProfileByAuthId(req.user.id);
     if (!likerProfile) return res.status(404).json({ error: "Profile not found" });
@@ -370,7 +371,7 @@ router.post("/prompts/:promptId/like", requireAuth, async (req, res) => {
 });
 
 // DELETE /api/dating/prompts/:promptId/like - Unlike a prompt
-router.delete("/prompts/:promptId/like", requireAuth, async (req, res) => {
+router.delete("/prompts/:promptId/like", requireAuth, writeLimiter, async (req, res) => {
   try {
     const likerProfile = await getDatingProfileByAuthId(req.user.id);
     if (!likerProfile) return res.status(404).json({ error: "Profile not found" });
@@ -393,7 +394,7 @@ router.delete("/prompts/:promptId/like", requireAuth, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 
 // POST /api/dating/photos/:photoId/like - Like a specific photo
-router.post("/photos/:photoId/like", requireAuth, async (req, res) => {
+router.post("/photos/:photoId/like", requireAuth, writeLimiter, async (req, res) => {
   try {
     const likerProfile = await getDatingProfileByAuthId(req.user.id);
     if (!likerProfile) return res.status(404).json({ error: "Profile not found" });
@@ -424,7 +425,7 @@ router.post("/photos/:photoId/like", requireAuth, async (req, res) => {
 });
 
 // DELETE /api/dating/photos/:photoId/like - Unlike a photo
-router.delete("/photos/:photoId/like", requireAuth, async (req, res) => {
+router.delete("/photos/:photoId/like", requireAuth, writeLimiter, async (req, res) => {
   try {
     const likerProfile = await getDatingProfileByAuthId(req.user.id);
     if (!likerProfile) return res.status(404).json({ error: "Profile not found" });
@@ -447,7 +448,7 @@ router.delete("/photos/:photoId/like", requireAuth, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 
 // POST /api/dating/friends/request - Send friend request
-router.post("/friends/request", requireAuth, async (req, res) => {
+router.post("/friends/request", requireAuth, writeLimiter, async (req, res) => {
   try {
     const senderProfile = await getDatingProfileByAuthId(req.user.id);
     if (!senderProfile) return res.status(404).json({ error: "Profile not found" });
@@ -481,7 +482,7 @@ router.post("/friends/request", requireAuth, async (req, res) => {
 });
 
 // PUT /api/dating/friends/request/:id - Accept/reject friend request
-router.put("/friends/request/:id", requireAuth, async (req, res) => {
+router.put("/friends/request/:id", requireAuth, writeLimiter, async (req, res) => {
   try {
     const receiverProfile = await getDatingProfileByAuthId(req.user.id);
     if (!receiverProfile) return res.status(404).json({ error: "Profile not found" });
@@ -542,7 +543,7 @@ router.get("/friends", requireAuth, async (req, res) => {
 });
 
 // DELETE /api/dating/friends/:friendId - Remove friend
-router.delete("/friends/:friendId", requireAuth, async (req, res) => {
+router.delete("/friends/:friendId", requireAuth, writeLimiter, async (req, res) => {
   try {
     const profile = await getDatingProfileByAuthId(req.user.id);
     if (!profile) return res.status(404).json({ error: "Profile not found" });
@@ -560,7 +561,7 @@ router.delete("/friends/:friendId", requireAuth, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 
 // POST /api/dating/blocks - Block user
-router.post("/blocks", requireAuth, async (req, res) => {
+router.post("/blocks", requireAuth, sensitiveLimiter, async (req, res) => {
   try {
     const blockerProfile = await getDatingProfileByAuthId(req.user.id);
     if (!blockerProfile) return res.status(404).json({ error: "Profile not found" });
@@ -582,7 +583,7 @@ router.post("/blocks", requireAuth, async (req, res) => {
 });
 
 // DELETE /api/dating/blocks/:blockedProfileId - Unblock user
-router.delete("/blocks/:blockedProfileId", requireAuth, async (req, res) => {
+router.delete("/blocks/:blockedProfileId", requireAuth, writeLimiter, async (req, res) => {
   try {
     const blockerProfile = await getDatingProfileByAuthId(req.user.id);
     if (!blockerProfile) return res.status(404).json({ error: "Profile not found" });
@@ -614,7 +615,7 @@ router.get("/blocks", requireAuth, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 
 // POST /api/dating/reports - Report user
-router.post("/reports", requireAuth, async (req, res) => {
+router.post("/reports", requireAuth, sensitiveLimiter, async (req, res) => {
   try {
     const reporterProfile = await getDatingProfileByAuthId(req.user.id);
     if (!reporterProfile) return res.status(404).json({ error: "Profile not found" });

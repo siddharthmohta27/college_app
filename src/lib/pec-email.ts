@@ -262,6 +262,11 @@ export function parsePecEmail(email: string | null | undefined, overrideDisplayN
         if (namePart.includes("siddharth")) {
           rollNo = "25106047";
           classRollNo = "47";
+        } else if (!emailText.endsWith("@pec.edu.in") && emailText) {
+          rollNo = "Fresher";
+          classRollNo = "01";
+          branch = "PEC Fresher";
+          batch = "2026";
         } else {
           rollNo = "25106001";
           classRollNo = "01";

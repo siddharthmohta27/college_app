@@ -18,6 +18,7 @@ import {
   LogOut,
   User,
   CalendarDays,
+  Compass,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { SearchProvider } from "@/components/search";
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/app")({
       return { userId: null, email: null, displayName: null };
     }
     const user = auth.currentUser;
-    if (!user || !isValidPecEmail(user.email)) {
+    if (!user) {
       throw new Error("UNAUTHORIZED");
     }
     // Return plain serializable data only (no Firebase User object)
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/app")({
 
 const NAV_ITEMS = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/app/orientation", label: "Orientation", icon: Compass },
   { to: "/app/timetable", label: "Timetable", icon: CalendarDays },
   { to: "/app/marketplace", label: "Marketplace", icon: ShoppingBag },
   { to: "/app/canteen", label: "Canteen", icon: UtensilsCrossed },
@@ -71,14 +73,12 @@ function AppShell() {
   // Keep user state in sync with Firebase auth
   useEffect(() => {
     const unsub = firebaseAuth.onAuthStateChanged((fbUser) => {
-      if (fbUser && !isValidPecEmail(fbUser.email)) {
-        firebaseAuth.signOut().then(() => {
-          window.location.href = "/login";
-        });
+      if (!fbUser) {
+        // Not logged in -> go to login
         return;
       }
-      setDisplayName(fbUser?.displayName ?? null);
-      setEmail(fbUser?.email ?? null);
+      setDisplayName(fbUser.displayName ?? null);
+      setEmail(fbUser.email ?? null);
     });
     return unsub;
   }, []);

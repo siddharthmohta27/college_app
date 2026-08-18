@@ -1,14 +1,8 @@
 import { firebaseAuth } from "@/lib/firebase";
 
-const isLocal =
-  typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-
 const API_BASE = import.meta.env.VITE_BACKEND_URL
   ? `${import.meta.env.VITE_BACKEND_URL}/api/orientation`
-  : isLocal
-    ? "http://localhost:3001/api/orientation"
-    : "/api/orientation";
+  : "http://localhost:3001/api/orientation";
 
 export interface OrientationData {
   success: boolean;
@@ -24,6 +18,8 @@ export interface OrientationData {
   };
   schedule?: Array<{
     id: number | string;
+    day_number?: number;
+    day?: number;
     time_slot?: string;
     time?: string;
     activity: string;
@@ -35,6 +31,11 @@ export interface OrientationData {
 }
 
 export async function fetchOrientationData(): Promise<OrientationData | null> {
+  if (typeof window === "undefined") {
+    // Avoid SSR fetch errors on Node server
+    return null;
+  }
+
   try {
     const res = await fetch(API_BASE);
     if (!res.ok) {

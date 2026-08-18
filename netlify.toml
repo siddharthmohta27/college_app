@@ -4,19 +4,6 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  NITRO_PRESET = "netlify"
-
-# ─── Netlify Functions (SSR via Nitro) ────────────────────────────────────────
-[functions]
-  directory = ".output/server"
-  node_bundler = "esbuild"
-
-# ─── SPA / SSR Fallback ───────────────────────────────────────────────────────
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server"
-  status = 200
-  force = false
 
 # ─── Headers ──────────────────────────────────────────────────────────────────
 

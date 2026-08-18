@@ -10,33 +10,39 @@ export function FloatingActionMenu({ open, onClose }: FloatingActionMenuProps) {
   if (!open) return null;
 
   return (
-    <div
-      role="menu"
-      aria-label="Quick actions"
-      /**
-       * Desktop/Tablet: vertical stack above the FAB trigger.
-       * Mobile: pill menu centred above the bottom nav, max-w-[320px] w-[90%].
-       */
-      className="
-        fab-menu
-        absolute bottom-[calc(100%+12px)] right-0
-        flex flex-col items-end gap-2
-        w-max
-        sm:w-auto
-        max-sm:right-1/2 max-sm:translate-x-1/2
-        max-sm:w-[90vw] max-sm:max-w-[320px]
-        max-sm:items-stretch
-      "
-    >
-      {FAB_ACTIONS.map((action, i) => (
-        <FloatingActionItem
-          key={action.id}
-          action={action}
-          index={i}
-          total={FAB_ACTIONS.length}
-          onSelect={onClose}
-        />
-      ))}
-    </div>
+    <>
+      {/* Full screen backdrop click-away and dim */}
+      <div
+        className="fixed inset-0 z-40 bg-background/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      <div
+        role="menu"
+        aria-label="Quick actions"
+        className="
+          fab-menu
+          absolute bottom-[calc(100%+14px)] right-0
+          z-50
+          flex flex-col items-end gap-2.5
+          w-max
+          sm:w-auto
+          max-sm:right-0
+          max-sm:items-end
+        "
+      >
+        {FAB_ACTIONS.map((action, i) => (
+          <FloatingActionItem
+            key={action.id}
+            action={action}
+            index={i}
+            total={FAB_ACTIONS.length}
+            onSelect={onClose}
+          />
+        ))}
+      </div>
+    </>
   );
 }
+

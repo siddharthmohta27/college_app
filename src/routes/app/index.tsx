@@ -288,12 +288,13 @@ function Dashboard() {
       setUnreadMessages(0);
     }
 
-    // 2. Active marketplace listings count
+    // 2. Active marketplace listings count (excluding sold items)
     async function loadMarketplaceCount() {
       try {
         const { count, error } = await supabase
           .from("marketplace_listings")
-          .select("id", { count: "exact", head: true });
+          .select("id", { count: "exact", head: true })
+          .eq("is_sold", false);
         if (!error && typeof count === "number") {
           setActiveListings(count);
         } else {

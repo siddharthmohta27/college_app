@@ -214,10 +214,11 @@ function AppShell() {
             <div className="flex items-center gap-3">
               <button
                 id="sidebar-toggle-btn"
-                className="text-muted-foreground transition hover:text-foreground md:hidden"
+                aria-label="Open Navigation Menu"
+                className="grid h-9 w-9 place-items-center rounded-xl border border-primary/30 bg-primary/10 text-primary shadow-sm transition-all duration-150 hover:bg-primary/20 hover:border-primary/50 hover:scale-105 active:scale-95 md:hidden"
                 onClick={() => setSidebarOpen(true)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className="h-5 w-5" strokeWidth={2.5} />
               </button>
               <div>
                 <h1 className="text-sm font-semibold">{currentPage?.label ?? "Campus Connect"}</h1>

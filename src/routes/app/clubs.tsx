@@ -21,6 +21,7 @@ export const Route = createFileRoute("/app/clubs")({
 type Club = {
   id: number;
   name: string;
+  fullName?: string;
   category: string;
   description: string;
   members: number;
@@ -44,173 +45,394 @@ type Event = {
   spotsLeft: number;
 };
 
-const CLUB_CATEGORIES = ["All", "Tech", "Cultural", "Sports", "Social", "Arts"];
+const CLUB_CATEGORIES = ["All", "Technical", "Cultural", "Entrepreneurship", "Editorial"];
 
 const CLUBS: Club[] = [
+  // ── Technical Societies ─────────────────────────────────────────
   {
     id: 1,
-    name: "Coding Club",
-    category: "Tech",
-    description: "Competitive programming, hackathons and open-source contributions.",
-    members: 342,
-    emoji: "💻",
-    gradient: "from-primary/20 to-violet-500/10",
-    joined: true,
-    tags: ["Hackathons", "CP", "Open Source"],
+    name: "ASCE",
+    fullName: "American Society of Civil Engineers",
+    category: "Technical",
+    description: "Civil engineering innovations, structural design challenges, concrete canoe, CAD workshops & site visits.",
+    members: 245,
+    emoji: "🏗️",
+    gradient: "from-blue-500/20 to-sky-500/10",
+    joined: false,
+    tags: ["Civil", "Structures", "Design"],
   },
   {
     id: 2,
-    name: "AI/ML Society",
-    category: "Tech",
-    description: "Exploring machine learning, deep learning and AI research papers.",
-    members: 218,
-    emoji: "🤖",
-    gradient: "from-cyan-500/20 to-blue-500/10",
+    name: "ASME",
+    fullName: "American Society of Mechanical Engineers",
+    category: "Technical",
+    description: "Mechanical engineering, CAD/CAM design, robotics, aeromodelling and global engineering competitions.",
+    members: 310,
+    emoji: "⚙️",
+    gradient: "from-amber-500/20 to-orange-500/10",
     joined: false,
-    tags: ["ML", "Research", "Python"],
+    tags: ["Mechanical", "CAD/CAM", "Robotics"],
   },
   {
     id: 3,
-    name: "Drama Club",
-    category: "Cultural",
-    description: "Annual theatre productions, improv sessions and acting workshops.",
-    members: 156,
-    emoji: "🎭",
-    gradient: "from-pink-500/20 to-rose-500/10",
+    name: "ASPS",
+    fullName: "Astronomy & Space Physics Society",
+    category: "Technical",
+    description: "Stargazing night sky sessions, astrophysics discussions, telescope handling and space science quizzes.",
+    members: 195,
+    emoji: "🌌",
+    gradient: "from-indigo-500/20 to-violet-500/10",
     joined: false,
-    tags: ["Theatre", "Acting", "Improv"],
+    tags: ["Astronomy", "Astrophysics", "Stargazing"],
   },
   {
     id: 4,
-    name: "Cricket Club",
-    category: "Sports",
-    description: "Inter-college tournaments, practice sessions and weekend matches.",
-    members: 89,
-    emoji: "🏏",
-    gradient: "from-emerald-500/20 to-teal-500/10",
-    joined: true,
-    tags: ["Cricket", "Tournaments", "Practice"],
+    name: "ATS",
+    fullName: "Aero Technical Society",
+    category: "Technical",
+    description: "RC planes, aeromodelling, drone development, flight mechanics and national aviation competitions.",
+    members: 220,
+    emoji: "✈️",
+    gradient: "from-cyan-500/20 to-blue-500/10",
+    joined: false,
+    tags: ["Aerospace", "Drones", "RC Planes"],
   },
   {
     id: 5,
-    name: "Photography Club",
-    category: "Arts",
-    description: "Photo walks, editing workshops and annual college magazine shots.",
-    members: 134,
-    emoji: "📸",
-    gradient: "from-amber-500/20 to-orange-500/10",
-    joined: false,
-    tags: ["DSLR", "Editing", "Photo walks"],
+    name: "IEEE",
+    fullName: "Institute of Electrical and Electronics Engineers",
+    category: "Technical",
+    description: "Electronics, embedded systems, signal processing, IoT, research paper publishing and hackathons.",
+    members: 410,
+    emoji: "⚡",
+    gradient: "from-sky-500/20 to-indigo-500/10",
+    joined: true,
+    tags: ["Electrical", "Electronics", "IoT"],
   },
   {
     id: 6,
-    name: "NSS Cell",
-    category: "Social",
-    description: "Social service camps, blood donation drives and community outreach.",
-    members: 450,
-    emoji: "🤝",
-    gradient: "from-rose-500/20 to-pink-500/10",
+    name: "IIM",
+    fullName: "Indian Institute of Metals",
+    category: "Technical",
+    description: "Materials science, metallurgy workshops, industrial research and advanced materials characterization.",
+    members: 160,
+    emoji: "🔬",
+    gradient: "from-teal-500/20 to-emerald-500/10",
     joined: false,
-    tags: ["Service", "Camps", "Leadership"],
+    tags: ["Metallurgy", "Materials", "Research"],
   },
   {
     id: 7,
-    name: "Music Society",
-    category: "Arts",
-    description: "Classical and western music, band rehearsals and annual fest performances.",
-    members: 201,
-    emoji: "🎸",
-    gradient: "from-violet-500/20 to-purple-500/10",
+    name: "IGS",
+    fullName: "Indian Geotechnical Society",
+    category: "Technical",
+    description: "Soil mechanics, foundation engineering, geotechnical research, surveying and earth sciences.",
+    members: 140,
+    emoji: "🌍",
+    gradient: "from-emerald-500/20 to-teal-500/10",
     joined: false,
-    tags: ["Band", "Classical", "Fest"],
+    tags: ["Geotech", "Soil Mechanics", "Surveys"],
   },
   {
     id: 8,
-    name: "Debate Club",
-    category: "Cultural",
-    description: "MUN simulations, parliamentary debates and public speaking training.",
-    members: 112,
-    emoji: "🗣️",
-    gradient: "from-sky-500/20 to-indigo-500/10",
+    name: "Robotics Society",
+    fullName: "Robotics & Automation Society",
+    category: "Technical",
+    description: "Autonomous bots, combat robotics, microcontrollers, ROS, computer vision and Robowars in PECFEST.",
+    members: 380,
+    emoji: "🤖",
+    gradient: "from-primary/20 to-violet-500/10",
+    joined: true,
+    tags: ["Robotics", "Hardware", "Robowars"],
+  },
+  {
+    id: 9,
+    name: "SAE",
+    fullName: "Society of Automotive Engineers",
+    category: "Technical",
+    description: "Formula Student, BAJA SAE, electric vehicle design, chassis fabrication and engine tuning.",
+    members: 290,
+    emoji: "🏎️",
+    gradient: "from-rose-500/20 to-orange-500/10",
     joined: false,
-    tags: ["MUN", "Debate", "Public Speaking"],
+    tags: ["Automotive", "BAJA", "EV"],
+  },
+  {
+    id: 10,
+    name: "SME",
+    fullName: "Society of Manufacturing Engineers",
+    category: "Technical",
+    description: "Advanced manufacturing, 3D printing, CNC machining, rapid prototyping and production technology.",
+    members: 175,
+    emoji: "🏭",
+    gradient: "from-slate-500/20 to-zinc-500/10",
+    joined: false,
+    tags: ["Manufacturing", "3D Printing", "CNC"],
+  },
+  {
+    id: 11,
+    name: "SESI",
+    fullName: "Solar Energy Society of India",
+    category: "Technical",
+    description: "Renewable solar energy projects, photovoltaic installations, sustainability and green campus drives.",
+    members: 155,
+    emoji: "☀️",
+    gradient: "from-amber-500/20 to-yellow-500/10",
+    joined: false,
+    tags: ["Solar", "Clean Energy", "Green Tech"],
+  },
+  {
+    id: 12,
+    name: "ACM CSS",
+    fullName: "Association for Computing Machinery (Computer Science Society)",
+    category: "Technical",
+    description: "Competitive programming, open source, AI/ML, web development, algorithms and premier college hackathons.",
+    members: 490,
+    emoji: "💻",
+    gradient: "from-violet-500/20 to-purple-500/10",
+    joined: true,
+    tags: ["CP", "DSA", "Hackathons", "WebDev"],
+  },
+
+  // ── Cultural Clubs ──────────────────────────────────────────────
+  {
+    id: 13,
+    name: "APC",
+    fullName: "Art & Photography Club",
+    category: "Cultural",
+    description: "Fine arts, digital painting, photography walks, photo editing, college magazine shoots & exhibitions.",
+    members: 230,
+    emoji: "🎨",
+    gradient: "from-fuchsia-500/20 to-pink-500/10",
+    joined: false,
+    tags: ["Art", "Photography", "Painting"],
+  },
+  {
+    id: 14,
+    name: "Music Club",
+    fullName: "Music Club",
+    category: "Cultural",
+    description: "Vocal and instrumental, jamming sessions, rock band performances, classical music and PECFEST concerts.",
+    members: 280,
+    emoji: "🎸",
+    gradient: "from-purple-500/20 to-pink-500/10",
+    joined: true,
+    tags: ["Band", "Vocals", "Guitar", "Jamming"],
+  },
+  {
+    id: 15,
+    name: "Dramatics Club",
+    fullName: "Dramatics Club",
+    category: "Cultural",
+    description: "Annual stage plays, nukkad natak (street play), monoacts, script writing and acting workshops.",
+    members: 210,
+    emoji: "🎭",
+    gradient: "from-pink-500/20 to-rose-500/10",
+    joined: false,
+    tags: ["Theatre", "Street Play", "Acting"],
+  },
+  {
+    id: 16,
+    name: "SAASC",
+    fullName: "Speakers Association & Study Circle",
+    category: "Cultural",
+    description: "Parliamentary debates, Model United Nations (MUN), extempore, GDs, group discussions and public speaking.",
+    members: 225,
+    emoji: "🎙️",
+    gradient: "from-blue-500/20 to-indigo-500/10",
+    joined: false,
+    tags: ["Debating", "MUN", "Public Speaking"],
+  },
+  {
+    id: 17,
+    name: "PDC",
+    fullName: "Projection & Design Club",
+    category: "Cultural",
+    description: "Stage visual mapping, graphic designing, UI/UX, video editing, after-effects and fest production.",
+    members: 190,
+    emoji: "📽️",
+    gradient: "from-cyan-500/20 to-teal-500/10",
+    joined: false,
+    tags: ["Design", "Video Editing", "VFX"],
+  },
+  {
+    id: 18,
+    name: "Rotaract Club",
+    fullName: "Rotaract Club of PEC",
+    category: "Cultural",
+    description: "Youth empowerment, community outreach, blood donation camps, environmental initiatives and social leadership.",
+    members: 320,
+    emoji: "🤝",
+    gradient: "from-rose-500/20 to-pink-500/10",
+    joined: false,
+    tags: ["Social Service", "Leadership", "Outreach"],
+  },
+  {
+    id: 19,
+    name: "CIM",
+    fullName: "Communication, Information & Media Cell",
+    category: "Cultural",
+    description: "Official campus media, journalism, newsletters, social media PR, interviewing and PEC event coverage.",
+    members: 205,
+    emoji: "📰",
+    gradient: "from-amber-500/20 to-red-500/10",
+    joined: false,
+    tags: ["Media", "Journalism", "PR"],
+  },
+
+  // ── Entrepreneurship ───────────────────────────────────────────
+  {
+    id: 20,
+    name: "EIC",
+    fullName: "Entrepreneurship & Incubation Cell",
+    category: "Entrepreneurship",
+    description: "Startups, innovation, incubation, mentorship, networking, Startup Fair, E-Summit, pitch events and SproutX startup funding.",
+    members: 450,
+    emoji: "🚀",
+    gradient: "from-emerald-500/20 to-cyan-500/10",
+    joined: true,
+    tags: ["Startups", "Funding", "E-Summit", "SproutX"],
+  },
+
+  // ── Editorial Boards ────────────────────────────────────────────
+  {
+    id: 21,
+    name: "English Editorial Board",
+    fullName: "English Editorial Board (EEB)",
+    category: "Editorial",
+    description: "Creative writing, literature, poetry, essays, PEC annual magazine editorial and blog publishing.",
+    members: 130,
+    emoji: "✍️",
+    gradient: "from-sky-500/20 to-blue-500/10",
+    joined: false,
+    tags: ["Writing", "Magazine", "Literature"],
+  },
+  {
+    id: 22,
+    name: "Hindi Editorial Board",
+    fullName: "Hindi Editorial Board (HEB)",
+    category: "Editorial",
+    description: "Kavita lekhan, sahitya charcha, Hindi creative writing, natak lekhan aur college magazine Hindi anubhaag.",
+    members: 115,
+    emoji: "📖",
+    gradient: "from-orange-500/20 to-amber-500/10",
+    joined: false,
+    tags: ["Hindi", "Sahitya", "Kavita"],
+  },
+  {
+    id: 23,
+    name: "Punjabi Editorial Board",
+    fullName: "Punjabi Editorial Board (PEB)",
+    category: "Editorial",
+    description: "Punjabi sahitya, cultural essays, Punjabi poetry, Maa Boli promotions and college magazine Punjabi section.",
+    members: 110,
+    emoji: "📜",
+    gradient: "from-yellow-500/20 to-amber-500/10",
+    joined: false,
+    tags: ["Punjabi", "Culture", "Poetry"],
   },
 ];
 
 const EVENTS: Event[] = [
   {
     id: 1,
-    title: "HackNight 2026 — 24hr Hackathon",
-    clubName: "Coding Club",
-    date: "July 8",
-    time: "8:00 PM – July 9, 8:00 PM",
-    venue: "Innovation Lab, Block C",
-    category: "Tech",
-    emoji: "⚡",
+    title: "Freshers Orientation 2026 — Day 1: Welcome & Director's Address",
+    clubName: "PEC Administration & Student Council",
+    date: "Aug 19, 2026",
+    time: "9:00 AM – 1:00 PM",
+    venue: "Main Auditorium, PEC",
+    category: "Orientation",
+    emoji: "🎉",
     rsvpd: true,
-    spots: 100,
-    spotsLeft: 23,
+    spots: 850,
+    spotsLeft: 42,
   },
   {
     id: 2,
-    title: "AI Paper Reading Session",
-    clubName: "AI/ML Society",
-    date: "July 9",
-    time: "5:00 PM – 7:00 PM",
-    venue: "Seminar Hall 2",
-    category: "Tech",
-    emoji: "🤖",
-    rsvpd: false,
-    spots: 50,
-    spotsLeft: 18,
+    title: "Freshers Orientation 2026 — Day 2: Academic Curriculum & Branch Mentorship",
+    clubName: "Dean Academics & HoDs",
+    date: "Aug 20, 2026",
+    time: "9:00 AM – 5:00 PM",
+    venue: "Respective Branch Lecture Theatres (Annexure 1)",
+    category: "Orientation",
+    emoji: "🎓",
+    rsvpd: true,
+    spots: 850,
+    spotsLeft: 60,
   },
   {
     id: 3,
-    title: "Open Mic Night — Season 4",
-    clubName: "Music Society",
-    date: "July 11",
-    time: "7:00 PM – 10:00 PM",
-    venue: "College Amphitheatre",
-    category: "Arts",
-    emoji: "🎤",
+    title: "Freshers Orientation 2026 — Day 3: Technical & Cultural Clubs Fair",
+    clubName: "Clubs & Societies Council",
+    date: "Aug 21, 2026",
+    time: "9:00 AM – 5:00 PM",
+    venue: "Open Air Theatre & Student Centre",
+    category: "Orientation",
+    emoji: "🎪",
     rsvpd: false,
-    spots: 200,
-    spotsLeft: 67,
+    spots: 850,
+    spotsLeft: 120,
   },
   {
     id: 4,
-    title: "Blood Donation Drive",
-    clubName: "NSS Cell",
-    date: "July 12",
-    time: "9:00 AM – 3:00 PM",
-    venue: "Main Hall, Ground Floor",
-    category: "Social",
-    emoji: "🩸",
+    title: "Freshers Orientation 2026 — Day 4: Life at PEC & Campus Heritage Tour",
+    clubName: "Student Council & Alumni Cell",
+    date: "Aug 22, 2026",
+    time: "9:00 AM – 5:00 PM",
+    venue: "Central Library & Heritage Campus Grounds",
+    category: "Orientation",
+    emoji: "🏛️",
     rsvpd: false,
-    spots: 150,
-    spotsLeft: 89,
+    spots: 850,
+    spotsLeft: 95,
   },
   {
     id: 5,
-    title: "Inter-Dept Cricket Match",
-    clubName: "Cricket Club",
-    date: "July 13",
-    time: "7:00 AM – 12:00 PM",
-    venue: "Sports Ground",
-    category: "Sports",
-    emoji: "🏏",
+    title: "Freshers Orientation 2026 — Day 5: Sports, Fitness & NCC/NSS Orientation",
+    clubName: "Sports Department & NSS Cell",
+    date: "Aug 23, 2026",
+    time: "9:00 AM – 5:00 PM",
+    venue: "PEC Sports Complex & Gymnasium",
+    category: "Orientation",
+    emoji: "🏆",
+    rsvpd: false,
+    spots: 850,
+    spotsLeft: 140,
+  },
+  {
+    id: 6,
+    title: "Freshers Orientation 2026 — Day 6: Innovation, Startups & EIC SproutX Fair",
+    clubName: "Entrepreneurship & Incubation Cell (EIC)",
+    date: "Aug 24, 2026",
+    time: "9:00 AM – 5:00 PM",
+    venue: "Siemens Centre of Excellence & EIC Hub",
+    category: "Orientation",
+    emoji: "🚀",
     rsvpd: true,
-    spots: 22,
-    spotsLeft: 4,
+    spots: 850,
+    spotsLeft: 75,
+  },
+  {
+    id: 7,
+    title: "Freshers Orientation 2026 — Day 7: Valedictory Ceremony & Cultural Evening",
+    clubName: "Cultural Clubs Council",
+    date: "Aug 25, 2026",
+    time: "9:00 AM – 6:00 PM",
+    venue: "Main Auditorium, PEC",
+    category: "Orientation",
+    emoji: "✨",
+    rsvpd: true,
+    spots: 850,
+    spotsLeft: 18,
   },
 ];
 
 const categoryColors: Record<string, string> = {
-  Tech: "bg-primary/20 text-primary",
+  Technical: "bg-primary/20 text-primary",
   Cultural: "bg-pink-500/20 text-pink-400",
-  Sports: "bg-emerald-500/20 text-emerald-400",
-  Social: "bg-rose-500/20 text-rose-400",
-  Arts: "bg-amber-500/20 text-amber-400",
+  Entrepreneurship: "bg-emerald-500/20 text-emerald-400",
+  Editorial: "bg-amber-500/20 text-amber-400",
+  Orientation: "bg-cyan-500/20 text-cyan-400",
 };
 
 function ClubsEvents() {
@@ -224,7 +446,9 @@ function ClubsEvents() {
     const matchCat = catFilter === "All" || c.category === catFilter;
     const matchSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.description.toLowerCase().includes(search.toLowerCase());
+      (c.fullName && c.fullName.toLowerCase().includes(search.toLowerCase())) ||
+      c.description.toLowerCase().includes(search.toLowerCase()) ||
+      c.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
     return matchCat && matchSearch;
   });
 
@@ -252,7 +476,7 @@ function ClubsEvents() {
       <div className="animate-fade-up">
         <h2 className="text-xl font-bold">Clubs & Events</h2>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          Discover communities and upcoming events on campus
+          Official Technical Societies, Cultural Clubs, Entrepreneurship & Editorial Boards of Punjab Engineering College
         </p>
       </div>
 
@@ -269,7 +493,7 @@ function ClubsEvents() {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {t === "clubs" ? "🏛️ Clubs" : "📅 Events"}
+            {t === "clubs" ? "🏛️ Official Clubs (23)" : "📅 Orientation Events (7)"}
           </button>
         ))}
       </div>
@@ -281,7 +505,7 @@ function ClubsEvents() {
           id={`${tab}-search`}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={tab === "clubs" ? "Search clubs..." : "Search events..."}
+          placeholder={tab === "clubs" ? "Search clubs (e.g. ASCE, EIC, Music Club, Robotics)..." : "Search orientation events..."}
           className="w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-3 text-sm outline-none focus:border-primary"
         />
       </div>
@@ -317,12 +541,15 @@ function ClubsEvents() {
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">{club.emoji}</span>
+                <div className="flex items-start gap-3">
+                  <span className="text-3xl shrink-0 mt-0.5">{club.emoji}</span>
                   <div>
-                    <h3 className="font-bold">{club.name}</h3>
+                    <h3 className="font-bold text-foreground text-base leading-tight">{club.name}</h3>
+                    {club.fullName && club.fullName !== club.name && (
+                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{club.fullName}</p>
+                    )}
                     <span
-                      className={`inline-block rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${categoryColors[club.category] ?? "bg-surface text-muted-foreground"}`}
+                      className={`inline-block mt-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold ${categoryColors[club.category] ?? "bg-surface text-muted-foreground"}`}
                     >
                       {club.category}
                     </span>
@@ -349,7 +576,7 @@ function ClubsEvents() {
                   {club.members} members
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {club.tags.slice(0, 2).map((tag) => (
+                  {club.tags.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
                       className="rounded-full bg-surface/60 px-2 py-0.5 text-[10px] text-muted-foreground"

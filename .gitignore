@@ -12,6 +12,7 @@ bun.lock
 dist
 dist-ssr
 .output
+.netlify
 .vinxi
 .tanstack/**
 .nitro

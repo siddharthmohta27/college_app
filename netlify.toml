@@ -1,9 +1,14 @@
 [build]
   command = "npm run build && node scripts/netlify-postbuild.mjs"
-  publish = ".output/public"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "22"
+  NITRO_PRESET = "netlify"
+
+# ─── Netlify Functions (SSR via Nitro netlify preset) ─────────────────────────
+# Nitro's netlify preset auto-outputs to .netlify/functions-internal/server/
+# which Netlify picks up automatically — no manual [functions] config needed.
 
 # ─── Headers ──────────────────────────────────────────────────────────────────
 

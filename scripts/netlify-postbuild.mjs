@@ -2,32 +2,27 @@
 /**
  * netlify-postbuild.mjs
  *
- * Runs after `vite build`. Prepares .output/public/ so Netlify can serve it
- * as a static SPA:
+ * Runs after `vite build` with NITRO_PRESET=netlify.
  *
- *  1. Finds the hashed entry JS + CSS files in .output/public/assets/
- *  2. Generates index.html that bootstraps the React/TanStack app
- *  3. Copies sw.js + workbox-*.js from dist/ into .output/public/
+ * With the netlify preset, Nitro outputs:
+ *   - Static assets → dist/  (JS bundles, icons, sw.js, etc.)
+ *   - SSR server    → .netlify/functions-internal/server/
+ *
+ * The only thing missing is index.html — Nitro's SSR handles requests
+ * server-side, but Netlify also needs a static index.html fallback for
+ * the deploy directory check to pass.
+ *
+ * This script generates dist/index.html that bootstraps the React app.
  */
 
-import { readdir, copyFile, writeFile, access } from "node:fs/promises";
+import { readdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const outPublic = join(root, ".output", "public");
 const distDir = join(root, "dist");
+const assetsDir = join(distDir, "assets");
 
-async function exists(p) {
-  try {
-    await access(p);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// ── 1. Find entry JS and CSS ──────────────────────────────────────────────────
-const assetsDir = join(outPublic, "assets");
+// ── Find entry JS and CSS ──────────────────────────────────────────────────────
 const allAssets = await readdir(assetsDir);
 
 const entryJs = allAssets.find((f) => f.startsWith("index-") && f.endsWith(".js"));
@@ -41,7 +36,7 @@ if (!entryJs) {
 console.log(`✔  Entry JS  : /assets/${entryJs}`);
 if (entryCss) console.log(`✔  Entry CSS : /assets/${entryCss}`);
 
-// ── 2. Generate index.html ────────────────────────────────────────────────────
+// ── Generate index.html ────────────────────────────────────────────────────────
 const cssLink = entryCss
   ? `  <link rel="stylesheet" href="/assets/${entryCss}" />\n`
   : "";
@@ -59,7 +54,6 @@ const html = `<!DOCTYPE html>
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
 ${cssLink}    <script>
-      // Register service worker (PWA)
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js', { scope: '/' });
@@ -74,21 +68,6 @@ ${cssLink}    <script>
 </html>
 `;
 
-const indexPath = join(outPublic, "index.html");
-await writeFile(indexPath, html, "utf-8");
-console.log("✔  Generated  : .output/public/index.html");
-
-// ── 3. Copy sw.js + workbox files from dist/ → .output/public/ ───────────────
-if (await exists(distDir)) {
-  const distFiles = await readdir(distDir);
-  for (const file of distFiles) {
-    if (file === "sw.js" || file.startsWith("workbox-")) {
-      await copyFile(join(distDir, file), join(outPublic, file));
-      console.log(`✔  Copied     : ${file}`);
-    }
-  }
-} else {
-  console.warn("⚠️  dist/ not found — skipping SW file copy");
-}
-
-console.log("\n🎉  Netlify static build ready at .output/public/");
+await writeFile(join(distDir, "index.html"), html, "utf-8");
+console.log("✔  Generated  : dist/index.html");
+console.log("\n🎉  Netlify build ready at dist/");

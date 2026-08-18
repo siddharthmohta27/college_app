@@ -14,6 +14,11 @@ import {
   MessageSquare,
   Zap,
   Loader2,
+  Compass,
+  CalendarDays,
+  CheckSquare,
+  FileText,
+  Heart,
 } from "lucide-react";
 import { firebaseAuth } from "@/lib/firebase";
 import { auth } from "@/lib/firebase";
@@ -200,14 +205,13 @@ function Landing() {
           <section className="pt-10 pb-16 text-center animate-fade-up sm:pt-16 sm:pb-24">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur">
               <Sparkles className="h-3.5 w-3.5 text-accent" />
-              <span>Your entire college life, in one place</span>
+              <span>Making your PEC journey smoother, connected & effortless 🚀</span>
             </div>
             <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-7xl">
               Your campus, <span className="gradient-text">supercharged</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground leading-relaxed sm:text-lg">
-              Marketplace, canteen menus, real-time chat, club events and study rooms — everything
-              your college life needs, beautifully unified.
+              Orientation schedules, section timetables, hostel mess menus, student marketplace, real-time chat, clubs & academic resources — everything you need for college life, beautifully unified.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <button
@@ -232,18 +236,22 @@ function Landing() {
               </button>
             </div>
 
-            {/* Mini preview badges */}
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+            {/* Feature Pills */}
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-2.5 max-w-3xl mx-auto">
               {[
+                { icon: Compass, label: "Orientation 2026", color: "text-amber-500" },
+                { icon: CalendarDays, label: "My Timetable", color: "text-primary" },
+                { icon: UtensilsCrossed, label: "Mess Menu", color: "text-primary" },
                 { icon: ShoppingBag, label: "Marketplace", color: "text-primary" },
-                { icon: UtensilsCrossed, label: "Canteen Menu", color: "text-primary" },
                 { icon: MessageSquare, label: "Campus Chat", color: "text-primary" },
-                { icon: Calendar, label: "Club Events", color: "text-primary" },
-                { icon: BookOpen, label: "Study Rooms", color: "text-primary" },
+                { icon: Calendar, label: "Clubs & PECFEST", color: "text-primary" },
+                { icon: BookOpen, label: "Study Rooms & Pomodoro", color: "text-primary" },
+                { icon: CheckSquare, label: "Attendance 75% Tracker", color: "text-primary" },
+                { icon: FileText, label: "Notes & PYQs", color: "text-primary" },
               ].map(({ icon: Icon, label, color }) => (
                 <span
                   key={label}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/40 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-surface/50 px-3.5 py-1.5 text-xs text-muted-foreground backdrop-blur hover:text-foreground hover:border-primary/40 transition"
                 >
                   <Icon className={`h-3.5 w-3.5 ${color}`} />
                   {label}
@@ -254,63 +262,92 @@ function Landing() {
 
           {/* Feature grid */}
           <section id="features" className="pb-24">
-            <h2 className="mb-10 text-center text-2xl font-bold">Everything your college needs</h2>
+            <div className="text-center mb-12 space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-bold">Everything your college life needs</h2>
+              <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+                Purpose-built tools to navigate academics, hostel dining, campus events and student commerce at PEC.
+              </p>
+            </div>
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {[
                 {
-                  icon: ShoppingBag,
-                  title: "Student Marketplace",
-                  desc: "Buy, sell and swap textbooks, electronics, dorm gear and event tickets across your campus. Safe, fast, peer-to-peer.",
+                  icon: Compass,
+                  title: "Orientation & Campus Maps",
+                  desc: "Day-by-day official induction timetable, reporting venues across Audi & Seminar Halls, and hostel guide.",
+                  color: "text-amber-500",
+                  glow: "group-hover:bg-amber-500/10",
+                  id: "orientation",
+                },
+                {
+                  icon: CalendarDays,
+                  title: "Section Timetables",
+                  desc: "Auto-detected by student roll number. Never miss a lecture, lab session or room venue change.",
                   color: "text-primary",
                   glow: "group-hover:bg-primary/10",
-                  id: "marketplace",
+                  id: "timetable",
                 },
                 {
                   icon: UtensilsCrossed,
-                  title: "Canteen Menu",
-                  desc: "View today's breakfast, lunch, snacks and dinner menu in real time. Pre-order meals and never wait in line again.",
+                  title: "Hostel Mess Menus",
+                  desc: "Weekly 4-meal cycle for Kurukshetra, Shivalik, Himalaya, Kalpana Chawla & Vindhya with live meal timings.",
                   color: "text-primary",
                   glow: "group-hover:bg-primary/10",
                   id: "canteen",
                 },
                 {
+                  icon: ShoppingBag,
+                  title: "Student Marketplace",
+                  desc: "Buy, sell and swap textbooks, electronics, cycle, drafter and gear directly with campus batchmates.",
+                  color: "text-primary",
+                  glow: "group-hover:bg-primary/10",
+                  id: "marketplace",
+                },
+                {
                   icon: MessageSquare,
-                  title: "Campus Chat",
-                  desc: "Department channels, study group DMs, event chats and voice rooms — all in one Discord-style experience.",
+                  title: "Campus Chat & Channels",
+                  desc: "Branch groups, hostel chats, assignments help, and voice study rooms — all in one Discord-style hub.",
                   color: "text-primary",
                   glow: "group-hover:bg-primary/10",
                   id: "chat",
                 },
                 {
                   icon: Calendar,
-                  title: "Clubs & Events",
-                  desc: "Discover and join clubs — tech, cultural, sports and more. RSVP to events and get reminders before they start.",
+                  title: "Clubs & PECFEST",
+                  desc: "Explore 15+ student societies, technical fests, cultural nights and PECFEST dates & event registrations.",
                   color: "text-primary",
                   glow: "group-hover:bg-primary/10",
                   id: "clubs",
                 },
                 {
+                  icon: CheckSquare,
+                  title: "Attendance Tracker",
+                  desc: "Target 75% attendance calculator with safe bnk predictor and per-subject lecture logs.",
+                  color: "text-primary",
+                  glow: "group-hover:bg-primary/10",
+                  id: "attendance",
+                },
+                {
                   icon: BookOpen,
-                  title: "Study Rooms",
-                  desc: "Book a study room, fire up a Pomodoro timer, and collaborate with classmates on shared notes — all in one tab.",
+                  title: "Study Rooms & Pomodoro",
+                  desc: "Real-time study hall occupancy, seat reservations, and focused Pomodoro grind sessions with friends.",
                   color: "text-primary",
                   glow: "group-hover:bg-primary/10",
                   id: "study",
                 },
                 {
-                  icon: Zap,
-                  title: "Campus Announcements",
-                  desc: "Never miss an important notice. Exam schedules, fee deadlines, holidays and emergency alerts — all curated for you.",
+                  icon: FileText,
+                  title: "Academic Notes & PYQs",
+                  desc: "Curated previous year papers, verified class notes, syllabus breakdown and semester resources.",
                   color: "text-primary",
                   glow: "group-hover:bg-primary/10",
-                  id: "announcements",
+                  id: "resources",
                 },
               ].map((f, i) => (
                 <div
                   key={f.title}
                   id={`feature-${f.id}`}
-                  className="group relative overflow-hidden rounded-2xl glass p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg animate-fade-up"
-                  style={{ animationDelay: `${i * 80}ms` }}
+                  className="group relative overflow-hidden rounded-2xl glass p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg animate-fade-up border border-border/80"
+                  style={{ animationDelay: `${i * 60}ms` }}
                 >
                   <div
                     className={`absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition duration-500 ${f.glow}`}
@@ -327,24 +364,27 @@ function Landing() {
             </div>
           </section>
 
-          {/* Stats strip */}
+          {/* PEC-Specific Stats & Trust Strip */}
           <section
             id="community"
             className="mb-24 rounded-3xl glass-strong neon-border p-8 md:p-12"
           >
-            <div className="mb-8 text-center">
-              <h2 className="text-xl font-bold">Trusted by students across campuses</h2>
+            <div className="mb-8 text-center space-y-1.5">
+              <h2 className="text-xl sm:text-2xl font-bold">Built Exclusively for Punjab Engineering College</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Crafted for PECians — from Freshers Orientation to Final Year Placements
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4 md:gap-8">
               {[
-                ["50+", "Colleges"],
-                ["12k+", "Students"],
-                ["3.2k", "Marketplace Listings"],
-                ["99.9%", "Uptime"],
+                ["100%", "PEC Batch Coverage"],
+                ["10+", "Branch Timetables"],
+                ["5", "Hostel Mess Menus"],
+                ["#1", "Student Super-App"],
               ].map(([n, l]) => (
-                <div key={l}>
+                <div key={l} className="space-y-1">
                   <div className="text-3xl font-bold gradient-text sm:text-4xl">{n}</div>
-                  <div className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
+                  <div className="mt-1 text-xs uppercase tracking-wider text-muted-foreground font-medium">
                     {l}
                   </div>
                 </div>

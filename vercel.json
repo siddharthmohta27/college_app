@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://campus-connect-api.onrender.com/api/:path*"
+      "destination": "https://college-app-47d0.onrender.com/api/:path*"
     }
   ],
   "headers": [

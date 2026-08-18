@@ -81,20 +81,22 @@ export default defineConfig({
     server: {
       port: 8080,
       proxy: {
+        // In dev, proxy /api/* to the local chat-server.
+        // In production (Vercel), vercel.json rewrites handle this instead.
         '/api/chat': {
-          target: 'http://localhost:3001',
+          target: process.env.VITE_API_BASE || 'http://localhost:3001',
           changeOrigin: true,
         },
         '/api/dating': {
-          target: 'http://localhost:3001',
+          target: process.env.VITE_API_BASE || 'http://localhost:3001',
           changeOrigin: true,
         },
         '/api/marketplace': {
-          target: 'http://localhost:3001',
+          target: process.env.VITE_API_BASE || 'http://localhost:3001',
           changeOrigin: true,
         },
         '/api/attendance': {
-          target: 'http://localhost:3001',
+          target: process.env.VITE_API_BASE || 'http://localhost:3001',
           changeOrigin: true,
         },
       },

@@ -351,12 +351,11 @@ function Dashboard() {
       </section>
 
       {/* Stats row */}
-      <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Unread Messages", value: String(unreadMessages), icon: MessageSquare, color: "text-primary" },
           { label: "Active Listings", value: String(activeListings), icon: ShoppingBag, color: "text-primary" },
           { label: "Events This Week", value: String(eventsThisWeek), icon: Calendar, color: "text-primary" },
-          { label: "Study Hours Today", value: studyHoursToday, icon: Clock, color: "text-primary" },
         ].map((stat, i) => (
           <div
             key={stat.label}

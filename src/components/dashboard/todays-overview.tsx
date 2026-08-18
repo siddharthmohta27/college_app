@@ -3,8 +3,6 @@ import {
   BookOpen,
   Calendar,
   CheckSquare,
-  Clock,
-  FileText,
   UtensilsCrossed,
   Zap,
 } from "lucide-react";
@@ -114,25 +112,6 @@ export function TodaysOverview() {
     return unsub;
   }, []);
 
-  const [studyBooking, setStudyBooking] = useState<{ value: string; subtitle: string }>({
-    value: "Available",
-    subtitle: "Browse study halls",
-  });
-
-  useEffect(() => {
-    try {
-      const booked = localStorage.getItem("bookedRooms");
-      if (booked) {
-        const parsed = JSON.parse(booked);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setStudyBooking({ value: `${parsed.length} Active`, subtitle: "Booked today" });
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-
   const TODAY_OVERVIEW: OverviewItem[] = [
     {
       icon: BookOpen,
@@ -153,22 +132,10 @@ export function TodaysOverview() {
       subtitle: attendanceData.msg,
     },
     {
-      icon: Clock,
-      title: "Study Room",
-      value: studyBooking.value,
-      subtitle: studyBooking.subtitle,
-    },
-    {
       icon: Calendar,
-      title: "Events",
-      value: "Campus Fests",
-      subtitle: "Clubs & societies live",
-    },
-    {
-      icon: FileText,
-      title: "Assignments",
-      value: "All Caught Up",
-      subtitle: "No pending submissions",
+      title: "Orientation & Events",
+      value: "Freshers Week 2026",
+      subtitle: "7-Day Schedule Live",
     },
   ];
 
@@ -180,7 +147,7 @@ export function TodaysOverview() {
       </h2>
 
       <div className="relative -mx-6 overflow-visible px-6 py-1">
-        <div className="flex gap-4 overflow-x-auto pb-2 pt-1 scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0 xl:grid-cols-6">
+        <div className="flex gap-4 overflow-x-auto pb-2 pt-1 scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:pb-0">
           {TODAY_OVERVIEW.map((item, index) => (
             <OverviewCard key={item.title} item={item} index={index} />
           ))}

@@ -25,6 +25,7 @@ import {
 import { TodaysOverview } from "@/components/dashboard/todays-overview";
 import { useState, useEffect } from "react";
 import { firebaseAuth } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { parsePecEmail } from "@/lib/pec-email";
 import { getSectionFromRollNo, getTimetableForSection, getTodaySchedule, getNextClass } from "@/lib/pec-timetable";
 
@@ -262,6 +263,10 @@ function Dashboard() {
 
   const [email, setEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState<number>(0);
+  const [activeListings, setActiveListings] = useState<number>(0);
+  const [eventsThisWeek, setEventsThisWeek] = useState<number>(0);
+  const [studyHoursToday, setStudyHoursToday] = useState<string>("0h");
 
   useEffect(() => {
     const unsub = firebaseAuth.onAuthStateChanged((user) => {
@@ -271,6 +276,59 @@ function Dashboard() {
       }
     });
     return unsub;
+  }, []);
+
+  // Fetch real statistics from database & local feature stores
+  useEffect(() => {
+    // 1. Unread messages (from local chat state or default 0)
+    try {
+      const storedUnread = localStorage.getItem("campus_unread_count");
+      setUnreadMessages(storedUnread ? parseInt(storedUnread, 10) : 0);
+    } catch {
+      setUnreadMessages(0);
+    }
+
+    // 2. Active marketplace listings count
+    async function loadMarketplaceCount() {
+      try {
+        const { count, error } = await supabase
+          .from("marketplace_listings")
+          .select("id", { count: "exact", head: true });
+        if (!error && typeof count === "number") {
+          setActiveListings(count);
+        } else {
+          setActiveListings(0);
+        }
+      } catch {
+        setActiveListings(0);
+      }
+    }
+    loadMarketplaceCount();
+
+    // 3. Events this week (0 if none scheduled for current week)
+    try {
+      const storedEvents = localStorage.getItem("campus_events_week");
+      setEventsThisWeek(storedEvents ? parseInt(storedEvents, 10) : 0);
+    } catch {
+      setEventsThisWeek(0);
+    }
+
+    // 4. Study hours / booked study rooms today
+    try {
+      const storedStudyTime = localStorage.getItem("pomodoro_today_mins");
+      const bookedRooms = localStorage.getItem("bookedRooms");
+      if (storedStudyTime) {
+        const mins = parseInt(storedStudyTime, 10);
+        setStudyHoursToday(mins >= 60 ? `${(mins / 60).toFixed(1)}h` : `${mins}m`);
+      } else if (bookedRooms) {
+        const parsed = JSON.parse(bookedRooms);
+        setStudyHoursToday(Array.isArray(parsed) && parsed.length > 0 ? `${parsed.length} booked` : "0h");
+      } else {
+        setStudyHoursToday("0h");
+      }
+    } catch {
+      setStudyHoursToday("0h");
+    }
   }, []);
 
   const profile = parsePecEmail(email, displayName);
@@ -290,10 +348,7 @@ function Dashboard() {
             {profile.yearLabel} · {profile.branch} · Roll No. {profile.rollNo}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs text-primary">
-              <Zap className="h-3 w-3" /> End Semester Exams Coming Up
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs text-primary">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs text-primary font-medium">
               <Star className="h-3 w-3" /> Batch of {profile.batch} ({profile.degree})
             </span>
           </div>
@@ -303,10 +358,10 @@ function Dashboard() {
       {/* Stats row */}
       <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
-          { label: "Unread Messages", value: "12", icon: MessageSquare, color: "text-primary" },
-          { label: "Active Listings", value: "3", icon: ShoppingBag, color: "text-primary" },
-          { label: "Events This Week", value: "5", icon: Calendar, color: "text-primary" },
-          { label: "Study Hours Today", value: "2.5h", icon: Clock, color: "text-primary" },
+          { label: "Unread Messages", value: String(unreadMessages), icon: MessageSquare, color: "text-primary" },
+          { label: "Active Listings", value: String(activeListings), icon: ShoppingBag, color: "text-primary" },
+          { label: "Events This Week", value: String(eventsThisWeek), icon: Calendar, color: "text-primary" },
+          { label: "Study Hours Today", value: studyHoursToday, icon: Clock, color: "text-primary" },
         ].map((stat, i) => (
           <div
             key={stat.label}

@@ -114,6 +114,25 @@ export function TodaysOverview() {
     return unsub;
   }, []);
 
+  const [studyBooking, setStudyBooking] = useState<{ value: string; subtitle: string }>({
+    value: "Available",
+    subtitle: "Browse study halls",
+  });
+
+  useEffect(() => {
+    try {
+      const booked = localStorage.getItem("bookedRooms");
+      if (booked) {
+        const parsed = JSON.parse(booked);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setStudyBooking({ value: `${parsed.length} Active`, subtitle: "Booked today" });
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const TODAY_OVERVIEW: OverviewItem[] = [
     {
       icon: BookOpen,
@@ -122,22 +141,10 @@ export function TodaysOverview() {
       subtitle: nextClassInfo.subtitle,
     },
     {
-      icon: FileText,
-      title: "Assignment Due",
-      value: "DSA Lab Report",
-      subtitle: "Due Today · 11:59 PM",
-    },
-    {
       icon: UtensilsCrossed,
-      title: "Today's Meal",
-      value: "Paneer Butter Masala",
-      subtitle: "₹45 · 520 kcal",
-    },
-    {
-      icon: Calendar,
-      title: "Upcoming Event",
-      value: "AI Workshop",
-      subtitle: "5:00 PM · Auditorium",
+      title: "Mess Menu",
+      value: "Kurukshetra Mess",
+      subtitle: "Scheduled 4-Meal Menu",
     },
     {
       icon: CheckSquare,
@@ -147,9 +154,21 @@ export function TodaysOverview() {
     },
     {
       icon: Clock,
-      title: "Study Room Booking",
-      value: "Room A",
-      subtitle: "Booked · 7:00 PM",
+      title: "Study Room",
+      value: studyBooking.value,
+      subtitle: studyBooking.subtitle,
+    },
+    {
+      icon: Calendar,
+      title: "Events",
+      value: "Campus Fests",
+      subtitle: "Clubs & societies live",
+    },
+    {
+      icon: FileText,
+      title: "Assignments",
+      value: "All Caught Up",
+      subtitle: "No pending submissions",
     },
   ];
 

@@ -57,7 +57,7 @@ interface ScheduleEvent {
 
 const SCHEDULE_DATA_BY_DAY: Record<number, ScheduleEvent[]> = {
   1: [
-    { id: "d1-1", day: 1, time: "9:30 AM – 10:00 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 1)", venue: "Annexure 1 (Day 1) Reporting Venues", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", highlight: true, notes: "Mandatory reporting for all first-year freshers." },
+    { id: "d1-1", day: 1, time: "9:30 AM – 10:00 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 1)", venue: "Annexure 1 (Day 1) Venues", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", highlight: true, notes: "Mandatory reporting for all first-year freshers." },
     { id: "d1-2", day: 1, time: "10:00 AM – 10:30 AM", activity: "Distribution of Welcome Kit", venue: "Auditorium", coordinator: "Prof. Amandeep Kaur", category: "morning" },
     { id: "d1-3", day: 1, time: "10:30 AM – 10:35 AM", activity: "Welcoming the Batch of 2030 & Welcoming Dignitaries", venue: "Auditorium", coordinator: "Prof. Amandeep Kaur", category: "inaugural" },
     { id: "d1-4", day: 1, time: "10:35 AM – 10:40 AM", activity: "Inaugural & Lamp Lighting", venue: "Auditorium", coordinator: "Prof. Amandeep Kaur", category: "inaugural" },
@@ -74,12 +74,12 @@ const SCHEDULE_DATA_BY_DAY: Record<number, ScheduleEvent[]> = {
     { id: "d1-15", day: 1, time: "2:00 PM – 3:00 PM", activity: "Address By Professor Rajeev Ahuja (Director, IIT Ropar)", venue: "Auditorium", coordinator: "Prof. Shilpa", category: "afternoon", highlight: true },
     { id: "d1-16", day: 1, time: "3:00 PM – 3:10 PM", activity: "Felicitation Ceremony", venue: "Auditorium", coordinator: "Prof. Shilpa", category: "afternoon" },
     { id: "d1-17", day: 1, time: "3:10 PM – 3:15 PM", activity: "Vote of Thanks", venue: "Auditorium", coordinator: "Prof. Shilpa", category: "afternoon" },
-    { id: "d1-18", day: 1, time: "3:30 PM – 4:30 PM", activity: "Department Visit(s) (Address by Respective HOD, Interaction With Faculty & Lab Visit)", venue: "Annexure 3", coordinator: "Address by Respective HOD, Interaction With Faculty, Department Lab Visit(s)", category: "afternoon", highlight: true },
+    { id: "d1-18", day: 1, time: "3:30 PM – 4:30 PM", activity: "Department Visit(s) (Address by Respective HOD, Interaction With Faculty & Lab Visit)", venue: "Annexure 3 Venues", coordinator: "Respective HODs & Faculty", category: "afternoon", highlight: true },
     { id: "d1-19", day: 1, time: "4:30 PM – 5:00 PM", activity: "SNACKS", venue: "Annexure 3", coordinator: "Organizing Committee", category: "afternoon" },
     { id: "d1-20", day: 1, time: "5:00 PM – 5:30 PM", activity: "Institute Tour", venue: "Campus", coordinator: "Student Branch Incharges & Discipline Incharges", category: "afternoon" },
   ],
   2: [
-    { id: "d2-1", day: 2, time: "8:45 AM – 9:15 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 2)", venue: "Annexure 1 (Day 2)", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", highlight: true },
+    { id: "d2-1", day: 2, time: "8:45 AM – 9:15 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 2)", venue: "Annexure 1 (Day 2) Venues", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", highlight: true },
     { id: "d2-2", day: 2, time: "9:15 AM – 9:25 AM", activity: "Address by Head, Physics", venue: "Auditorium", coordinator: "Prof. Nidhi Tanwar, Prof. Amandeep Kaur", category: "morning" },
     { id: "d2-3", day: 2, time: "9:25 AM – 9:35 AM", activity: "Address by Head, Chemistry", venue: "Auditorium", coordinator: "Prof. Nidhi Tanwar, Prof. Amandeep Kaur", category: "morning" },
     { id: "d2-4", day: 2, time: "9:35 AM – 9:45 AM", activity: "Address by Head, Mathematics", venue: "Auditorium", coordinator: "Prof. Nidhi Tanwar, Prof. Amandeep Kaur", category: "morning" },
@@ -92,16 +92,16 @@ const SCHEDULE_DATA_BY_DAY: Record<number, ScheduleEvent[]> = {
     { id: "d2-11", day: 2, time: "11:40 AM – 11:45 AM", activity: "Vote of Thanks", venue: "Auditorium", coordinator: "Prof. Nidhi Tanwar, Prof. Amandeep Kaur", category: "morning" },
     { id: "d2-12", day: 2, time: "11:45 AM – 12:15 PM", activity: "Club Presentations Slot 1: Group A (HEB in L-26), Group B (EEB in L-27), Group C (SAASC in L-28), Group D (ACM in L-29), Group E (PDC in Auditorium), Group F (WEC in Aero Audi), Group G (NCC in L-30), Group H (Robotics in L-31)", venue: "Respective Lecture Halls / Audi", coordinator: "Respective P/I's of Club, Societies, Cells, NSS & NCC to coordinate and supervise.", category: "afternoon" },
     { id: "d2-13", day: 2, time: "12:15 PM – 12:45 PM", activity: "Club Presentations Slot 2: Group A (SAE in L-26), Group B (ASCE in L-27), Group C (SME in L-28), Group D (CIM in L-29), Group E (EEB in Auditorium), Group F (ASME in Aero Audi), Group G (APC in L-30), Group H (SESI in L-31)", venue: "Respective Lecture Halls / Audi", coordinator: "Respective P/I's of Club, Societies, Cells, NSS & NCC to coordinate and supervise.", category: "afternoon" },
-    { id: "d2-14", day: 2, time: "12:45 PM – 2:15 PM", activity: "Lunch", venue: "Annexure 3", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch" },
-    { id: "d2-15", day: 2, time: "2:15 PM – 2:30 PM", activity: "Movement of Students", venue: "Respective Venues", coordinator: "Student Mentors", category: "afternoon" },
+    { id: "d2-14", day: 2, time: "12:45 PM – 2:15 PM", activity: "Lunch", venue: "Annexure 3 Venues", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch" },
+    { id: "d2-15", day: 2, time: "2:15 PM – 2:30 PM", activity: "Movement of Students to Respective Venues", venue: "Respective Venues", coordinator: "Student Mentors", category: "afternoon" },
     { id: "d2-16", day: 2, time: "2:30 PM – 3:00 PM", activity: "Club Presentations Slot 3: Group A (Rotaract in L-26), Group B (ELC in L-27), Group C (ASPS in L-28), Group D (ATS in L-29), Group E (IIM in Auditorium), Group F (IEEE in Aero Audi), Group G (NSS in L-30), Group H (IGS in L-31)", venue: "Respective Lecture Halls / Audi", coordinator: "Respective P/I's of Club, Societies, Cells, NSS & NCC to coordinate and supervise.", category: "afternoon" },
     { id: "d2-17", day: 2, time: "3:00 PM – 3:30 PM", activity: "Club Presentations Slot 4: Group A (ELC in L-26), Group B (ASPS in L-27), Group C (ATS in L-28), Group D (IIM in L-29), Group E (IEEE in Auditorium), Group F (NSS in Aero Audi), Group G (IGS in L-30), Group H (ES in L-31)", venue: "Respective Lecture Halls / Audi", coordinator: "Respective P/I's of Club, Societies, Cells, NSS & NCC to coordinate and supervise.", category: "afternoon" },
-    { id: "d2-18", day: 2, time: "3:30 PM – 4:00 PM", activity: "Evening Snacks", venue: "Respective Venues / Campus", coordinator: "Organizing Committee", category: "afternoon" },
+    { id: "d2-18", day: 2, time: "3:30 PM – 4:00 PM", activity: "Evening Snacks", venue: "Respective Venues", coordinator: "Organizing Committee", category: "afternoon" },
     { id: "d2-19", day: 2, time: "4:00 PM – 4:15 PM", activity: "Movement of Students to Respective Venues", venue: "Respective Venues", coordinator: "Student Mentors", category: "afternoon" },
     { id: "d2-20", day: 2, time: "4:15 PM – 5:45 PM", activity: "Parallel Evening Displays: Technical Display (T1 in Centenary Hall) | Sports (S1 in Athletic Ground) | Music (A3 in Auditorium)", venue: "Centenary Hall / Athletic Ground / Auditorium", coordinator: "Respective P/I's of Club, Societies, Cells & Sports to coordinate and supervise.", category: "afternoon", highlight: true },
   ],
   3: [
-    { id: "d3-1", day: 3, time: "8:30 AM – 9:15 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 3)", venue: "Annexure 1 (Day 3)", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", highlight: true },
+    { id: "d3-1", day: 3, time: "8:30 AM – 9:15 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 3)", venue: "Annexure 1 (Day 3) Venues", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", highlight: true },
     { id: "d3-2", day: 3, time: "9:15 AM – 9:30 AM", activity: "Address by Head, SCC", venue: "Auditorium", coordinator: "Prof. Nidhi Tanwar, Prof. Shilpa", category: "morning" },
     { id: "d3-3", day: 3, time: "9:30 AM – 9:45 AM", activity: "Address By Head, Alumni Relations", venue: "Auditorium", coordinator: "Prof. Nidhi Tanwar, Prof. Shilpa", category: "morning" },
     { id: "d3-4", day: 3, time: "9:45 AM – 10:00 AM", activity: "Address by Head, Library", venue: "Auditorium", coordinator: "Prof. Nidhi Tanwar, Prof. Shilpa", category: "morning" },
@@ -110,13 +110,78 @@ const SCHEDULE_DATA_BY_DAY: Record<number, ScheduleEvent[]> = {
     { id: "d3-7", day: 3, time: "11:20 AM – 12:20 PM", activity: "Speaker Session 2", venue: "Auditorium", coordinator: "Prof. Nidhi Tanwar, Prof. Shilpa", category: "morning" },
     { id: "d3-8", day: 3, time: "12:20 PM – 12:30 PM", activity: "Felicitation and Vote of Thanks", venue: "Auditorium", coordinator: "Prof. Nidhi Tanwar, Prof. Shilpa", category: "morning" },
     { id: "d3-9", day: 3, time: "12:30 PM – 12:45 PM", activity: "Movement of Students to Respective Hostels", venue: "Annexure 3", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch" },
-    { id: "d3-10", day: 3, time: "12:45 PM – 2:15 PM", activity: "Lunch", venue: "Annexure 3", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch" },
+    { id: "d3-10", day: 3, time: "12:45 PM – 2:15 PM", activity: "Lunch", venue: "Annexure 3 Venues", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch" },
     { id: "d3-11", day: 3, time: "2:15 PM – 2:30 PM", activity: "Movement of Students to Respective Venues", venue: "Respective Venues", coordinator: "Student Mentors", category: "afternoon" },
     { id: "d3-12", day: 3, time: "2:30 PM – 3:00 PM", activity: "Club Presentations Slot 5: Group A (Robotics in L-26), Group B (HEB in Aero Audi), Group C (EEB in L-27), Group D (SAASC in L-28), Group E (ACM in L-29), Group F (EIC in L-30), Group G (WEC in Auditorium), Group H (NCC in L-31)", venue: "Respective Lecture Halls / Audi", coordinator: "Respective P/I's of Club, Societies, Cells, NSS & NCC to coordinate and supervise.", category: "afternoon" },
     { id: "d3-13", day: 3, time: "3:00 PM – 3:30 PM", activity: "Club Presentations Slot 6: Group A (SCC in L-26), Group B (SAE in Aero Audi), Group C (PDC in L-27), Group D (SME in L-28), Group E (CIM in L-29), Group F (ASCE in L-30), Group G (Robotics in Auditorium), Group H (APC in L-31)", venue: "Respective Lecture Halls / Audi", coordinator: "Respective P/I's of Club, Societies, Cells, NSS & NCC to coordinate and supervise.", category: "afternoon" },
-    { id: "d3-14", day: 3, time: "3:30 PM – 4:00 PM", activity: "Evening Snacks", venue: "Respective Venues / Campus", coordinator: "Organizing Committee", category: "afternoon" },
+    { id: "d3-14", day: 3, time: "3:30 PM – 4:00 PM", activity: "Evening Snacks", venue: "Respective Venues", coordinator: "Organizing Committee", category: "afternoon" },
     { id: "d3-15", day: 3, time: "4:00 PM – 4:15 PM", activity: "Movement of Students to Respective Venues", venue: "Respective Venues", coordinator: "Student Mentors", category: "afternoon" },
     { id: "d3-16", day: 3, time: "4:15 PM – 5:45 PM", activity: "Parallel Evening Displays: Tech Display (T2 in Centenary Hall) | Sports (S2 in Athletic Ground) | Drams (A1 in Auditorium)", venue: "Centenary Hall / Athletic Ground / Auditorium", coordinator: "Respective P/I's of Club, Societies, Cells & Sports to supervise.", category: "afternoon", highlight: true },
+  ],
+  4: [
+    { id: "d4-1", day: 4, time: "9:00 AM – 9:30 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 4)", venue: "Annexure 1 (Day 4) Venues", coordinator: "Respective Faculty Incharges & Student Branch Incharges", category: "morning", highlight: true },
+    { id: "d4-2", day: 4, time: "9:30 AM – 10:30 AM", activity: "Speaker Session", venue: "Auditorium", coordinator: "Faculty Coordinators", category: "morning", highlight: true },
+    { id: "d4-3", day: 4, time: "10:30 AM – 11:00 AM", activity: "Club Slot 7: Group A (SME in L-31), Group B (CIM in L-26), Group C (IGS in Aero Audi), Group D (ES in L-27)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies, Cells, NSS & NCC", category: "morning" },
+    { id: "d4-4", day: 4, time: "11:00 AM – 11:30 AM", activity: "Club Slot 8: Group A (ATS in L-31), Group B (IIM in L-26), Group C (APC in Aero Audi), Group D (SESI in L-27)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies, Cells, NSS & NCC", category: "morning" },
+    { id: "d4-5", day: 4, time: "11:30 AM – 12:00 PM", activity: "Club Slot 9: Group A (EEB in L-31), Group B (IEEE in L-26), Group C (HEB in Aero Audi)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies, Cells, NSS & NCC", category: "morning" },
+    { id: "d4-6", day: 4, time: "10:30 AM – 12:00 PM", activity: "Cultural / PEB: Group A2 (PEB in Auditorium)", venue: "Auditorium", coordinator: "Cultural Committee", category: "morning" },
+    { id: "d4-7", day: 4, time: "12:00 PM – 12:15 PM", activity: "Movement of Students to Respective Hostels", venue: "Campus", coordinator: "Student Branch Incharges", category: "lunch" },
+    { id: "d4-8", day: 4, time: "12:15 PM – 1:45 PM", activity: "Lunch", venue: "Annexure 3 Venues", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch" },
+    { id: "d4-9", day: 4, time: "1:45 PM – 2:00 PM", activity: "Movement of Students to Respective Venues", venue: "Campus", coordinator: "Student Mentors", category: "afternoon" },
+    { id: "d4-10", day: 4, time: "1:15 PM – 2:45 PM", activity: "Group A3 (Music in Auditorium)", venue: "Auditorium", coordinator: "Music Society", category: "afternoon" },
+    { id: "d4-11", day: 4, time: "2:45 PM – 4:15 PM", activity: "Group A3 (PEB in Auditorium)", venue: "Auditorium", coordinator: "Cultural Committee", category: "afternoon" },
+    { id: "d4-12", day: 4, time: "2:00 PM – 2:30 PM", activity: "Club Slot 10: Group A (IIM in L-31), Group B (SME in L-26), Group E (WEC in L-27), Group G (PDC in Aero Audi)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d4-13", day: 4, time: "2:30 PM – 3:00 PM", activity: "Club Slot 11: Group A (NSS in L-31), Group B (IGS in L-26), Group E (EIC in L-27), Group G (ASME in L-29)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d4-14", day: 4, time: "3:00 PM – 3:30 PM", activity: "Club Slot 12: Group A (ASCE in L-31), Group B (ACM in L-26), Group E (NCC in L-27), Group G (HEB in Aero Audi)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d4-15", day: 4, time: "3:30 PM – 4:00 PM", activity: "Club Slot 13: Group A (ASPS in L-31), Group B (ATS in L-26), Group E (HEB in L-27), Group G (ELC in Aero Audi)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d4-16", day: 4, time: "4:00 PM – 4:30 PM", activity: "SNACKS", venue: "Respective Venues", coordinator: "Organizing Committee", category: "afternoon" },
+    { id: "d4-17", day: 4, time: "4:30 PM – 4:40 PM", activity: "Movement of Students to Respective Venues", venue: "Campus", coordinator: "Student Mentors", category: "afternoon" },
+    { id: "d4-18", day: 4, time: "4:40 PM – 6:00 PM", activity: "Parallel Evening Displays: Drams (A2 in Auditorium) | Technical Display (T4 in Centenary Hall) | Sports (S4 in Athletics Ground)", venue: "Auditorium / Centenary Hall / Athletics Ground", coordinator: "Respective P/I's of Club, Societies, Cells & Sports", category: "afternoon", highlight: true },
+  ],
+  5: [
+    { id: "d5-1", day: 5, time: "8:30 AM – 9:00 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 5)", venue: "Annexure 1 (Day 5) Venues", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", highlight: true },
+    { id: "d5-2", day: 5, time: "9:00 AM – 9:45 AM", activity: "Speaker Session", venue: "Auditorium", coordinator: "Faculty Coordinators", category: "morning" },
+    { id: "d5-3", day: 5, time: "9:45 AM – 11:15 AM", activity: "Cultural / Drams: Group A1 (Drams in Auditorium)", venue: "Auditorium", coordinator: "Dramatics Club", category: "morning", highlight: true },
+    { id: "d5-4", day: 5, time: "9:45 AM – 10:15 AM", activity: "Club Slot 14: Group C (CIM in L-30), Group D (ASCE in L-31), Group E (APC in L-26), Group F (NCC in L-27), Group G (Rotaract in L-28), Group H (SAASC in Aero Audi)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies, Cells, NSS & NCC", category: "morning" },
+    { id: "d5-5", day: 5, time: "10:15 AM – 10:45 AM", activity: "Club Slot 15: Group C (ES in L-30), Group D (EIC in L-31), Group E (IGS in L-26), Group F (ELC in L-27), Group G (SCC in L-28), Group H (HEB in L-29)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies, Cells, NSS & NCC", category: "morning" },
+    { id: "d5-6", day: 5, time: "10:45 AM – 11:15 AM", activity: "Club Slot 16: Group A (SAASC in Auditorium), Group B (WEC in L-29), Group C (IIM in L-30), Group D (ASME in L-31), Group E (EIC in L-26), Group F (HEB in L-27), Group H (ELC in Aero Audi)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies, Cells, NSS & NCC", category: "morning" },
+    { id: "d5-7", day: 5, time: "11:15 AM – 11:45 AM", activity: "Club Slot 17: Group A (EIC in L-28), Group B (NSS in L-29), Group C (NCC in L-30), Group D (SAE in L-31)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies, Cells, NSS & NCC", category: "morning" },
+    { id: "d5-8", day: 5, time: "11:45 AM – 12:15 PM", activity: "Club Slot 18: Group A (IEEE in L-28), Group B (ASME in L-29), Group D (NSS in L-31)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies, Cells, NSS & NCC", category: "morning" },
+    { id: "d5-9", day: 5, time: "11:45 AM – 1:15 PM", activity: "Cultural / PEB: Group A2 (PEB in Auditorium)", venue: "Auditorium", coordinator: "Cultural Committee", category: "morning" },
+  ],
+  6: [
+    { id: "d6-1", day: 6, time: "9:00 AM – 9:30 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 6)", venue: "Annexure 1 (Day 6) Venues", coordinator: "Respective Faculty Incharges & Student Branch Incharge", category: "morning", highlight: true },
+    { id: "d6-2", day: 6, time: "9:30 AM – 10:30 AM", activity: "Speaker Session", venue: "Auditorium", coordinator: "Faculty Coordinators", category: "morning", highlight: true },
+    { id: "d6-3", day: 6, time: "10:30 AM – 11:00 AM", activity: "Club Slot 19: Group A (ES in L-29), Group B (SCC in L-30), Group C (ACM in L-31), Group D (EEB in Auditorium), Group E (SAASC in Aero Audi), Group F (CIM in L-26), Group G (EIC in L-27), Group H (WEC in L-28)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "morning" },
+    { id: "d6-4", day: 6, time: "11:00 AM – 11:30 AM", activity: "Club Slot 20: Group A (NCC in L-29), Group B (Robotics in L-30), Group C (SAE in L-31), Group D (PDC in Auditorium), Group E (SME in Aero Audi), Group F (ES in L-26), Group G (ASCE in L-27), Group H (ASME in L-28)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "morning" },
+    { id: "d6-5", day: 6, time: "11:30 AM – 12:00 PM", activity: "Club Slot 21: Group A (APC in L-29), Group B (SESI in L-30), Group C (Rotaract in L-31), Group D (ELC in Auditorium), Group E (ASPS in Aero Audi), Group F (ATS in L-26), Group G (IIM in L-27), Group H (IEEE in L-28)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "morning" },
+    { id: "d6-6", day: 6, time: "12:00 PM – 12:30 PM", activity: "Club Slot 22: Group C (ASCE in L-31), Group G (EEB in L-27), Group E (SCC in Aero Audi), Group F (PDC in L-26), Group H (ACM in L-28)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "morning" },
+    { id: "d6-7", day: 6, time: "12:00 PM – 12:15 PM", activity: "Movement of Students to Respective Venues", venue: "Campus", coordinator: "Student Branch Incharge", category: "lunch" },
+    { id: "d6-8", day: 6, time: "12:45 PM – 2:15 PM", activity: "Lunch", venue: "Annexure 3 Venues", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch" },
+    { id: "d6-9", day: 6, time: "2:15 PM – 2:30 PM", activity: "Movement of Students to Respective Venues", venue: "Campus", coordinator: "Student Mentors", category: "afternoon" },
+    { id: "d6-10", day: 6, time: "2:30 PM – 3:00 PM", activity: "Club Slot 23: Group A (IGS in L-29), Group B (ES in L-30), Group C (Robotics in L-31), Group D (HEB in Auditorium), Group E (ASCE in Aero Audi), Group F (SAASC in L-26), Group G (ACM in L-27), Group H (EIC in L-28)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d6-11", day: 6, time: "3:00 PM – 3:30 PM", activity: "Club Slot 24: Group A (WEC in L-29), Group B (NCC in L-30), Group C (SCC in L-31), Group D (Robotics in Auditorium), Group E (ASME in Aero Audi), Group F (SME in L-26), Group G (CIM in L-27), Group H (ASCE in L-28)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d6-12", day: 6, time: "3:30 PM – 4:00 PM", activity: "Club Slot 25: Group A (ASME in L-29), Group B (APC in L-30), Group C (SESI in L-31), Group D (Rotaract in Auditorium), Group E (ELC in Aero Audi), Group F (ASPS in L-26), Group G (ATS in L-27), Group H (IIM in L-28)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d6-13", day: 6, time: "4:00 PM – 4:30 PM", activity: "Evening Snacks", venue: "Respective Venues", coordinator: "Organizing Committee", category: "afternoon" },
+    { id: "d6-14", day: 6, time: "4:30 PM – 4:40 PM", activity: "Movement of Students to Respective Venues", venue: "Campus", coordinator: "Student Mentors", category: "afternoon" },
+    { id: "d6-15", day: 6, time: "4:40 PM – 6:00 PM", activity: "Parallel Evening Displays: Technical Display (T3 in Centenary Hall) | Sports (S3 in Athletics Ground) | Music (A2 in Auditorium)", venue: "Centenary Hall / Athletics Ground / Auditorium", coordinator: "Respective P/I's of Club, Societies, Cells & Sports", category: "afternoon", highlight: true },
+  ],
+  7: [
+    { id: "d7-1", day: 7, time: "8:30 AM – 9:00 AM", activity: "Attendance in respective rooms/Venue mentioned in Annexure 1 (Day 7)", venue: "Annexure 1 (Day 7) Venues", coordinator: "Respective Faculty Incharges & Student Branch Inchargess", category: "morning", highlight: true },
+    { id: "d7-2", day: 7, time: "9:00 AM – 9:30 AM", activity: "Club Slot 26: Group A (ACM in Auditorium), Group B (EIC in L-28), Group C (WEC in L-29), Group D (NCC in L-30), Group E (Robotics in L-31), Group F (SAE in L-26), Group G (SESI in Aero Audi), Group H (SME in L-27)", venue: "Respective Venues", coordinator: "Faculty & Student Branch Incharges", category: "morning" },
+    { id: "d7-3", day: 7, time: "9:30 AM – 10:00 AM", activity: "Club Slot 27: Group A (CIM in Auditorium), Group B (SAASC in L-28), Group C (IEEE in L-29), Group D (APC in L-30), Group E (SESI in L-31), Group F (Rotaract in L-26), Group G (SAASC in Aero Audi), Group H (ASPS in L-27)", venue: "Respective Venues", coordinator: "Faculty & Student Branch Incharges", category: "morning" },
+    { id: "d7-4", day: 7, time: "10:00 AM – 10:30 AM", activity: "Club Slot 28: Group D (IGS in L-30), Group E (ES in L-31), Group F (SCC in L-26), Group G (SAE in Aero Audi), Group H (EEB in L-27)", venue: "Respective Venues", coordinator: "Faculty & Student Branch Incharges", category: "morning" },
+    { id: "d7-5", day: 7, time: "10:30 AM – 11:00 AM", activity: "Club Slot 29: Group A (SESI in Auditorium), Group B (Rotaract in L-28), Group C (ASME in L-29), Group D (SCC in L-30), Group E (Rotaract in L-31), Group F (IIM in L-26), Group G (ASPS in Aero Audi), Group H (NSS in L-27)", venue: "Respective Venues", coordinator: "Faculty & Student Branch Incharges", category: "morning" },
+    { id: "d7-6", day: 7, time: "11:00 AM – 11:30 AM", activity: "Club Slot 30: Group D (IEEE in L-30), Group E (ATS in L-31), Group F (EEB in L-26), Group G (ES in Aero Audi), Group H (SCC in L-27)", venue: "Respective Venues", coordinator: "Faculty & Student Branch Incharges", category: "morning" },
+    { id: "d7-7", day: 7, time: "11:30 AM – 12:00 PM", activity: "Club Slot 31: Group D (WEC in L-30), Group E (NSS in L-31), Group F (Robotics in L-26), Group G (IEEE in Aero Audi), Group H (Rotaract in L-27)", venue: "Respective Venues", coordinator: "Faculty & Student Branch Incharges", category: "morning" },
+    { id: "d7-8", day: 7, time: "12:30 PM – 12:45 PM", activity: "Movement of Students to Respective Hostels", venue: "Campus", coordinator: "Student Branch Incharges", category: "lunch" },
+    { id: "d7-9", day: 7, time: "12:45 PM – 2:15 PM", activity: "Lunch", venue: "Annexure 3 Venues", coordinator: "Student Branch Incharges & Discipline Incharges", category: "lunch" },
+    { id: "d7-10", day: 7, time: "1:45 PM – 2:15 PM", activity: "Club Slot 32: Group A (PDC in Audi), Group B (PDC in Audi), Group C (NSS in L-29), Group D (ASPS in L-30), Group E (Rotaract in L-31), Group F (IGS in L-26), Group G (SME in Aero Audi), Group H (SAE in L-27)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies, NSS & NCC", category: "afternoon" },
+    { id: "d7-11", day: 7, time: "2:15 PM – 2:45 PM", activity: "Club Slot 33: Group E (SAE in L-31), Group F (APC in L-26), Group H (PDC in L-27)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d7-12", day: 7, time: "2:45 PM – 3:15 PM", activity: "Club Slot 34: Group C (ELC in L-29), Group F (ACM in L-26), Group H (ATS in L-27)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d7-13", day: 7, time: "3:15 PM – 3:45 PM", activity: "Club Slot 35: Group F (SESI in L-26), Group H (CIM in L-27)", venue: "Respective Venues", coordinator: "P/Is of Club, Societies & Cells", category: "afternoon" },
+    { id: "d7-14", day: 7, time: "4:00 PM – 4:15 PM", activity: "Movement of Students", venue: "Campus", coordinator: "Student Branch Incharges & Discipline Incharges", category: "afternoon" },
+    { id: "d7-15", day: 7, time: "4:15 PM onwards", activity: "Grand FUN Event & Batch 2030 Celebrations 🎉", venue: "Auditorium / Campus", coordinator: "Student Branch Incharges & Cultural Committee", category: "afternoon", highlight: true },
   ],
 };
 
@@ -295,23 +360,27 @@ const REPORTING_BRANCHES: ReportingBranch[] = [
 export const ORIENTATION_DAYS = [
   { day: 1, label: "Day 1", date: "19 Aug (Wed)", title: "Inaugural, Director Keynote & Dept Visits" },
   { day: 2, label: "Day 2", date: "20 Aug (Thu)", title: "Science HODs, Clubs (1–4), Tech/Sports/Music" },
-  { day: 3, label: "Day 3", date: "21 Aug (Fri)", title: "SCC, Library, CDGC, Speaker Sessions, Clubs (5–6), Displays" },
+  { day: 3, label: "Day 3", date: "21 Aug (Fri)", title: "SCC, Library, CDGC, Speaker Sessions, Clubs (5–6)" },
+  { day: 4, label: "Day 4", date: "22 Aug (Sat)", title: "Speaker Session, Clubs (7–13), PEB/Music Displays" },
+  { day: 5, label: "Day 5", date: "23 Aug (Sun)", title: "Speaker Session, Drams A1, Clubs (14–18), PEB A2" },
+  { day: 6, label: "Day 6", date: "24 Aug (Mon)", title: "Speaker Session, Clubs (19–25), Tech/Sports/Music" },
+  { day: 7, label: "Day 7", date: "25 Aug (Tue)", title: "Clubs (26–35), PDC/ELC/SESI & Grand FUN Event 🎉" },
 ];
 
 export const ATTENDANCE_VENUES_BY_DAY: Record<string, Record<number, string>> = {
-  CSE: { 1: "Auditorium", 2: "L-26", 3: "L-26" },
-  ECE: { 1: "Auditorium", 2: "L-27", 3: "L-27" },
-  VLSI: { 1: "Auditorium", 2: "L-28", 3: "L-28" },
-  "B.Design": { 1: "L-26", 2: "L-28", 3: "L-28" },
-  AERO: { 1: "L-26", 2: "L-28", 3: "L-28" },
-  Electrical: { 1: "L-27", 2: "L-29", 3: "L-29" },
-  Civil: { 1: "L-28", 2: "L-30", 3: "L-30" },
-  AI: { 1: "L-29", 2: "L-31", 3: "L-31" },
-  DS: { 1: "L-29", 2: "L-31", 3: "L-31" },
-  "M&C": { 1: "L-29", 2: "L-31", 3: "L-31" },
-  Mechanical: { 1: "L-30", 2: "Aero Audi", 3: "Aero Audi" },
-  Metallurgy: { 1: "L-31", 2: "Auditorium", 3: "Auditorium" },
-  Production: { 1: "L-31", 2: "Auditorium", 3: "Auditorium" },
+  CSE: { 1: "Auditorium", 2: "L-26", 3: "L-26", 4: "L-31", 5: "Auditorium", 6: "L-29", 7: "Auditorium" },
+  ECE: { 1: "Auditorium", 2: "L-27", 3: "Aero Audi", 4: "L-26", 5: "Auditorium", 6: "L-30", 7: "L-28" },
+  VLSI: { 1: "Auditorium", 2: "L-28", 3: "L-27", 4: "Aero Audi", 5: "L-30", 6: "L-31", 7: "L-29" },
+  "B.Design": { 1: "L-26", 2: "L-28", 3: "L-27", 4: "Aero Audi", 5: "L-30", 6: "L-31", 7: "L-29" },
+  AERO: { 1: "L-26", 2: "L-28", 3: "L-27", 4: "Aero Audi", 5: "L-30", 6: "L-31", 7: "L-29" },
+  Electrical: { 1: "L-27", 2: "L-29", 3: "L-28", 4: "L-27", 5: "L-31", 6: "Auditorium", 7: "L-30" },
+  Civil: { 1: "L-28", 2: "Auditorium", 3: "L-29", 4: "Auditorium", 5: "L-26", 6: "Aero Audi", 7: "L-31" },
+  AI: { 1: "L-29", 2: "Aero Audi", 3: "L-30", 4: "L-28", 5: "L-27", 6: "L-26", 7: "L-26" },
+  DS: { 1: "L-29", 2: "Aero Audi", 3: "L-30", 4: "L-28", 5: "L-27", 6: "L-26", 7: "L-26" },
+  "M&C": { 1: "L-29", 2: "Aero Audi", 3: "L-30", 4: "Audi / L-30", 5: "L-27", 6: "L-26", 7: "L-26" },
+  Mechanical: { 1: "L-30", 2: "L-30", 3: "Auditorium", 4: "Auditorium", 5: "L-28", 6: "L-27", 7: "Aero Audi" },
+  Metallurgy: { 1: "L-31", 2: "L-31", 3: "L-31", 4: "L-29", 5: "Aero Audi", 6: "L-28", 7: "L-27" },
+  Production: { 1: "L-31", 2: "L-31", 3: "L-31", 4: "Audi / L-30", 5: "Aero Audi", 6: "L-28", 7: "L-27" },
 };
 
 export const SPECIAL_GROUPINGS = {
@@ -1019,24 +1088,24 @@ function OrientationPage() {
               {/* Official Schedule Status Notice */}
               <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-3.5 sm:p-4 text-xs">
                 <div className="grid h-8 w-8 place-items-center rounded-xl bg-primary/15 text-primary shrink-0">
-                  <Info className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4" />
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-foreground text-xs sm:text-sm">
-                    Official Schedule (Days 1 – 3)
+                    Official B.Tech Orientation Schedule (Days 1 – 7)
                   </p>
                   <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-                    Other days will be added after official confirmation by college administration.
+                    Complete verified schedule for Batch 2026–2030 including all 7-day club presentations, speaker sessions, sports & displays.
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary shrink-0">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-500 shrink-0">
                   <Sparkles className="h-3 w-3" />
-                  Official PDF
+                  Official PDF Verified
                 </span>
               </div>
             </div>
 
-            {/* Schedule Table Component for Days 1 to 3 */}
+            {/* Schedule Table Component for Days 1 to 7 */}
             <div className="rounded-2xl border border-border glass overflow-hidden shadow-lg">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
@@ -1229,7 +1298,7 @@ function OrientationPage() {
                 <div className="rounded-3xl border border-primary/20 bg-surface/90 p-6 space-y-4 animate-in fade-in duration-200">
                   <h4 className="text-sm font-bold text-primary flex items-center gap-2">
                     <FileText className="h-4 w-4" />
-                    <span>Annexure 1: Daily Morning Attendance Venues for all 13 Branches</span>
+                    <span>Annexure 1: Daily Morning Attendance Venues for all 13 Branches (Days 1–7)</span>
                   </h4>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs border border-border/80 rounded-xl overflow-hidden">
@@ -1237,26 +1306,31 @@ function OrientationPage() {
                         <tr>
                           <th className="py-2.5 px-3">Branch</th>
                           <th className="py-2.5 px-3">Group</th>
-                          <th className="py-2.5 px-3">Day 1 (19th Aug)</th>
-                          <th className="py-2.5 px-3">Day 2 (20th Aug)</th>
-                          <th className="py-2.5 px-3">Day 3 (21st Aug)</th>
+                          <th className="py-2.5 px-3">Day 1 (19 Aug)</th>
+                          <th className="py-2.5 px-3">Day 2 (20 Aug)</th>
+                          <th className="py-2.5 px-3">Day 3 (21 Aug)</th>
+                          <th className="py-2.5 px-3">Day 4 (22 Aug)</th>
+                          <th className="py-2.5 px-3">Day 5 (23 Aug)</th>
+                          <th className="py-2.5 px-3">Day 6 (24 Aug)</th>
+                          <th className="py-2.5 px-3">Day 7 (25 Aug)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/60">
                         {REPORTING_BRANCHES.map((b) => (
                           <tr key={b.code} className="hover:bg-surface-elevated/40">
-                            <td className="py-2 px-3 font-semibold text-foreground">{b.name}</td>
+                            <td className="py-2 px-3 font-semibold text-foreground whitespace-nowrap">{b.name}</td>
                             <td className="py-2 px-3 font-mono text-primary font-bold">{b.group}</td>
-                            <td className="py-2 px-3 font-mono font-medium">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[1]}</td>
-                            <td className="py-2 px-3 font-mono font-medium">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[2]}</td>
-                            <td className="py-2 px-3 font-mono font-medium">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[3]}</td>
+                            <td className="py-2 px-3 font-mono font-medium whitespace-nowrap">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[1]}</td>
+                            <td className="py-2 px-3 font-mono font-medium whitespace-nowrap">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[2]}</td>
+                            <td className="py-2 px-3 font-mono font-medium whitespace-nowrap">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[3]}</td>
+                            <td className="py-2 px-3 font-mono font-medium whitespace-nowrap">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[4]}</td>
+                            <td className="py-2 px-3 font-mono font-medium whitespace-nowrap">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[5]}</td>
+                            <td className="py-2 px-3 font-mono font-medium whitespace-nowrap">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[6]}</td>
+                            <td className="py-2 px-3 font-mono font-medium whitespace-nowrap">{ATTENDANCE_VENUES_BY_DAY[b.code]?.[7]}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                    <p className="text-[11px] text-muted-foreground italic">
-                      * Attendance venues for further days will be updated after official confirmation.
-                    </p>
                   </div>
                 </div>
               )}

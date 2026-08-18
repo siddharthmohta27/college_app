@@ -60,32 +60,43 @@ export function mergeTimetableWithSaved(
 
   const result: AttendanceSubject[] = [];
 
-  // Add all timetable subjects (restoring saved counts if present)
-  for (const ts of timetableSubjects) {
-    const existing = savedMap.get(ts.code);
-    if (existing) {
-      result.push({
-        ...existing,
-        name: ts.name, // keep up to date
-      });
-      savedMap.delete(ts.code);
-    } else {
-      result.push({
-        id: ts.code,
-        name: ts.name,
-        code: ts.code,
-        lecturesAttended: 0,
-        lecturesAbsent: 0,
-        lecturesCancelled: 0,
-        lastUpdated: "Scheduled in Timetable",
-        isCustom: false,
-      });
+  if (timetableSubjects.length > 0) {
+    // Add all timetable subjects (restoring saved counts if present)
+    for (const ts of timetableSubjects) {
+      const existing = savedMap.get(ts.code);
+      if (existing) {
+        result.push({
+          ...existing,
+          name: ts.name, // keep up to date
+        });
+        savedMap.delete(ts.code);
+      } else {
+        result.push({
+          id: ts.code,
+          name: ts.name,
+          code: ts.code,
+          lecturesAttended: 0,
+          lecturesAbsent: 0,
+          lecturesCancelled: 0,
+          lastUpdated: "Scheduled in Timetable",
+          isCustom: false,
+        });
+      }
     }
-  }
 
-  // Add any custom subjects the user added manually
-  for (const remaining of savedMap.values()) {
-    result.push(remaining);
+    // Add any custom subjects the user added manually
+    for (const remaining of savedMap.values()) {
+      if (remaining.isCustom) {
+        result.push(remaining);
+      }
+    }
+  } else {
+    // If no timetable is loaded (e.g. non-pec or fresher without section), only keep explicitly custom subjects
+    for (const remaining of savedMap.values()) {
+      if (remaining.isCustom) {
+        result.push(remaining);
+      }
+    }
   }
 
   return result;

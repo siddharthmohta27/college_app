@@ -19,7 +19,25 @@ import {
 import { firebaseAuth } from "@/lib/firebase";
 import { formatDistanceToNow } from "date-fns";
 
-const API = "http://localhost:3001/api/marketplace";
+const isLocal =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+const API = import.meta.env.VITE_BACKEND_URL
+  ? `${import.meta.env.VITE_BACKEND_URL}/api/marketplace`
+  : isLocal
+    ? "http://localhost:3001/api/marketplace"
+    : "/api/marketplace";
+
+const formatListingTime = (dateStr: string) => {
+  if (!dateStr) return "recently";
+  try {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? "recently" : formatDistanceToNow(d, { addSuffix: true });
+  } catch {
+    return "recently";
+  }
+};
 
 export const Route = createFileRoute("/app/marketplace")({
   head: () => ({
@@ -375,7 +393,7 @@ function Marketplace() {
                       <div className="text-base font-bold text-primary">₹{listing.price}</div>
                       <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                         <Clock className="h-2.5 w-2.5" />
-                        {formatDistanceToNow(new Date(listing.created_at), { addSuffix: true })}
+                        {formatListingTime(listing.created_at)}
                       </div>
                     </div>
                   </div>

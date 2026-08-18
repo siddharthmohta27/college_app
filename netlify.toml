@@ -1,12 +1,67 @@
 [build]
   command = "npm run build"
-  publish = "dist"
+  publish = ".output/public"
 
 [build.environment]
   NODE_VERSION = "22"
   NITRO_PRESET = "netlify"
 
+# ─── Netlify Functions (SSR via Nitro) ────────────────────────────────────────
+[functions]
+  directory = ".output/server"
+  node_bundler = "esbuild"
+
+# ─── SPA / SSR Fallback ───────────────────────────────────────────────────────
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/server"
   status = 200
+  force = false
+
+# ─── Headers ──────────────────────────────────────────────────────────────────
+
+# Service Worker — must NEVER be CDN-cached (PWA requirement)
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+# Workbox runtime chunk — also never cache
+[[headers]]
+  for = "/workbox-*.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Web App Manifest — short cache so updates propagate quickly
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type = "application/manifest+json"
+
+# PWA icons — long-lived (content-hashed filenames)
+[[headers]]
+  for = "/pwa-*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/apple-touch-icon.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Static assets (JS/CSS with hashed names) — aggressive cache
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Security headers for all pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

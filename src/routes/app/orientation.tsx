@@ -376,45 +376,60 @@ function OrientationPage() {
 
   // Fetch dynamic orientation content on mount
   useEffect(() => {
-    fetchOrientationData().then((data) => {
-      if (data && Array.isArray(data.schedule) && data.schedule.length > 0) {
-        const grouped: Record<number, ScheduleEvent[]> = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] };
-        data.schedule.forEach((item) => {
-          const d = Number((item as any).day || (item as any).day_number) || 1;
-          if (!grouped[d]) grouped[d] = [];
-          grouped[d].push({
-            id: String(item.id),
-            day: d,
-            time: item.time_slot || item.time || "",
-            activity: item.activity,
-            venue: item.venue,
-            coordinator: item.coordinator,
-            category: (item.category as any) || "morning",
+    fetchOrientationData()
+      .then((data) => {
+        if (data && Array.isArray(data.schedule) && data.schedule.length > 0) {
+          const grouped: Record<number, ScheduleEvent[]> = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] };
+          data.schedule.forEach((item) => {
+            if (!item) return;
+            const d = Number((item as any).day || (item as any).day_number) || 1;
+            if (!grouped[d]) grouped[d] = [];
+            grouped[d].push({
+              id: String(item.id || Math.random()),
+              day: d,
+              time: item.time_slot || item.time || "",
+              activity: item.activity || "",
+              venue: item.venue || "",
+              coordinator: item.coordinator || undefined,
+              category: (item.category as any) || "morning",
+            });
           });
-        });
-        setAllScheduleData(grouped);
-      }
-    });
+
+          // If valid day 1 items exist, set state
+          if (grouped[1] && grouped[1].length > 0) {
+            setAllScheduleData(grouped);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn("Orientation API fetch failed:", err);
+      });
   }, []);
 
   const selectedBranch = useMemo(() => {
-    return REPORTING_BRANCHES.find((b) => b.code === selectedBranchCode) || REPORTING_BRANCHES[0];
+    return (
+      REPORTING_BRANCHES.find((b) => b.code === selectedBranchCode) ||
+      REPORTING_BRANCHES[0]
+    );
   }, [selectedBranchCode]);
 
   const currentDayEvents = useMemo(() => {
-    return allScheduleData[selectedDay] || SCHEDULE_DATA_BY_DAY[selectedDay] || [];
+    const list = allScheduleData[selectedDay] || SCHEDULE_DATA_BY_DAY[selectedDay] || [];
+    return Array.isArray(list) && list.length > 0 ? list : SCHEDULE_DATA_BY_DAY[selectedDay] || [];
   }, [allScheduleData, selectedDay]);
 
   const filteredSchedule = useMemo(() => {
+    const query = (scheduleSearch || "").trim().toLowerCase();
     return currentDayEvents.filter((item) => {
+      if (!item) return false;
       const matchCategory =
         scheduleCategory === "all" || item.category === scheduleCategory;
       const matchSearch =
-        scheduleSearch.trim() === "" ||
-        item.activity.toLowerCase().includes(scheduleSearch.toLowerCase()) ||
-        item.venue.toLowerCase().includes(scheduleSearch.toLowerCase()) ||
-        (item.coordinator && item.coordinator.toLowerCase().includes(scheduleSearch.toLowerCase())) ||
-        item.time.toLowerCase().includes(scheduleSearch.toLowerCase());
+        query === "" ||
+        Boolean(item.activity && String(item.activity).toLowerCase().includes(query)) ||
+        Boolean(item.venue && String(item.venue).toLowerCase().includes(query)) ||
+        Boolean(item.coordinator && String(item.coordinator).toLowerCase().includes(query)) ||
+        Boolean(item.time && String(item.time).toLowerCase().includes(query));
       return matchCategory && matchSearch;
     });
   }, [currentDayEvents, scheduleCategory, scheduleSearch]);

@@ -210,13 +210,16 @@ router.get("/", async (req, res) => {
 
         // Query schedule items sorted by sort_order
         const scheduleRes = await pool.query(
-          `SELECT id, time_slot, activity, venue, coordinator, category, sort_order, created_at
+          `SELECT id, day_number, time_slot, activity, venue, coordinator, category, sort_order, created_at
            FROM orientation_schedule_items
            ORDER BY sort_order ASC, id ASC`
         );
 
         if (scheduleRes.rows.length > 0) {
-          scheduleItems = scheduleRes.rows;
+          scheduleItems = scheduleRes.rows.map((r) => ({
+            ...r,
+            day: r.day_number || 1,
+          }));
         }
       }
     } catch (dbErr) {

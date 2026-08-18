@@ -1,4 +1,54 @@
+const jwt = require("jsonwebtoken");
 const { verifyFirebaseToken, getUserIdFromToken } = require("../config/db");
+
+const JWT_SECRET = process.env.JWT_SECRET || "campus_connect_jwt_secret_key_2026";
+
+/**
+ * Helper to decode and verify either Firebase JWT or Server JWT token
+ */
+async function verifyAnyToken(token) {
+  // 1. Try Firebase Admin verification first if configured
+  try {
+    const decoded = await verifyFirebaseToken(token);
+    const isPec = decoded.email && decoded.email.toLowerCase().endsWith("@pec.edu.in");
+    const accountType = decoded.account_type || (isPec ? "pec_verified" : "fresher_temp");
+    const isAdmin = decoded.admin === true || decoded.isAdmin === true || decoded.role === "admin";
+
+    return {
+      id: getUserIdFromToken(decoded),
+      auth_user_id: getUserIdFromToken(decoded),
+      email: decoded.email,
+      role: isAdmin ? "admin" : (decoded.role || "authenticated"),
+      account_type: accountType,
+      email_verified: decoded.email_verified !== false,
+      isAdmin,
+      is_admin: isAdmin,
+      ...decoded,
+    };
+  } catch (firebaseErr) {
+    // 2. Fall back to Server JWT verification
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const isPec = decoded.email && decoded.email.toLowerCase().endsWith("@pec.edu.in");
+      const accountType = decoded.account_type || (isPec ? "pec_verified" : "fresher_temp");
+      const isAdmin = decoded.is_admin === true || decoded.isAdmin === true || decoded.role === "admin";
+
+      return {
+        id: decoded.id || decoded.auth_user_id,
+        auth_user_id: decoded.auth_user_id || decoded.id,
+        email: decoded.email,
+        role: isAdmin ? "admin" : (decoded.role || "authenticated"),
+        account_type: accountType,
+        email_verified: decoded.email_verified !== false,
+        isAdmin,
+        is_admin: isAdmin,
+        ...decoded,
+      };
+    } catch (jwtErr) {
+      throw new Error(`Token verification failed: ${jwtErr.message}`);
+    }
+  }
+}
 
 // ──────────────────────────────────────────────────────────────
 // REST API Middleware
@@ -6,8 +56,8 @@ const { verifyFirebaseToken, getUserIdFromToken } = require("../config/db");
 
 /**
  * requireAuth - Protects REST endpoints
- * Verifies Supabase JWT from Authorization header
- * Attaches req.user = { id, email, ... }
+ * Accepts both PEC verified students and fresher temporary accounts
+ * Attaches req.user = { id, email, account_type, email_verified, isAdmin, ... }
  */
 function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -21,22 +71,9 @@ function requireAuth(req, res, next) {
 
   const token = authHeader.slice(7); // Remove "Bearer "
 
-  verifyFirebaseToken(token)
-    .then((decoded) => {
-      if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
-        return res.status(403).json({
-          error: "Forbidden",
-          message: "Only @pec.edu.in email domain is allowed",
-        });
-      }
-      const isAdmin = decoded.admin === true;
-      req.user = {
-        id: getUserIdFromToken(decoded),
-        email: decoded.email,
-        role: isAdmin ? "admin" : (decoded.role || "authenticated"),
-        isAdmin,
-        ...decoded,
-      };
+  verifyAnyToken(token)
+    .then((user) => {
+      req.user = user;
       next();
     })
     .catch((err) => {
@@ -61,20 +98,9 @@ function optionalAuth(req, res, next) {
 
   const token = authHeader.slice(7);
 
-  verifyFirebaseToken(token)
-    .then((decoded) => {
-      if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
-        req.user = null;
-        return next();
-      }
-      const isAdmin = decoded.admin === true;
-      req.user = {
-        id: getUserIdFromToken(decoded),
-        email: decoded.email,
-        role: isAdmin ? "admin" : (decoded.role || "authenticated"),
-        isAdmin,
-        ...decoded,
-      };
+  verifyAnyToken(token)
+    .then((user) => {
+      req.user = user;
       next();
     })
     .catch(() => {
@@ -89,21 +115,14 @@ function optionalAuth(req, res, next) {
 
 /**
  * socketAuth - Validates JWT during Socket.io handshake
- * Token can be sent via:
- * 1. auth: { token } in connection options
- * 2. query string: ?token=...
- * 3. Authorization header (handled by socket.io-client)
  */
 function socketAuth(socket, next) {
-  // Try to get token from auth object (preferred)
   let token = socket.handshake.auth?.token;
 
-  // Fallback: query string
   if (!token && socket.handshake.query?.token) {
     token = socket.handshake.query.token;
   }
 
-  // Fallback: Authorization header (some clients send this)
   if (!token && socket.handshake.headers?.authorization?.startsWith("Bearer ")) {
     token = socket.handshake.headers.authorization.slice(7);
   }
@@ -112,19 +131,9 @@ function socketAuth(socket, next) {
     return next(new Error("Authentication required"));
   }
 
-  verifyFirebaseToken(token)
-    .then((decoded) => {
-      if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
-        return next(new Error("Only @pec.edu.in email domain is allowed"));
-      }
-      const isAdmin = decoded.admin === true;
-      socket.user = {
-        id: getUserIdFromToken(decoded),
-        email: decoded.email,
-        role: isAdmin ? "admin" : (decoded.role || "authenticated"),
-        isAdmin,
-        ...decoded,
-      };
+  verifyAnyToken(token)
+    .then((user) => {
+      socket.user = user;
       next();
     })
     .catch((err) => {
@@ -133,19 +142,11 @@ function socketAuth(socket, next) {
     });
 }
 
-module.exports = {
-  requireAuth,
-  optionalAuth,
-  socketAuth,
-  requireAdmin,
-};
-
 /**
  * requireAdmin - Protects admin-only endpoints
- * Requires user to have admin custom claim in Firebase token
  */
 function requireAdmin(req, res, next) {
-  if (!req.user || !req.user.isAdmin) {
+  if (!req.user || (!req.user.isAdmin && !req.user.is_admin && req.user.role !== "admin")) {
     return res.status(403).json({
       error: "Forbidden",
       message: "Admin access required",
@@ -153,3 +154,12 @@ function requireAdmin(req, res, next) {
   }
   next();
 }
+
+module.exports = {
+  requireAuth,
+  optionalAuth,
+  socketAuth,
+  requireAdmin,
+  verifyAnyToken,
+};
+

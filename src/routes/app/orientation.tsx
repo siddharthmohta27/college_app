@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { fetchOrientationData, OrientationData } from "@/lib/orientation-api";
 import {
   Compass,
   MapPin,
@@ -383,6 +384,7 @@ function OrientationPage() {
   const [scheduleCategory, setScheduleCategory] = useState<string>("all");
   const [scheduleSearch, setScheduleSearch] = useState("");
   const [activeAnnexure, setActiveAnnexure] = useState<"none" | "1" | "2" | "3">("none");
+  const [scheduleEvents, setScheduleEvents] = useState<ScheduleEvent[]>(DAY1_SCHEDULE);
   
   // Lightbox modal state
   const [lightboxImage, setLightboxImage] = useState<{ src: string; title: string } | null>(null);
@@ -393,12 +395,29 @@ function OrientationPage() {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  // Fetch dynamic orientation content on mount
+  useEffect(() => {
+    fetchOrientationData().then((data) => {
+      if (data && Array.isArray(data.schedule) && data.schedule.length > 0) {
+        const formatted: ScheduleEvent[] = data.schedule.map((item) => ({
+          id: String(item.id),
+          time: item.time_slot || item.time || "",
+          activity: item.activity,
+          venue: item.venue,
+          coordinator: item.coordinator,
+          category: (item.category as any) || "morning",
+        }));
+        setScheduleEvents(formatted);
+      }
+    });
+  }, []);
+
   const selectedBranch = useMemo(() => {
     return REPORTING_BRANCHES.find((b) => b.code === selectedBranchCode) || REPORTING_BRANCHES[0];
   }, [selectedBranchCode]);
 
   const filteredSchedule = useMemo(() => {
-    return DAY1_SCHEDULE.filter((item) => {
+    return scheduleEvents.filter((item) => {
       const matchCategory =
         scheduleCategory === "all" || item.category === scheduleCategory;
       const matchSearch =
@@ -409,7 +428,7 @@ function OrientationPage() {
         item.time.toLowerCase().includes(scheduleSearch.toLowerCase());
       return matchCategory && matchSearch;
     });
-  }, [scheduleCategory, scheduleSearch]);
+  }, [scheduleEvents, scheduleCategory, scheduleSearch]);
 
   const handleZoomIn = () => setMapZoom((prev) => Math.min(prev + 0.3, 3));
   const handleZoomOut = () => setMapZoom((prev) => Math.max(prev - 0.3, 0.8));

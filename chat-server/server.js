@@ -9,6 +9,10 @@ const datingV3Router = require("./src/routes/dating-v3");
 const chatRouter = require("./src/routes/chat");
 const marketplaceRouter = require("./src/routes/marketplace");
 const attendanceRouter = require("./src/routes/attendance");
+const { authRouter } = require("./src/routes/auth");
+const accountRouter = require("./src/routes/account");
+const orientationRouter = require("./src/routes/orientation");
+const { verifyAnyToken } = require("./src/middleware/auth");
 const {
   pool,
   verifyFirebaseToken,
@@ -58,6 +62,9 @@ const writeLimiter = rateLimit({
 app.use("/api/", apiLimiter);
 
 // ─── REST Routes ──────────────────────────────────────────────────
+app.use("/api/auth", authRouter);
+app.use("/api/account", accountRouter);
+app.use("/api/orientation", orientationRouter);
 app.use("/api/dating", datingRouter);
 app.use("/api/dating", datingV3Router);
 app.use("/api/chat", chatRouter);
@@ -168,7 +175,6 @@ function broadcastChannelMembers(channelId) {
 
 io.use(async (socket, next) => {
   try {
-    // Get token from handshake auth or query
     const token = socket.handshake.auth?.token || socket.handshake.query?.token;
 
     if (!token) {
@@ -176,26 +182,17 @@ io.use(async (socket, next) => {
       return next(new Error("Authentication required"));
     }
 
-    // Verify Firebase JWT
-    const decoded = await verifyFirebaseToken(token);
-    const userId = getUserIdFromToken(decoded);
+    // Verify Firebase JWT or Server JWT (supports both PEC and fresher accounts)
+    const user = await verifyAnyToken(token);
 
-    if (!userId) {
+    if (!user || !user.id) {
       return next(new Error("Invalid token: no user ID"));
     }
 
-    if (!decoded.email || !decoded.email.toLowerCase().endsWith("@pec.edu.in")) {
-      return next(new Error("Only @pec.edu.in email domain is allowed"));
-    }
-
     // Attach user info to socket
-    socket.user = {
-      id: userId,
-      email: decoded.email,
-      user_metadata: decoded.user_metadata || {},
-    };
+    socket.user = user;
 
-    console.log(`🔌 Socket ${socket.id} - Authenticated user: ${userId}`);
+    console.log(`🔌 Socket ${socket.id} - Authenticated user: ${user.id} (${user.account_type || 'user'})`);
     next();
   } catch (err) {
     console.error(`🔌 Socket ${socket.id} - Auth failed:`, err.message);

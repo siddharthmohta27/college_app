@@ -17,17 +17,8 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { firebaseAuth } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
-
-const isLocal =
-  typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-
-const API = import.meta.env.VITE_BACKEND_URL
-  ? `${import.meta.env.VITE_BACKEND_URL}/api/marketplace`
-  : isLocal
-    ? "http://localhost:3001/api/marketplace"
-    : "/api/marketplace";
 
 const formatListingTime = (dateStr: string) => {
   if (!dateStr) return "recently";
@@ -76,6 +67,82 @@ const EMOJI_MAP: Record<string, string> = {
   Others: "📦",
 };
 
+// Derive display name initials from displayName or email
+function getInitials(name: string | null, email: string | null): string {
+  if (name) {
+    const parts = name.trim().split(" ");
+    return parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : name.slice(0, 2).toUpperCase();
+  }
+  if (email) return email.slice(0, 2).toUpperCase();
+  return "??";
+}
+
+const AVATAR_COLORS = [
+  "from-violet-500 to-purple-700",
+  "from-blue-500 to-indigo-700",
+  "from-emerald-500 to-teal-700",
+  "from-rose-500 to-pink-700",
+  "from-amber-500 to-orange-700",
+  "from-cyan-500 to-sky-700",
+];
+
+function hashColor(uid: string): string {
+  let hash = 0;
+  for (let i = 0; i < uid.length; i++) hash = uid.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+// Sample seed listings shown when table is empty
+const SEED_LISTINGS = [
+  {
+    title: "Calculus by Thomas (12th ed.)",
+    description: "Barely used, all pages intact. Great for first-years.",
+    price: 350,
+    category: "Books",
+    condition: "Like New",
+    location: "Main Library lobby",
+    emoji: "📚",
+    seller_auth_id: "seed",
+    seller_name: "Rahul Sharma",
+    seller_initials: "RS",
+    seller_color: "from-violet-500 to-purple-700",
+    seller_email: "rahul@pec.edu.in",
+    is_sold: false,
+  },
+  {
+    title: "Dell Laptop Charger 65W",
+    description: "Works perfectly. Lost my laptop so selling the charger.",
+    price: 500,
+    category: "Electronics",
+    condition: "Good",
+    location: "Hostel D, Room 12",
+    emoji: "💻",
+    seller_auth_id: "seed",
+    seller_name: "Priya Singh",
+    seller_initials: "PS",
+    seller_color: "from-blue-500 to-indigo-700",
+    seller_email: "priya@pec.edu.in",
+    is_sold: false,
+  },
+  {
+    title: "Badminton Racket (Yonex)",
+    description: "Used for one semester. Strings are good.",
+    price: 800,
+    category: "Others",
+    condition: "Good",
+    location: "Sports Complex",
+    emoji: "📦",
+    seller_auth_id: "seed",
+    seller_name: "Arjun Mehta",
+    seller_initials: "AM",
+    seller_color: "from-emerald-500 to-teal-700",
+    seller_email: "arjun@pec.edu.in",
+    is_sold: false,
+  },
+];
+
 function Marketplace() {
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
@@ -104,68 +171,105 @@ function Marketplace() {
     return unsub;
   }, []);
 
-  // Get Firebase auth headers
-  const getAuthHeaders = useCallback(async () => {
-    const token = await firebaseAuth.getIdToken();
-    return {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  }, []);
-
-  // Fetch listings
+  // Fetch listings from Supabase
   const fetchListings = useCallback(async () => {
     setLoading(true);
     try {
-      const headers = await getAuthHeaders();
-      const res = await fetch(`${API}/listings`, { headers });
-      const data = await res.json();
-      setListings(data.listings || []);
-    } catch (err) {
-      console.error("Failed to fetch listings:", err);
+      // Fetch listings
+      const { data: rows, error } = await supabase
+        .from("marketplace_listings")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // If empty, seed with sample data
+      if (!rows || rows.length === 0) {
+        const { data: seeded, error: seedError } = await supabase
+          .from("marketplace_listings")
+          .insert(SEED_LISTINGS)
+          .select("*");
+        if (seedError) console.warn("Seed failed:", seedError.message);
+        setListings((seeded || []).map((l) => ({ ...l, saved: false })));
+        setLoading(false);
+        return;
+      }
+
+      // Fetch saves for current user
+      const uid = firebaseAuth.currentUser?.uid;
+      let savedIds = new Set<number>();
+      if (uid) {
+        const { data: saves } = await supabase
+          .from("marketplace_saves")
+          .select("listing_id")
+          .eq("saver_auth_id", uid);
+        if (saves) savedIds = new Set(saves.map((s: { listing_id: number }) => s.listing_id));
+      }
+
+      setListings(rows.map((l) => ({ ...l, saved: savedIds.has(l.id) })));
+    } catch (err: any) {
+      console.error("Failed to fetch listings:", err?.message ?? err);
     } finally {
       setLoading(false);
     }
-  }, [getAuthHeaders]);
+  }, []);
 
   useEffect(() => {
     fetchListings();
   }, [fetchListings]);
 
-  // Toggle save
+  // Toggle save/unsave listing
   const toggleSave = async (id: number) => {
     if (!currentUser) return;
+    const listing = listings.find((l) => l.id === id);
+    if (!listing) return;
+
     // Optimistic update
     setListings((prev) => prev.map((l) => (l.id === id ? { ...l, saved: !l.saved } : l)));
+
     try {
-      const headers = await getAuthHeaders();
-      await fetch(`${API}/listings/${id}/save`, { method: "POST", headers });
+      if (listing.saved) {
+        // Unsave
+        await supabase
+          .from("marketplace_saves")
+          .delete()
+          .eq("listing_id", id)
+          .eq("saver_auth_id", currentUser.uid);
+      } else {
+        // Save
+        await supabase
+          .from("marketplace_saves")
+          .insert({ listing_id: id, saver_auth_id: currentUser.uid });
+      }
     } catch (_) {
-      // revert on error
+      // Revert on error
       setListings((prev) => prev.map((l) => (l.id === id ? { ...l, saved: !l.saved } : l)));
     }
   };
 
-  // Delete listing
+  // Delete listing (owner only)
   const deleteListing = async (id: number) => {
     if (!confirm("Delete this listing?")) return;
     try {
-      const headers = await getAuthHeaders();
-      await fetch(`${API}/listings/${id}`, { method: "DELETE", headers });
+      const { error } = await supabase.from("marketplace_listings").delete().eq("id", id);
+      if (error) throw error;
       setListings((prev) => prev.filter((l) => l.id !== id));
-    } catch (err) {
-      alert("Failed to delete listing.");
+    } catch (err: any) {
+      alert("Failed to delete listing: " + (err?.message ?? "Unknown error"));
     }
   };
 
-  // Mark as sold
+  // Mark listing as sold (owner only)
   const markSold = async (id: number) => {
     try {
-      const headers = await getAuthHeaders();
-      await fetch(`${API}/listings/${id}/sold`, { method: "PATCH", headers });
+      const { error } = await supabase
+        .from("marketplace_listings")
+        .update({ is_sold: true })
+        .eq("id", id);
+      if (error) throw error;
       setListings((prev) => prev.map((l) => (l.id === id ? { ...l, is_sold: true } : l)));
-    } catch (err) {
-      alert("Failed to mark as sold.");
+    } catch (err: any) {
+      alert("Failed to mark as sold: " + (err?.message ?? "Unknown error"));
     }
   };
 
@@ -176,33 +280,41 @@ function Marketplace() {
     const form = e.currentTarget;
     const data = new FormData(form);
     const category = data.get("category") as string;
+
     setPosting(true);
     setPostError(null);
+
+    const sellerName = currentUser.displayName || currentUser.email?.split("@")[0] || "Anonymous";
+    const sellerInitials = getInitials(currentUser.displayName, currentUser.email);
+    const sellerColor = hashColor(currentUser.uid);
+
     try {
-      const headers = await getAuthHeaders();
-      const res = await fetch(`${API}/listings`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          title: data.get("title"),
-          description: data.get("description"),
+      const { data: inserted, error } = await supabase
+        .from("marketplace_listings")
+        .insert({
+          title: data.get("title") as string,
+          description: (data.get("description") as string) || "",
           price: Number(data.get("price")),
           category,
-          condition: data.get("condition"),
-          location: data.get("location"),
+          condition: data.get("condition") as string,
+          location: (data.get("location") as string) || "",
           emoji: EMOJI_MAP[category] || "📦",
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to post listing");
-      }
-      const result = await res.json();
-      setListings((prev) => [{ ...result.listing, saved: false }, ...prev]);
+          seller_auth_id: currentUser.uid,
+          seller_name: sellerName,
+          seller_initials: sellerInitials,
+          seller_color: sellerColor,
+          seller_email: currentUser.email || "",
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+
+      setListings((prev) => [{ ...inserted, saved: false }, ...prev]);
       setShowPost(false);
       form.reset();
     } catch (err: any) {
-      setPostError(err.message);
+      setPostError(err?.message || "Failed to post listing");
     } finally {
       setPosting(false);
     }

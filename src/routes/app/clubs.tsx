@@ -538,7 +538,7 @@ function ClubsEvents() {
               key={club.id}
               id={`club-${club.id}`}
               className={`relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br ${club.gradient} p-5 animate-fade-up card-hover`}
-              style={{ animationDelay: `${i * 50}ms` }}
+              style={{ animationDelay: `${i * 40}ms` }}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
@@ -555,31 +555,16 @@ function ClubsEvents() {
                     </span>
                   </div>
                 </div>
-                <button
-                  id={`join-club-${club.id}`}
-                  onClick={() => toggleJoin(club.id)}
-                  className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition btn-press ${
-                    club.joined
-                      ? "bg-primary/20 text-primary"
-                      : "bg-surface-elevated border border-border hover:border-primary hover:text-primary"
-                  }`}
-                >
-                  {club.joined ? "✓ Joined" : "+ Join"}
-                </button>
               </div>
               <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
                 {club.description}
               </p>
-              <div className="mt-3 flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Users className="h-3.5 w-3.5" />
-                  {club.members} members
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {club.tags.slice(0, 3).map((tag) => (
+              <div className="mt-3.5 flex items-center justify-end">
+                <div className="flex flex-wrap gap-1.5">
+                  {club.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full bg-surface/60 px-2 py-0.5 text-[10px] text-muted-foreground"
+                      className="rounded-full bg-surface/70 border border-border/40 px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
                     >
                       #{tag}
                     </span>
@@ -596,76 +581,45 @@ function ClubsEvents() {
         <div className="space-y-4">
           {events
             .filter((e) => e.title.toLowerCase().includes(search.toLowerCase()))
-            .map((event, i) => {
-              const spotsPct = ((event.spots - event.spotsLeft) / event.spots) * 100;
-              const almostFull = event.spotsLeft < 10;
-              return (
-                <div
-                  key={event.id}
-                  id={`event-${event.id}`}
-                  className="group overflow-hidden rounded-2xl border border-border glass p-5 animate-fade-up card-hover"
-                  style={{ animationDelay: `${i * 60}ms` }}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-surface-elevated text-3xl">
-                      {event.emoji}
+            .map((event, i) => (
+              <div
+                key={event.id}
+                id={`event-${event.id}`}
+                className="group overflow-hidden rounded-2xl border border-border glass p-5 animate-fade-up card-hover"
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-surface-elevated text-3xl">
+                    {event.emoji}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                      <div>
+                        <h3 className="font-bold text-foreground text-base leading-tight">{event.title}</h3>
+                        <p className="mt-0.5 text-xs text-muted-foreground font-medium">{event.clubName}</p>
+                      </div>
+                      <span className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-bold text-primary">
+                        Official Event
+                      </span>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2 flex-wrap">
-                        <div>
-                          <h3 className="font-bold leading-tight">{event.title}</h3>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{event.clubName}</p>
-                        </div>
-                        <button
-                          id={`rsvp-event-${event.id}`}
-                          onClick={() => toggleRSVP(event.id)}
-                          className={`shrink-0 flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition btn-press ${
-                            event.rsvpd
-                              ? "bg-emerald-500/20 text-emerald-400"
-                              : "bg-primary text-primary-foreground"
-                          }`}
-                        >
-                          {event.rsvpd && <CheckCircle className="h-3.5 w-3.5" />}
-                          {event.rsvpd ? "RSVP'd" : "RSVP Now"}
-                        </button>
+                    <div className="mt-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Calendar className="h-4 w-4 text-primary/70 shrink-0" />
+                        <span className="font-medium text-foreground">{event.date}</span>
                       </div>
-                      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Calendar className="h-3.5 w-3.5 text-primary/60" />
-                          {event.date}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5 text-primary/60" />
-                          {event.time.split("–")[0].trim()}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <MapPin className="h-3.5 w-3.5 text-primary/60" />
-                          {event.venue}
-                        </div>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock className="h-4 w-4 text-primary/70 shrink-0" />
+                        <span>{event.time}</span>
                       </div>
-                      <div className="mt-3">
-                        <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
-                          <span>
-                            {event.spots - event.spotsLeft} / {event.spots} spots filled
-                          </span>
-                          {almostFull && (
-                            <span className="text-amber-400 font-semibold">
-                              ⚠ Only {event.spotsLeft} left!
-                            </span>
-                          )}
-                        </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
-                          <div
-                            className={`h-full rounded-full transition-all ${almostFull ? "bg-amber-500" : "bg-primary"}`}
-                            style={{ width: `${spotsPct}%` }}
-                          />
-                        </div>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <MapPin className="h-4 w-4 text-primary/70 shrink-0" />
+                        <span>{event.venue}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
         </div>
       )}
     </div>

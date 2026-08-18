@@ -1,7 +1,8 @@
 import {
-  Upload,
+  Compass,
+  CheckSquare,
+  UtensilsCrossed,
   ShoppingBag,
-  BookOpen,
   Calendar,
   type LucideIcon,
 } from "lucide-react";
@@ -17,11 +18,25 @@ export interface FabAction {
 
 export const FAB_ACTIONS: FabAction[] = [
   {
-    id: "fab-upload-notes",
-    label: "Upload Notes",
-    icon: Upload,
-    href: "/app/resources",
-    ariaLabel: "Upload study notes & PYQs",
+    id: "fab-orientation",
+    label: "Orientation Schedule",
+    icon: Compass,
+    href: "/app/orientation",
+    ariaLabel: "View Freshers 7-day orientation schedule & venues",
+  },
+  {
+    id: "fab-attendance",
+    label: "Track Attendance",
+    icon: CheckSquare,
+    href: "/app/attendance",
+    ariaLabel: "Track 75% semester attendance",
+  },
+  {
+    id: "fab-mess-menu",
+    label: "Hostel Mess Menu",
+    icon: UtensilsCrossed,
+    href: "/app/canteen",
+    ariaLabel: "Check today's hostel mess menu",
   },
   {
     id: "fab-marketplace-listing",
@@ -31,15 +46,8 @@ export const FAB_ACTIONS: FabAction[] = [
     ariaLabel: "List an item for sale on Marketplace",
   },
   {
-    id: "fab-book-room",
-    label: "Book Study Room",
-    icon: BookOpen,
-    href: "/app/study",
-    ariaLabel: "Book a study hall or start timer",
-  },
-  {
     id: "fab-explore-clubs",
-    label: "Clubs & Events",
+    label: "Clubs & Societies",
     icon: Calendar,
     href: "/app/clubs",
     ariaLabel: "Explore PEC clubs, societies & events",

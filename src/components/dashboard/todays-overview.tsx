@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 import { useState, useEffect } from "react";
-import { loadLocalAttendance } from "@/lib/attendance";
+import { loadLocalAttendance, fetchSupabaseAttendance } from "@/lib/attendance";
 import { firebaseAuth } from "@/lib/firebase";
 import { parsePecEmail } from "@/lib/pec-email";
 import {
@@ -50,26 +50,56 @@ function OverviewCard({ item, index }: { item: OverviewItem; index: number }) {
 }
 
 export function TodaysOverview() {
-  const [attendanceData, setAttendanceData] = useState({ pct: 82, msg: "Safe Zone" });
+  const [attendanceData, setAttendanceData] = useState<{ value: string; msg: string }>({
+    value: "0/0 Classes",
+    msg: "Target: 75% Attendance",
+  });
   const [nextClassInfo, setNextClassInfo] = useState<{ value: string; subtitle: string }>({
     value: "Loading...",
     subtitle: "Checking schedule",
   });
 
-  // Calculate real attendance stats
+  // Calculate real attendance stats matching actual recorded classes
   useEffect(() => {
-    const list = loadLocalAttendance();
-    if (list && list.length > 0) {
-      const conducted = list.reduce((s, a) => s + a.lecturesAttended + a.lecturesAbsent, 0);
-      const attended = list.reduce((s, a) => s + a.lecturesAttended, 0);
-      if (conducted > 0) {
-        const pct = (attended / conducted) * 100;
+    async function loadStats(user: any) {
+      let list = loadLocalAttendance();
+      if (user?.uid) {
+        try {
+          const remote = await fetchSupabaseAttendance(user.uid);
+          if (remote && remote.length > 0) {
+            list = remote;
+          }
+        } catch (_) {}
+      }
+
+      if (list && list.length > 0) {
+        const conducted = list.reduce((s, a) => s + a.lecturesAttended + a.lecturesAbsent, 0);
+        const attended = list.reduce((s, a) => s + a.lecturesAttended, 0);
+        if (conducted > 0) {
+          const pct = Math.round((attended / conducted) * 100);
+          setAttendanceData({
+            value: `${pct}%`,
+            msg: pct >= 75 ? `${attended}/${conducted} classes (Safe)` : `${attended}/${conducted} classes (Below 75%)`,
+          });
+        } else {
+          setAttendanceData({
+            value: "0/0 Classes",
+            msg: "Target: 75% Attendance",
+          });
+        }
+      } else {
         setAttendanceData({
-          pct: Math.round(pct),
-          msg: pct >= 75 ? "Above 75% Target" : "Below 75% Target",
+          value: "0/0 Classes",
+          msg: "Target: 75% Attendance",
         });
       }
     }
+
+    const unsub = firebaseAuth.onAuthStateChanged((user) => {
+      loadStats(user);
+    });
+
+    return unsub;
   }, []);
 
   // Detect real next class from PEC timetable & roll number
@@ -128,7 +158,7 @@ export function TodaysOverview() {
     {
       icon: CheckSquare,
       title: "Attendance Status",
-      value: `${attendanceData.pct}%`,
+      value: attendanceData.value,
       subtitle: attendanceData.msg,
     },
     {

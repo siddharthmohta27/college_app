@@ -114,13 +114,14 @@ const QUICK_LINKS = [
     iconColor: "text-primary",
     count: "Explore clubs & fests",
   },
-  {
-    to: "/app/study",
-    label: "Study Rooms",
-    icon: BookOpen,
-    iconColor: "text-primary",
-    count: "Book hall & Pomodoro",
-  },
+  // Study Rooms - coming soon
+  // {
+  //   to: "/app/study",
+  //   label: "Study Rooms",
+  //   icon: BookOpen,
+  //   iconColor: "text-primary",
+  //   count: "Book & collaborate",
+  // },
   {
     to: "/app/dating",
     label: "Campus Match",
@@ -135,13 +136,14 @@ const QUICK_LINKS = [
     iconColor: "text-primary",
     count: "Target 75% Tracker",
   },
-  {
-    to: "/app/resources",
-    label: "Academic Resources",
-    icon: FileText,
-    iconColor: "text-primary",
-    count: "PYQs, Notes & Syllabus",
-  },
+  // Academic Resources - coming soon
+  // {
+  //   to: "/app/resources",
+  //   label: "Academic Resources",
+  //   icon: FileText,
+  //   iconColor: "text-primary",
+  //   count: "PYQs, Notes & Syllabus",
+  // },
 ];
 
 const TRENDING = [

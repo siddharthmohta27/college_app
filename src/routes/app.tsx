@@ -54,10 +54,10 @@ const NAV_ITEMS = [
   { to: "/app/canteen", label: "Mess Menu", icon: UtensilsCrossed },
   { to: "/app/chat", label: "Chat", icon: MessageSquare },
   { to: "/app/clubs", label: "Clubs & Events", icon: Calendar },
-  { to: "/app/study", label: "Study Rooms", icon: BookOpen },
+  // { to: "/app/study", label: "Study Rooms", icon: BookOpen }, // hidden - coming soon
   { to: "/app/dating", label: "Campus Match", icon: Heart },
   { to: "/app/attendance", label: "Attendance", icon: CheckSquare },
-  { to: "/app/resources", label: "Resources", icon: FileText },
+  // { to: "/app/resources", label: "Resources", icon: FileText }, // hidden - coming soon
 ];
 
 function AppShell() {

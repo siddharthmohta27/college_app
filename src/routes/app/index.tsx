@@ -102,10 +102,10 @@ const QUICK_LINKS = [
   },
   {
     to: "/app/canteen",
-    label: "Canteen Menu",
+    label: "Mess Menu",
     icon: UtensilsCrossed,
     iconColor: "text-primary",
-    count: "Lunch: 12:00 - 2:30",
+    count: "Hostels & Campus Dining",
   },
   {
     to: "/app/chat",
@@ -154,7 +154,7 @@ const QUICK_LINKS = [
 const TRENDING = [
   { text: "DS Lab files due tonight — share in #assignments", tag: "CS Dept", time: "14 min ago" },
   { text: "NVIDIA GPU for sale — ₹18,000 OBO", tag: "Marketplace", time: "32 min ago" },
-  { text: "Today's Special lunch: Paneer Butter Masala", tag: "Canteen", time: "1 hr ago" },
+  { text: "Today's Special lunch: Paneer Butter Masala", tag: "Mess Menu", time: "1 hr ago" },
   { text: "Coding Club hackathon — register by Sunday", tag: "Events", time: "3 hr ago" },
 ];
 

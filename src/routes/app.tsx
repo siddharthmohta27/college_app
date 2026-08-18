@@ -51,7 +51,7 @@ const NAV_ITEMS = [
   { to: "/app/orientation", label: "Orientation", icon: Compass },
   { to: "/app/timetable", label: "Timetable", icon: CalendarDays },
   { to: "/app/marketplace", label: "Marketplace", icon: ShoppingBag },
-  { to: "/app/canteen", label: "Canteen", icon: UtensilsCrossed },
+  { to: "/app/canteen", label: "Mess Menu", icon: UtensilsCrossed },
   { to: "/app/chat", label: "Chat", icon: MessageSquare },
   { to: "/app/clubs", label: "Clubs & Events", icon: Calendar },
   { to: "/app/study", label: "Study Rooms", icon: BookOpen },

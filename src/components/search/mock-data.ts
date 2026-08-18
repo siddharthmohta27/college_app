@@ -67,12 +67,12 @@ export const SEARCH_DATA: SearchResult[] = [
   },
   {
     id: "page-canteen",
-    title: "Canteen Menu",
-    subtitle: "Today's food menu and specials",
+    title: "Mess Menu",
+    subtitle: "Hostel mess menus and campus dining",
     category: "Pages",
     icon: UtensilsCrossed,
     href: "/app/canteen",
-    keywords: ["food", "lunch", "menu", "eat"],
+    keywords: ["food", "lunch", "menu", "eat", "mess", "kurukshetra", "hostel"],
   },
   {
     id: "page-chat",

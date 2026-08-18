@@ -7,7 +7,6 @@ import {
   Calendar,
   BookOpen,
   GraduationCap,
-  Bell,
   Search,
   Menu,
   X,
@@ -234,13 +233,6 @@ function AppShell() {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <button
-                id="notifications-btn"
-                className="relative grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-surface hover:text-foreground icon-hover"
-              >
-                <Bell className="h-4 w-4" />
-                <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary bell-pulse" />
-              </button>
               <button
                 onClick={() => setProfileModalOpen(true)}
                 className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-[10px] font-bold text-primary-foreground transition hover:opacity-90 hover:scale-105"

@@ -353,6 +353,52 @@ const REPORTING_BRANCHES: ReportingBranch[] = [
   },
 ];
 
+export const ORIENTATION_DAYS = [
+  { day: 1, label: "Day 1", date: "19 Aug (Wed)", title: "Inaugural & Department Visits" },
+  { day: 2, label: "Day 2", date: "20 Aug (Thu)", title: "Science HODs, Clubs (1-4), Tech/Sports/Music" },
+  { day: 3, label: "Day 3", date: "21 Aug (Fri)", title: "CDGC, Library, Clubs (5-6), Dramatics" },
+  { day: 4, label: "Day 4", date: "22 Aug (Sat)", title: "Mental Health & Nasha Mukti, PEB & Displays" },
+  { day: 5, label: "Day 5", date: "23 Aug (Sun)", title: "Dhyan Kendra, Music, Club Rotations" },
+  { day: 6, label: "Day 6", date: "24 Aug (Mon)", title: "Career Guidance, Technical & Sports Displays" },
+  { day: 7, label: "Day 7", date: "25 Aug (Tue)", title: "Final Club Rotations & Grand Finale" },
+];
+
+export const ATTENDANCE_VENUES_BY_DAY: Record<string, Record<number, string>> = {
+  CSE: { 1: "Auditorium", 2: "L-26", 3: "L-26", 4: "L-26", 5: "L-26", 6: "L-26", 7: "L-26" },
+  ECE: { 1: "Auditorium", 2: "L-27", 3: "L-27", 4: "L-27", 5: "L-27", 6: "L-27", 7: "L-27" },
+  VLSI: { 1: "Auditorium", 2: "L-28", 3: "L-28", 4: "L-28", 5: "L-28", 6: "L-28", 7: "L-28" },
+  "B.Design": { 1: "L-26", 2: "L-28", 3: "L-28", 4: "L-28", 5: "L-28", 6: "L-28", 7: "L-28" },
+  AERO: { 1: "L-26", 2: "L-28", 3: "L-28", 4: "L-28", 5: "L-28", 6: "L-28", 7: "L-28" },
+  Electrical: { 1: "L-27", 2: "L-29", 3: "L-29", 4: "L-29", 5: "L-29", 6: "L-29", 7: "L-29" },
+  Civil: { 1: "L-28", 2: "L-30", 3: "L-30", 4: "L-30", 5: "L-30", 6: "L-30", 7: "L-30" },
+  AI: { 1: "L-29", 2: "L-31", 3: "L-31", 4: "L-31", 5: "L-31", 6: "L-31", 7: "L-31" },
+  DS: { 1: "L-29", 2: "L-31", 3: "L-31", 4: "L-31", 5: "L-31", 6: "L-31", 7: "L-31" },
+  "M&C": { 1: "L-29", 2: "L-31", 3: "L-31", 4: "L-31", 5: "L-31", 6: "L-31", 7: "L-31" },
+  Mechanical: { 1: "L-30", 2: "Aero Audi", 3: "Aero Audi", 4: "Aero Audi", 5: "Aero Audi", 6: "Aero Audi", 7: "Aero Audi" },
+  Metallurgy: { 1: "L-31", 2: "Auditorium", 3: "Auditorium", 4: "Auditorium", 5: "Auditorium", 6: "Auditorium", 7: "Auditorium" },
+  Production: { 1: "L-31", 2: "Auditorium", 3: "Auditorium", 4: "Auditorium", 5: "Auditorium", 6: "Auditorium", 7: "Auditorium" },
+};
+
+export const SPECIAL_GROUPINGS = {
+  tech: [
+    { code: "T1", branches: ["CSE", "VLSI", "B.Design", "Production"], venue: "Centenary Hall" },
+    { code: "T2", branches: ["AERO", "AI", "DS", "M&C", "Mechanical"], venue: "Centenary Hall" },
+    { code: "T3", branches: ["ECE", "Civil"], venue: "Centenary Hall" },
+    { code: "T4", branches: ["Electrical", "Metallurgy"], venue: "Centenary Hall" },
+  ],
+  sports: [
+    { code: "S1", branches: ["ECE", "Civil"], venue: "Athletic Ground" },
+    { code: "S2", branches: ["Electrical", "Metallurgy", "Production"], venue: "Athletic Ground" },
+    { code: "S3", branches: ["CSE", "M&C", "Mechanical"], venue: "Athletic Ground" },
+    { code: "S4", branches: ["VLSI", "B.Design", "AERO", "AI", "DS"], venue: "Athletic Ground" },
+  ],
+  cultural: [
+    { code: "A1", branches: ["CSE", "ECE", "VLSI", "B.Design"], venue: "Auditorium" },
+    { code: "A2", branches: ["Civil", "M&C", "Mechanical", "Production"], venue: "Auditorium" },
+    { code: "A3", branches: ["AERO", "Electrical", "AI", "DS", "Metallurgy"], venue: "Auditorium" },
+  ],
+};
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 function OrientationPage() {

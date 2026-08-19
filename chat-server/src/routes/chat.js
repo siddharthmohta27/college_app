@@ -1,8 +1,26 @@
 const express = require("express");
 const router = express.Router();
+const rateLimit = require("express-rate-limit");
 const { pool } = require("../config/db");
 const { requireAuth, optionalAuth } = require("../middleware/auth");
 const { getOrCreateChatUser, getOrCreateDatingProfile } = require("../config/db");
+
+// Chat specific rate limiters
+const chatMessageLimiter = rateLimit({
+  windowMs: 5 * 1000, // 5 seconds
+  max: 5,             // limit each IP to 5 messages per 5 seconds
+  message: { error: "You are sending messages too fast. Please slow down." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const chatReactionLimiter = rateLimit({
+  windowMs: 5 * 1000, // 5 seconds
+  max: 10,            // limit each IP to 10 reactions per 5 seconds
+  message: { error: "You are reacting too fast. Please slow down." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // ──────────────────────────────────────────────────────────────
 // GET /api/chat/channels - List all channels
@@ -102,7 +120,7 @@ router.get("/channels/:channelId/messages", requireAuth, async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 // POST /api/chat/channels/:channelId/messages - Send message
 // ──────────────────────────────────────────────────────────────
-router.post("/channels/:channelId/messages", requireAuth, async (req, res) => {
+router.post("/channels/:channelId/messages", requireAuth, chatMessageLimiter, async (req, res) => {
   const { channelId } = req.params;
   const { text } = req.body;
   const firebaseUid = req.user.id;
@@ -140,9 +158,9 @@ router.post("/channels/:channelId/messages", requireAuth, async (req, res) => {
 });
 
 // ──────────────────────────────────────────────────────────────
-// POST /api/chat/messages/:messageId/reactions - Add reaction
+// POST /api/chat/messages/:messageId/reactions - Add/Toggle reaction
 // ──────────────────────────────────────────────────────────────
-router.post("/messages/:messageId/reactions", requireAuth, async (req, res) => {
+router.post("/messages/:messageId/reactions", requireAuth, chatReactionLimiter, async (req, res) => {
   const { messageId } = req.params;
   const { emoji } = req.body;
   const firebaseUid = req.user.id;
@@ -153,22 +171,40 @@ router.post("/messages/:messageId/reactions", requireAuth, async (req, res) => {
 
   try {
     // Ensure chat user exists
-    await getOrCreateChatUser(firebaseUid, { email: req.user.email });
+    const chatUser = await getOrCreateChatUser(firebaseUid, { email: req.user.email });
 
-    // Upsert reaction (one per user per emoji per message)
-    await pool.query(
-      `INSERT INTO reactions (message_id, user_id, emoji)
-       VALUES ($1, (SELECT id FROM chat_users WHERE auth_user_id = $2), $3)
-       ON CONFLICT (message_id, user_id, emoji) DO NOTHING`,
-      [messageId, firebaseUid, emoji],
+    // WhatsApp single-reaction behavior:
+    // Check if user already reacted to this message
+    const existing = await pool.query(
+      `SELECT id, emoji FROM reactions WHERE message_id = $1 AND user_id = $2`,
+      [messageId, chatUser.id],
     );
+
+    if (existing.rows.length > 0) {
+      const currentEmoji = existing.rows[0].emoji;
+      if (currentEmoji === emoji) {
+        // Same reaction clicked again -> remove/toggle off
+        await pool.query(`DELETE FROM reactions WHERE id = $1`, [existing.rows[0].id]);
+      } else {
+        // Different emoji clicked -> update to new emoji (strictly 1 reaction per user)
+        await pool.query(`UPDATE reactions SET emoji = $1 WHERE id = $2`, [emoji, existing.rows[0].id]);
+      }
+    } else {
+      // No reaction yet -> insert
+      await pool.query(
+        `INSERT INTO reactions (message_id, user_id, emoji)
+         VALUES ($1, $2, $3)`,
+        [messageId, chatUser.id, emoji],
+      );
+    }
 
     // Get updated reaction counts
     const reactions = await pool.query(
       `SELECT emoji, COUNT(*) as count
        FROM reactions
        WHERE message_id = $1
-       GROUP BY emoji`,
+       GROUP BY emoji
+       ORDER BY count DESC`,
       [messageId],
     );
 
@@ -179,8 +215,8 @@ router.post("/messages/:messageId/reactions", requireAuth, async (req, res) => {
 
     res.json({ reactions: formatted });
   } catch (err) {
-    console.error("Error adding reaction:", err);
-    res.status(500).json({ error: "Failed to add reaction" });
+    console.error("Error updating reaction:", err);
+    res.status(500).json({ error: "Failed to update reaction" });
   }
 });
 

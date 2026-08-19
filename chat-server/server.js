@@ -85,6 +85,117 @@ const PORT = process.env.PORT || 3001;
 // In-memory presence tracking (socket.id -> user info)
 const activeUsers = new Map();
 
+// ─── Socket.IO Rate Limiting ─────────────────────────────────────
+const socketRateLimits = new Map();
+
+const RATE_LIMIT_CONFIG = {
+  MESSAGE_BURST_MAX: 5,         // Max 5 messages in 5-second window
+  MESSAGE_WINDOW_MS: 5000,      // 5 second rolling window
+  MIN_MESSAGE_INTERVAL_MS: 250, // Minimum 250ms between consecutive messages
+  DUPLICATE_INTERVAL_MS: 2000,  // Prevent exact duplicate spam within 2s
+  COOLDOWN_MS: 4000,            // 4s cooldown when limit breached
+  REACTION_BURST_MAX: 10,       // Max 10 reactions in 5-second window
+  REACTION_WINDOW_MS: 5000,     // 5 second rolling window
+};
+
+function checkMessageRateLimit(key, text) {
+  const now = Date.now();
+  let userLimit = socketRateLimits.get(key);
+  if (!userLimit) {
+    userLimit = {
+      messageTimestamps: [],
+      lastMessageText: "",
+      lastMessageTime: 0,
+      reactionTimestamps: [],
+      cooldownUntil: 0,
+    };
+    socketRateLimits.set(key, userLimit);
+  }
+
+  // Active cooldown check
+  if (now < userLimit.cooldownUntil) {
+    const remainingSec = Math.ceil((userLimit.cooldownUntil - now) / 1000);
+    return {
+      allowed: false,
+      reason: `Slow down! You're sending messages too fast. Please wait ${remainingSec}s.`,
+      retryAfter: remainingSec,
+    };
+  }
+
+  // Minimum interval check (burst throttling)
+  if (now - userLimit.lastMessageTime < RATE_LIMIT_CONFIG.MIN_MESSAGE_INTERVAL_MS) {
+    return {
+      allowed: false,
+      reason: "Please wait a moment before sending another message.",
+      retryAfter: 1,
+    };
+  }
+
+  // Duplicate spam check
+  if (
+    userLimit.lastMessageText &&
+    userLimit.lastMessageText === (text || "").trim() &&
+    now - userLimit.lastMessageTime < RATE_LIMIT_CONFIG.DUPLICATE_INTERVAL_MS
+  ) {
+    return {
+      allowed: false,
+      reason: "Please avoid sending identical duplicate messages repeatedly.",
+      retryAfter: 2,
+    };
+  }
+
+  // Clean window
+  userLimit.messageTimestamps = userLimit.messageTimestamps.filter(
+    (ts) => now - ts < RATE_LIMIT_CONFIG.MESSAGE_WINDOW_MS
+  );
+
+  // Check burst count
+  if (userLimit.messageTimestamps.length >= RATE_LIMIT_CONFIG.MESSAGE_BURST_MAX) {
+    userLimit.cooldownUntil = now + RATE_LIMIT_CONFIG.COOLDOWN_MS;
+    const remainingSec = Math.ceil(RATE_LIMIT_CONFIG.COOLDOWN_MS / 1000);
+    return {
+      allowed: false,
+      reason: `You're sending messages too fast! Cooldown active for ${remainingSec}s.`,
+      retryAfter: remainingSec,
+    };
+  }
+
+  userLimit.messageTimestamps.push(now);
+  userLimit.lastMessageTime = now;
+  userLimit.lastMessageText = (text || "").trim();
+  return { allowed: true };
+}
+
+function checkReactionRateLimit(key) {
+  const now = Date.now();
+  let userLimit = socketRateLimits.get(key);
+  if (!userLimit) {
+    userLimit = {
+      messageTimestamps: [],
+      lastMessageText: "",
+      lastMessageTime: 0,
+      reactionTimestamps: [],
+      cooldownUntil: 0,
+    };
+    socketRateLimits.set(key, userLimit);
+  }
+
+  userLimit.reactionTimestamps = userLimit.reactionTimestamps.filter(
+    (ts) => now - ts < RATE_LIMIT_CONFIG.REACTION_WINDOW_MS
+  );
+
+  if (userLimit.reactionTimestamps.length >= RATE_LIMIT_CONFIG.REACTION_BURST_MAX) {
+    return {
+      allowed: false,
+      reason: "You're reacting too fast. Please slow down.",
+      retryAfter: 2,
+    };
+  }
+
+  userLimit.reactionTimestamps.push(now);
+  return { allowed: true };
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────
 
 async function loadChannelHistory(channelId, limit = 100) {
@@ -142,14 +253,33 @@ async function saveMessage(channelId, senderId, text) {
 }
 
 async function upsertReaction(messageId, userId, emoji) {
-  await pool.query(
-    `INSERT INTO reactions (message_id, user_id, emoji)
-     VALUES ($1, $2, $3)
-     ON CONFLICT (message_id, user_id, emoji) DO NOTHING`,
-    [messageId, userId, emoji],
+  // WhatsApp single-reaction behavior:
+  // Check if user already reacted to this message
+  const existing = await pool.query(
+    `SELECT id, emoji FROM reactions WHERE message_id = $1 AND user_id = $2`,
+    [messageId, userId]
   );
+
+  if (existing.rows.length > 0) {
+    const currentEmoji = existing.rows[0].emoji;
+    if (currentEmoji === emoji) {
+      // Same reaction tapped again -> Remove/toggle off
+      await pool.query(`DELETE FROM reactions WHERE id = $1`, [existing.rows[0].id]);
+    } else {
+      // Different reaction tapped -> Update to new emoji (strictly 1 reaction per user)
+      await pool.query(`UPDATE reactions SET emoji = $1 WHERE id = $2`, [emoji, existing.rows[0].id]);
+    }
+  } else {
+    // No existing reaction -> Insert new reaction
+    await pool.query(
+      `INSERT INTO reactions (message_id, user_id, emoji)
+       VALUES ($1, $2, $3)`,
+      [messageId, userId, emoji]
+    );
+  }
+
   const res = await pool.query(
-    `SELECT emoji, COUNT(*) as count FROM reactions WHERE message_id = $1 GROUP BY emoji`,
+    `SELECT emoji, COUNT(*) as count FROM reactions WHERE message_id = $1 GROUP BY emoji ORDER BY count DESC`,
     [messageId],
   );
   return res.rows.map((r) => ({ emoji: r.emoji, count: parseInt(r.count) }));
@@ -264,8 +394,24 @@ io.on("connection", (socket) => {
     const user = activeUsers.get(socket.id);
     if (!user) return;
 
+    if (!text || !text.trim()) {
+      socket.emit("error", { message: "Message cannot be empty." });
+      return;
+    }
+
+    // Rate limiting check
+    const rateCheck = checkMessageRateLimit(user.authUserId || socket.id, text);
+    if (!rateCheck.allowed) {
+      socket.emit("rate_limit", {
+        type: "MESSAGE_RATE_LIMIT",
+        message: rateCheck.reason,
+        retryAfter: rateCheck.retryAfter,
+      });
+      return;
+    }
+
     try {
-      const saved = await saveMessage(channelId, user.chatUserId, text);
+      const saved = await saveMessage(channelId, user.chatUserId, text.trim());
 
       const newMsg = {
         id: saved.id,
@@ -277,13 +423,14 @@ io.on("connection", (socket) => {
           minute: "2-digit",
           hour12: false,
         }),
-        text,
+        text: text.trim(),
         reactions: [],
       };
 
       io.to(channelId).emit("message", newMsg);
     } catch (err) {
       console.error("❌ Error saving message:", err.message);
+      socket.emit("error", { message: "Failed to send message. Please try again." });
     }
   });
 
@@ -292,11 +439,25 @@ io.on("connection", (socket) => {
     const user = activeUsers.get(socket.id);
     if (!user) return;
 
+    if (!emoji || !msgId) return;
+
+    // Rate limiting check
+    const rateCheck = checkReactionRateLimit(user.authUserId || socket.id);
+    if (!rateCheck.allowed) {
+      socket.emit("rate_limit", {
+        type: "REACTION_RATE_LIMIT",
+        message: rateCheck.reason,
+        retryAfter: rateCheck.retryAfter,
+      });
+      return;
+    }
+
     try {
       const reactions = await upsertReaction(msgId, user.chatUserId, emoji);
       io.to(channelId).emit("reactionUpdate", { msgId, reactions });
     } catch (err) {
       console.error("❌ Error saving reaction:", err.message);
+      socket.emit("error", { message: "Failed to update reaction." });
     }
   });
 

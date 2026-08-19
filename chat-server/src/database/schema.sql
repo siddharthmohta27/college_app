@@ -39,13 +39,13 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Emoji reactions on messages
+-- Emoji reactions on messages (WhatsApp style: 1 reaction per user per message)
 CREATE TABLE IF NOT EXISTS reactions (
     id SERIAL PRIMARY KEY,
     message_id UUID REFERENCES messages(id) ON DELETE CASCADE,
     user_id INT REFERENCES chat_users(id) ON DELETE CASCADE,
     emoji VARCHAR(10) NOT NULL,
-    UNIQUE(message_id, user_id, emoji)        -- one reaction per user per emoji
+    UNIQUE(message_id, user_id)        -- strictly one reaction per user per message
 );
 
 -- Performance indexes

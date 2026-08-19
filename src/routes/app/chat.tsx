@@ -21,9 +21,11 @@ import {
   Loader2,
   Wifi,
   WifiOff,
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { firebaseAuth } from "@/lib/firebase";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/chat")({
   head: () => ({
@@ -38,6 +40,12 @@ export const Route = createFileRoute("/app/chat")({
   component: ChatApp,
 });
 
+export type ReactionItem = {
+  emoji: string;
+  count: number;
+  users?: string[];
+};
+
 type Msg = {
   id: string;
   user: string;
@@ -45,7 +53,7 @@ type Msg = {
   avatar: string;
   time: string;
   text: string;
-  reactions?: { emoji: string; count: number }[];
+  reactions?: ReactionItem[];
 };
 
 type Member = {
@@ -103,12 +111,34 @@ function ChatApp() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [showChannelDrawer, setShowChannelDrawer] = useState(false);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentUser, setCurrentUser] = useState<{
     id: string;
     email: string;
     displayName: string | null;
   } | null>(null);
+
+  // Rate limiting refs
+  const recentSentTimestamps = useRef<number[]>([]);
+  const lastSentTime = useRef<number>(0);
+  const lastSentText = useRef<string>("");
+  const recentReactionTimestamps = useRef<number[]>([]);
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return;
+    const timer = setInterval(() => {
+      setCooldownRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldownRemaining]);
 
   // Get current user from Firebase auth
   useEffect(() => {
@@ -196,6 +226,21 @@ function ChatApp() {
           });
         }
       )
+      .on(
+        "postgres_changes" as any,
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "chat_messages",
+          filter: `channel_id=eq.${activeChannel}`,
+        },
+        (payload: any) => {
+          const row = payload.new;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === row.id ? { ...m, reactions: row.reactions || [] } : m))
+          );
+        }
+      )
       .subscribe();
 
     return () => {
@@ -218,6 +263,39 @@ function ChatApp() {
   const send = async () => {
     if (!draft.trim() || !currentUser || sending) return;
     const text = draft.trim();
+
+    // ─── Rate Limit & Anti-Spam Checks ───
+    const now = Date.now();
+
+    // Check active cooldown
+    if (cooldownRemaining > 0) {
+      toast.error(`Slow down! Please wait ${cooldownRemaining}s before sending again.`);
+      return;
+    }
+
+    // Burst throttle (minimum 250ms interval)
+    if (now - lastSentTime.current < 250) {
+      return;
+    }
+
+    // Duplicate message spam check (within 2 seconds)
+    if (lastSentText.current === text && now - lastSentTime.current < 2000) {
+      toast.warning("Please avoid sending duplicate messages repeatedly.");
+      return;
+    }
+
+    // Sliding window check: max 5 messages in 5 seconds
+    recentSentTimestamps.current = recentSentTimestamps.current.filter((ts) => now - ts < 5000);
+    if (recentSentTimestamps.current.length >= 5) {
+      setCooldownRemaining(4);
+      toast.error("You're sending messages too fast! Cooldown active for 4s.");
+      return;
+    }
+
+    recentSentTimestamps.current.push(now);
+    lastSentTime.current = now;
+    lastSentText.current = text;
+
     setDraft("");
     setSending(true);
 
@@ -239,6 +317,7 @@ function ChatApp() {
       color: "text-primary",
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       text,
+      reactions: [],
     };
     setMessages((prev) => [...prev, optimistic]);
 
@@ -252,36 +331,116 @@ function ChatApp() {
 
     if (error) {
       console.error("Send failed:", error.message);
+      toast.error("Failed to send message: " + error.message);
       // Remove optimistic message on failure
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
     }
     setSending(false);
   };
 
+  // WhatsApp-style reaction handler: strictly ONE reaction per user per message
   const handleAddReaction = async (msgId: string, emoji: string) => {
+    const now = Date.now();
+    recentReactionTimestamps.current = recentReactionTimestamps.current.filter((ts) => now - ts < 5000);
+    if (recentReactionTimestamps.current.length >= 10) {
+      toast.warning("You're reacting too fast. Please slow down.");
+      return;
+    }
+    recentReactionTimestamps.current.push(now);
+
+    const currentUserId = currentUser?.id || "anon";
+
+    let updatedReactionsForMsg: ReactionItem[] = [];
+
     // Optimistic update locally
     setMessages((prev) =>
       prev.map((m) => {
         if (m.id !== msgId) return m;
-        const existing = m.reactions || [];
-        const idx = existing.findIndex((r) => r.emoji === emoji);
-        const updated = [...existing];
-        if (idx >= 0) {
-          updated[idx] = { ...updated[idx], count: updated[idx].count + 1 };
+        const currentReactions: ReactionItem[] = m.reactions ? [...m.reactions] : [];
+
+        // Find which reaction this user currently has on this message (if any)
+        const userReactionIndex = currentReactions.findIndex(
+          (r) => r.users && r.users.includes(currentUserId)
+        );
+
+        if (userReactionIndex >= 0) {
+          const currentReaction = currentReactions[userReactionIndex];
+          if (currentReaction.emoji === emoji) {
+            // Case 1: Same emoji tapped again -> Remove / toggle off reaction
+            const newUsers = (currentReaction.users || []).filter((u) => u !== currentUserId);
+            if (newUsers.length === 0 || currentReaction.count <= 1) {
+              // Remove emoji pill completely
+              currentReactions.splice(userReactionIndex, 1);
+            } else {
+              currentReactions[userReactionIndex] = {
+                ...currentReaction,
+                count: currentReaction.count - 1,
+                users: newUsers,
+              };
+            }
+          } else {
+            // Case 2: Different emoji tapped -> Switch reaction to new emoji
+            // Remove user from old reaction
+            const oldUsers = (currentReaction.users || []).filter((u) => u !== currentUserId);
+            if (oldUsers.length === 0 || currentReaction.count <= 1) {
+              currentReactions.splice(userReactionIndex, 1);
+            } else {
+              currentReactions[userReactionIndex] = {
+                ...currentReaction,
+                count: currentReaction.count - 1,
+                users: oldUsers,
+              };
+            }
+
+            // Add user to new emoji
+            const targetIdx = currentReactions.findIndex((r) => r.emoji === emoji);
+            if (targetIdx >= 0) {
+              currentReactions[targetIdx] = {
+                ...currentReactions[targetIdx],
+                count: currentReactions[targetIdx].count + 1,
+                users: [...(currentReactions[targetIdx].users || []), currentUserId],
+              };
+            } else {
+              currentReactions.push({
+                emoji,
+                count: 1,
+                users: [currentUserId],
+              });
+            }
+          }
         } else {
-          updated.push({ emoji, count: 1 });
+          // Case 3: User had no reaction yet -> Add reaction
+          const targetIdx = currentReactions.findIndex((r) => r.emoji === emoji);
+          if (targetIdx >= 0) {
+            currentReactions[targetIdx] = {
+              ...currentReactions[targetIdx],
+              count: currentReactions[targetIdx].count + 1,
+              users: [...(currentReactions[targetIdx].users || []), currentUserId],
+            };
+          } else {
+            currentReactions.push({
+              emoji,
+              count: 1,
+              users: [currentUserId],
+            });
+          }
         }
-        return { ...m, reactions: updated };
+
+        updatedReactionsForMsg = currentReactions;
+        return { ...m, reactions: currentReactions };
       })
     );
-    // Persist to Supabase
-    const msg = messages.find((m) => m.id === msgId);
-    if (msg && !msgId.startsWith("tmp_")) {
-      const newReactions = (msg.reactions || []).map((r) =>
-        r.emoji === emoji ? { ...r, count: r.count + 1 } : r
-      );
-      if (!newReactions.some((r) => r.emoji === emoji)) newReactions.push({ emoji, count: 1 });
-      await supabase.from("chat_messages").update({ reactions: newReactions }).eq("id", msgId);
+
+    // Persist to Supabase if not a temporary message
+    if (!msgId.startsWith("tmp_")) {
+      try {
+        await supabase
+          .from("chat_messages")
+          .update({ reactions: updatedReactionsForMsg })
+          .eq("id", msgId);
+      } catch (err) {
+        console.error("Failed to update reactions in Supabase:", err);
+      }
     }
   };
 
@@ -451,21 +610,45 @@ function ChatApp() {
             messages.map((m, i) => {
               const prev = messages[i - 1];
               const grouped = prev && prev.user === m.user;
-              return <Message key={m.id} m={m} grouped={grouped} onAddReaction={handleAddReaction} />;
+              return (
+                <Message
+                  key={m.id}
+                  m={m}
+                  grouped={grouped}
+                  onAddReaction={handleAddReaction}
+                  currentUserId={currentUser?.id}
+                />
+              );
             })
           )}
         </div>
 
         {/* Composer */}
         <div className="px-3 pb-4 md:px-6" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 1rem))" }}>
-          <div className="flex items-end gap-2 rounded-2xl border border-border bg-surface/70 p-2 backdrop-blur transition focus-within:border-primary focus-within:shadow-[0_0_30px_-8px_var(--primary)]">
-            <button className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-muted-foreground hover:bg-surface-elevated hover:text-foreground">
+          {cooldownRemaining > 0 && (
+            <div className="mb-2 flex items-center justify-center gap-1.5 text-xs text-rose-400 animate-fade-in font-medium">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              <span>Slow down! Please wait {cooldownRemaining}s before sending another message.</span>
+            </div>
+          )}
+          <div
+            className={`flex items-end gap-2 rounded-2xl border bg-surface/70 p-2 backdrop-blur transition ${
+              cooldownRemaining > 0
+                ? "border-rose-500/40 opacity-75"
+                : "border-border focus-within:border-primary focus-within:shadow-[0_0_30px_-8px_var(--primary)]"
+            }`}
+          >
+            <button
+              disabled={cooldownRemaining > 0}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-muted-foreground hover:bg-surface-elevated hover:text-foreground disabled:opacity-40"
+            >
               <Paperclip className="h-4 w-4" />
             </button>
             <textarea
               id="chat-composer"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
+              disabled={cooldownRemaining > 0}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -473,19 +656,30 @@ function ChatApp() {
                 }
               }}
               rows={1}
-              placeholder={`Message #${activeChannel}`}
-              className="max-h-40 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-muted-foreground"
+              placeholder={
+                cooldownRemaining > 0
+                  ? `Cooldown active (${cooldownRemaining}s)...`
+                  : `Message #${activeChannel}`
+              }
+              className="max-h-40 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
             />
-            <button className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-muted-foreground hover:bg-surface-elevated hover:text-foreground">
+            <button
+              disabled={cooldownRemaining > 0}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-muted-foreground hover:bg-surface-elevated hover:text-foreground disabled:opacity-40"
+            >
               <Smile className="h-4 w-4" />
             </button>
             <button
               id="chat-send-btn"
               onClick={send}
-              disabled={!draft.trim()}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
+              disabled={!draft.trim() || cooldownRemaining > 0 || sending}
+              className="grid h-9 min-w-9 px-2 place-items-center rounded-xl bg-primary text-primary-foreground transition hover:opacity-90 disabled:opacity-40 font-medium text-xs"
             >
-              <Send className="h-4 w-4" />
+              {cooldownRemaining > 0 ? (
+                <span className="font-mono text-[11px]">{cooldownRemaining}s</span>
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>
@@ -628,13 +822,16 @@ function Message({
   m,
   grouped,
   onAddReaction,
+  currentUserId,
 }: {
   m: Msg;
   grouped: boolean;
   onAddReaction: (id: string, emoji: string) => void;
+  currentUserId?: string;
 }) {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const emojis = ["🔥", "😭", "👍", "👀", "🙏", "❤️"];
+  const userActiveEmoji = m.reactions?.find((r) => r.users && currentUserId && r.users.includes(currentUserId))?.emoji;
 
   return (
     <div
@@ -663,31 +860,49 @@ function Message({
         <div className="text-sm text-foreground/95">{m.text}</div>
         {m.reactions && m.reactions.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
-            {m.reactions.map((r) => (
-              <button
-                key={r.emoji}
-                onClick={() => onAddReaction(m.id, r.emoji)}
-                className="flex items-center gap-1 rounded-full border border-border bg-surface/70 px-2 py-0.5 text-xs transition hover:border-primary hover:bg-primary/10"
-              >
-                <span>{r.emoji}</span>
-                <span className="font-mono text-[10px] text-muted-foreground">{r.count}</span>
-              </button>
-            ))}
+            {m.reactions.map((r) => {
+              const isUserActive = Boolean(currentUserId && r.users && r.users.includes(currentUserId));
+              return (
+                <button
+                  key={r.emoji}
+                  onClick={() => onAddReaction(m.id, r.emoji)}
+                  title={isUserActive ? "Click to remove reaction" : "Click to react"}
+                  className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition ${
+                    isUserActive
+                      ? "border-primary/60 bg-primary/20 text-primary font-bold shadow-[0_0_12px_rgba(var(--primary-rgb,59,130,246),0.25)]"
+                      : "border-border bg-surface/70 hover:border-primary/50 hover:bg-primary/10"
+                  }`}
+                >
+                  <span>{r.emoji}</span>
+                  <span className={`font-mono text-[10px] ${isUserActive ? "text-primary font-semibold" : "text-muted-foreground"}`}>
+                    {r.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Floating Reaction Bar */}
       <div className="absolute right-2 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center gap-0.5 rounded-lg border border-border bg-surface-elevated p-1 shadow-md z-10">
-        {emojis.slice(0, 4).map((emoji) => (
-          <button
-            key={emoji}
-            onClick={() => onAddReaction(m.id, emoji)}
-            className="hover:bg-surface rounded p-1 transition text-xs"
-          >
-            {emoji}
-          </button>
-        ))}
+        {emojis.slice(0, 4).map((emoji) => {
+          const isSelected = emoji === userActiveEmoji;
+          return (
+            <button
+              key={emoji}
+              onClick={() => onAddReaction(m.id, emoji)}
+              className={`rounded p-1 transition text-xs ${
+                isSelected
+                  ? "bg-primary/25 text-primary scale-110 shadow-sm"
+                  : "hover:bg-surface"
+              }`}
+              title={isSelected ? "Remove reaction" : "React"}
+            >
+              {emoji}
+            </button>
+          );
+        })}
         <button
           onClick={() => setShowReactionPicker(!showReactionPicker)}
           className="hover:bg-surface rounded p-1 transition text-[10px] font-bold text-muted-foreground px-1.5"
@@ -696,18 +911,26 @@ function Message({
         </button>
         {showReactionPicker && (
           <div className="absolute right-0 top-8 flex gap-1 border border-border bg-surface-elevated p-1.5 rounded-lg shadow-lg z-20">
-            {emojis.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => {
-                  onAddReaction(m.id, emoji);
-                  setShowReactionPicker(false);
-                }}
-                className="hover:bg-surface rounded p-1.5 transition text-sm"
-              >
-                {emoji}
-              </button>
-            ))}
+            {emojis.map((emoji) => {
+              const isSelected = emoji === userActiveEmoji;
+              return (
+                <button
+                  key={emoji}
+                  onClick={() => {
+                    onAddReaction(m.id, emoji);
+                    setShowReactionPicker(false);
+                  }}
+                  className={`rounded p-1.5 transition text-sm ${
+                    isSelected
+                      ? "bg-primary/25 text-primary scale-110 shadow-sm"
+                      : "hover:bg-surface"
+                  }`}
+                  title={isSelected ? "Remove reaction" : "React"}
+                >
+                  {emoji}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

@@ -119,6 +119,25 @@ function ChatApp() {
     displayName: string | null;
   } | null>(null);
 
+  // Local storage backed user reaction mapping: messageId -> emoji
+  const [myReactions, setMyReactions] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem("campus_chat_user_reactions");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Save reactions to localStorage on change
+  useEffect(() => {
+    try {
+      localStorage.setItem("campus_chat_user_reactions", JSON.stringify(myReactions));
+    } catch {
+      // ignore
+    }
+  }, [myReactions]);
+
   // Rate limiting refs
   const recentSentTimestamps = useRef<number[]>([]);
   const lastSentTime = useRef<number>(0);
@@ -183,7 +202,7 @@ function ChatApp() {
                 minute: "2-digit",
               }),
               text: row.text,
-              reactions: row.reactions || [],
+              reactions: Array.isArray(row.reactions) ? row.reactions : [],
             }))
           );
         }
@@ -213,7 +232,7 @@ function ChatApp() {
               minute: "2-digit",
             }),
             text: row.text,
-            reactions: row.reactions || [],
+            reactions: Array.isArray(row.reactions) ? row.reactions : [],
           };
           setMessages((prev) => {
             // Replace the optimistic tmp_ message with the real DB row
@@ -237,7 +256,11 @@ function ChatApp() {
         (payload: any) => {
           const row = payload.new;
           setMessages((prev) =>
-            prev.map((m) => (m.id === row.id ? { ...m, reactions: row.reactions || [] } : m))
+            prev.map((m) =>
+              m.id === row.id
+                ? { ...m, reactions: Array.isArray(row.reactions) ? row.reactions : [] }
+                : m
+            )
           );
         }
       )
@@ -348,95 +371,96 @@ function ChatApp() {
     }
     recentReactionTimestamps.current.push(now);
 
-    const currentUserId = currentUser?.id || "anon";
+    const prevEmoji = myReactions[msgId];
+    let newUpdatedReactions: { emoji: string; count: number }[] = [];
 
-    let updatedReactionsForMsg: ReactionItem[] = [];
+    if (prevEmoji === emoji) {
+      // Case 1: Tapped same reaction -> Toggle off
+      setMyReactions((prev) => {
+        const next = { ...prev };
+        delete next[msgId];
+        return next;
+      });
 
-    // Optimistic update locally
-    setMessages((prev) =>
-      prev.map((m) => {
-        if (m.id !== msgId) return m;
-        const currentReactions: ReactionItem[] = m.reactions ? [...m.reactions] : [];
-
-        // Find which reaction this user currently has on this message (if any)
-        const userReactionIndex = currentReactions.findIndex(
-          (r) => r.users && r.users.includes(currentUserId)
-        );
-
-        if (userReactionIndex >= 0) {
-          const currentReaction = currentReactions[userReactionIndex];
-          if (currentReaction.emoji === emoji) {
-            // Case 1: Same emoji tapped again -> Remove / toggle off reaction
-            const newUsers = (currentReaction.users || []).filter((u) => u !== currentUserId);
-            if (newUsers.length === 0 || currentReaction.count <= 1) {
-              // Remove emoji pill completely
-              currentReactions.splice(userReactionIndex, 1);
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== msgId) return m;
+          const existing = (m.reactions || []).map((r) => ({ ...r }));
+          const idx = existing.findIndex((r) => r.emoji === emoji);
+          if (idx >= 0) {
+            if (existing[idx].count <= 1) {
+              existing.splice(idx, 1);
             } else {
-              currentReactions[userReactionIndex] = {
-                ...currentReaction,
-                count: currentReaction.count - 1,
-                users: newUsers,
-              };
-            }
-          } else {
-            // Case 2: Different emoji tapped -> Switch reaction to new emoji
-            // Remove user from old reaction
-            const oldUsers = (currentReaction.users || []).filter((u) => u !== currentUserId);
-            if (oldUsers.length === 0 || currentReaction.count <= 1) {
-              currentReactions.splice(userReactionIndex, 1);
-            } else {
-              currentReactions[userReactionIndex] = {
-                ...currentReaction,
-                count: currentReaction.count - 1,
-                users: oldUsers,
-              };
-            }
-
-            // Add user to new emoji
-            const targetIdx = currentReactions.findIndex((r) => r.emoji === emoji);
-            if (targetIdx >= 0) {
-              currentReactions[targetIdx] = {
-                ...currentReactions[targetIdx],
-                count: currentReactions[targetIdx].count + 1,
-                users: [...(currentReactions[targetIdx].users || []), currentUserId],
-              };
-            } else {
-              currentReactions.push({
-                emoji,
-                count: 1,
-                users: [currentUserId],
-              });
+              existing[idx].count -= 1;
             }
           }
-        } else {
-          // Case 3: User had no reaction yet -> Add reaction
-          const targetIdx = currentReactions.findIndex((r) => r.emoji === emoji);
-          if (targetIdx >= 0) {
-            currentReactions[targetIdx] = {
-              ...currentReactions[targetIdx],
-              count: currentReactions[targetIdx].count + 1,
-              users: [...(currentReactions[targetIdx].users || []), currentUserId],
-            };
-          } else {
-            currentReactions.push({
-              emoji,
-              count: 1,
-              users: [currentUserId],
-            });
-          }
-        }
+          newUpdatedReactions = existing;
+          return { ...m, reactions: existing };
+        })
+      );
+    } else if (prevEmoji) {
+      // Case 2: Tapped different reaction -> Switch from prevEmoji to new emoji
+      setMyReactions((prev) => ({
+        ...prev,
+        [msgId]: emoji,
+      }));
 
-        updatedReactionsForMsg = currentReactions;
-        return { ...m, reactions: currentReactions };
-      })
-    );
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== msgId) return m;
+          const existing = (m.reactions || []).map((r) => ({ ...r }));
+
+          // Decrement previous emoji
+          const oldIdx = existing.findIndex((r) => r.emoji === prevEmoji);
+          if (oldIdx >= 0) {
+            if (existing[oldIdx].count <= 1) {
+              existing.splice(oldIdx, 1);
+            } else {
+              existing[oldIdx].count -= 1;
+            }
+          }
+
+          // Increment new emoji
+          const newIdx = existing.findIndex((r) => r.emoji === emoji);
+          if (newIdx >= 0) {
+            existing[newIdx].count += 1;
+          } else {
+            existing.push({ emoji, count: 1 });
+          }
+
+          newUpdatedReactions = existing;
+          return { ...m, reactions: existing };
+        })
+      );
+    } else {
+      // Case 3: No previous reaction -> Add reaction
+      setMyReactions((prev) => ({
+        ...prev,
+        [msgId]: emoji,
+      }));
+
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id !== msgId) return m;
+          const existing = (m.reactions || []).map((r) => ({ ...r }));
+          const idx = existing.findIndex((r) => r.emoji === emoji);
+          if (idx >= 0) {
+            existing[idx].count += 1;
+          } else {
+            existing.push({ emoji, count: 1 });
+          }
+          newUpdatedReactions = existing;
+          return { ...m, reactions: existing };
+        })
+      );
+    }
 
     // Persist to Supabase if not a temporary message
     if (!msgId.startsWith("tmp_")) {
       try {
         await supabase
           .from("chat_messages")
-          .update({ reactions: updatedReactionsForMsg })
+          .update({ reactions: newUpdatedReactions })
           .eq("id", msgId);
       } catch (err) {
         console.error("Failed to update reactions in Supabase:", err);
@@ -616,7 +640,7 @@ function ChatApp() {
                   m={m}
                   grouped={grouped}
                   onAddReaction={handleAddReaction}
-                  currentUserId={currentUser?.id}
+                  userReaction={myReactions[m.id]}
                 />
               );
             })
@@ -822,16 +846,15 @@ function Message({
   m,
   grouped,
   onAddReaction,
-  currentUserId,
+  userReaction,
 }: {
   m: Msg;
   grouped: boolean;
   onAddReaction: (id: string, emoji: string) => void;
-  currentUserId?: string;
+  userReaction?: string;
 }) {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const emojis = ["🔥", "😭", "👍", "👀", "🙏", "❤️"];
-  const userActiveEmoji = m.reactions?.find((r) => r.users && currentUserId && r.users.includes(currentUserId))?.emoji;
 
   return (
     <div
@@ -861,7 +884,7 @@ function Message({
         {m.reactions && m.reactions.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
             {m.reactions.map((r) => {
-              const isUserActive = Boolean(currentUserId && r.users && r.users.includes(currentUserId));
+              const isUserActive = userReaction === r.emoji;
               return (
                 <button
                   key={r.emoji}
@@ -870,11 +893,11 @@ function Message({
                   className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition ${
                     isUserActive
                       ? "border-primary/60 bg-primary/20 text-primary font-bold shadow-[0_0_12px_rgba(var(--primary-rgb,59,130,246),0.25)]"
-                      : "border-border bg-surface/70 hover:border-primary/50 hover:bg-primary/10"
+                      : "border-border bg-surface/70 hover:border-primary/50 hover:bg-primary/10 text-foreground/90"
                   }`}
                 >
                   <span>{r.emoji}</span>
-                  <span className={`font-mono text-[10px] ${isUserActive ? "text-primary font-semibold" : "text-muted-foreground"}`}>
+                  <span className={`font-mono text-[10px] ${isUserActive ? "text-primary font-bold" : "text-muted-foreground"}`}>
                     {r.count}
                   </span>
                 </button>
@@ -887,14 +910,14 @@ function Message({
       {/* Floating Reaction Bar */}
       <div className="absolute right-2 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center gap-0.5 rounded-lg border border-border bg-surface-elevated p-1 shadow-md z-10">
         {emojis.slice(0, 4).map((emoji) => {
-          const isSelected = emoji === userActiveEmoji;
+          const isSelected = emoji === userReaction;
           return (
             <button
               key={emoji}
               onClick={() => onAddReaction(m.id, emoji)}
               className={`rounded p-1 transition text-xs ${
                 isSelected
-                  ? "bg-primary/25 text-primary scale-110 shadow-sm"
+                  ? "bg-primary/25 text-primary scale-110 shadow-sm ring-1 ring-primary/50"
                   : "hover:bg-surface"
               }`}
               title={isSelected ? "Remove reaction" : "React"}
@@ -912,7 +935,7 @@ function Message({
         {showReactionPicker && (
           <div className="absolute right-0 top-8 flex gap-1 border border-border bg-surface-elevated p-1.5 rounded-lg shadow-lg z-20">
             {emojis.map((emoji) => {
-              const isSelected = emoji === userActiveEmoji;
+              const isSelected = emoji === userReaction;
               return (
                 <button
                   key={emoji}
@@ -922,7 +945,7 @@ function Message({
                   }}
                   className={`rounded p-1.5 transition text-sm ${
                     isSelected
-                      ? "bg-primary/25 text-primary scale-110 shadow-sm"
+                      ? "bg-primary/25 text-primary scale-110 shadow-sm ring-1 ring-primary/50"
                       : "hover:bg-surface"
                   }`}
                   title={isSelected ? "Remove reaction" : "React"}

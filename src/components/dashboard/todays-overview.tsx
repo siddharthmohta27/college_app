@@ -6,6 +6,7 @@ import {
   UtensilsCrossed,
   Zap,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 import { useState, useEffect } from "react";
 import { loadLocalAttendance, fetchSupabaseAttendance } from "@/lib/attendance";
@@ -23,14 +24,15 @@ type OverviewItem = {
   title: string;
   value: string;
   subtitle: string;
+  href?: string;
 };
 
 function OverviewCard({ item, index }: { item: OverviewItem; index: number }) {
   const Icon = item.icon;
 
-  return (
+  const content = (
     <article
-      className="group relative z-0 min-w-[220px] shrink-0 rounded-2xl border border-border glass p-4 transition-all duration-300 hover:z-20 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_0_25px_rgba(234,179,8,0.15)] animate-fade-up md:min-w-0"
+      className="group relative z-0 min-w-[220px] shrink-0 rounded-2xl border border-border glass p-4 transition-all duration-300 hover:z-20 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_0_25px_rgba(234,179,8,0.15)] animate-fade-up md:min-w-0 h-full cursor-pointer"
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <div className="mb-3 flex items-center justify-between">
@@ -47,6 +49,16 @@ function OverviewCard({ item, index }: { item: OverviewItem; index: number }) {
       <p className="mt-1 truncate text-xs text-muted-foreground">{item.subtitle}</p>
     </article>
   );
+
+  if (item.href) {
+    return (
+      <Link to={item.href as any} className="block no-underline">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
 
 export function TodaysOverview() {
@@ -148,24 +160,28 @@ export function TodaysOverview() {
       title: "Next Class",
       value: nextClassInfo.value,
       subtitle: nextClassInfo.subtitle,
+      href: "/app/timetable",
     },
     {
       icon: UtensilsCrossed,
       title: "Mess Menu",
-      value: "Kurukshetra Mess",
+      value: "Kurukshetra / Vindhya",
       subtitle: "Scheduled 4-Meal Menu",
+      href: "/app/canteen",
     },
     {
       icon: CheckSquare,
       title: "Attendance Status",
       value: attendanceData.value,
       subtitle: attendanceData.msg,
+      href: "/app/attendance",
     },
     {
       icon: Calendar,
       title: "Orientation & Events",
       value: "Freshers Week 2026",
       subtitle: "7-Day Schedule Live",
+      href: "/app/clubs",
     },
   ];
 

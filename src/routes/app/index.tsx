@@ -28,6 +28,7 @@ import { firebaseAuth } from "@/lib/firebase";
 import { supabase } from "@/lib/supabase";
 import { parsePecEmail } from "@/lib/pec-email";
 import { getSectionFromRollNo, getTimetableForSection, getTodaySchedule, getNextClass } from "@/lib/pec-timetable";
+import { EVENTS } from "@/routes/app/clubs";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
@@ -300,12 +301,16 @@ function Dashboard() {
     }
     loadMarketplaceCount();
 
-    // 3. Events this week (0 if none scheduled for current week)
+    // 3. Events this week (dynamic from clubs & orientation events)
     try {
       const storedEvents = localStorage.getItem("campus_events_week");
-      setEventsThisWeek(storedEvents ? parseInt(storedEvents, 10) : 0);
+      if (storedEvents) {
+        setEventsThisWeek(parseInt(storedEvents, 10));
+      } else {
+        setEventsThisWeek(EVENTS.length);
+      }
     } catch {
-      setEventsThisWeek(0);
+      setEventsThisWeek(EVENTS.length);
     }
 
     // 4. Study hours / booked study rooms today
@@ -353,13 +358,14 @@ function Dashboard() {
       {/* Stats row */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: "Unread Messages", value: String(unreadMessages), icon: MessageSquare, color: "text-primary" },
-          { label: "Active Listings", value: String(activeListings), icon: ShoppingBag, color: "text-primary" },
-          { label: "Events This Week", value: String(eventsThisWeek), icon: Calendar, color: "text-primary" },
+          { label: "Unread Messages", value: String(unreadMessages), icon: MessageSquare, color: "text-primary", href: "/app/chat" },
+          { label: "Active Listings", value: String(activeListings), icon: ShoppingBag, color: "text-primary", href: "/app/marketplace" },
+          { label: "Events This Week", value: String(eventsThisWeek), icon: Calendar, color: "text-primary", href: "/app/clubs" },
         ].map((stat, i) => (
-          <div
+          <Link
             key={stat.label}
-            className="rounded-2xl border border-border glass p-4 animate-fade-up card-hover"
+            to={stat.href as any}
+            className="rounded-2xl border border-border glass p-4 animate-fade-up card-hover block no-underline transition-all hover:border-primary/40"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <stat.icon className={`h-5 w-5 ${stat.color} icon-hover`} />
@@ -370,7 +376,7 @@ function Dashboard() {
               {stat.value}
             </div>
             <div className="mt-0.5 text-xs text-muted-foreground">{stat.label}</div>
-          </div>
+          </Link>
         ))}
       </section>
 

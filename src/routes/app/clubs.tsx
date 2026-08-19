@@ -333,7 +333,7 @@ const CLUBS: Club[] = [
   },
 ];
 
-const EVENTS: Event[] = [
+export const EVENTS: Event[] = [
   {
     id: 1,
     title: "Freshers Orientation 2026 — Day 1: Welcome & Director's Address",

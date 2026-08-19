@@ -856,6 +856,25 @@ function Message({
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const emojis = ["🔥", "😭", "👍", "👀", "🙏", "❤️"];
 
+  // Compute effective display reactions combining server/optimistic reactions with the user's active reaction
+  const displayReactions = (() => {
+    const map = new Map<string, number>();
+    (m.reactions || []).forEach((r) => {
+      if (r.count > 0) map.set(r.emoji, r.count);
+    });
+
+    if (userReaction) {
+      if (!map.has(userReaction)) {
+        map.set(userReaction, 1);
+      }
+    }
+
+    return Array.from(map.entries()).map(([emoji, count]) => ({
+      emoji,
+      count,
+    }));
+  })();
+
   return (
     <div
       className={`group flex gap-3 rounded-lg px-2 py-1 transition hover:bg-surface/50 relative ${grouped ? "" : "mt-3"}`}
@@ -881,23 +900,27 @@ function Message({
           </div>
         )}
         <div className="text-sm text-foreground/95">{m.text}</div>
-        {m.reactions && m.reactions.length > 0 && (
+        {displayReactions.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
-            {m.reactions.map((r) => {
+            {displayReactions.map((r) => {
               const isUserActive = userReaction === r.emoji;
               return (
                 <button
                   key={r.emoji}
                   onClick={() => onAddReaction(m.id, r.emoji)}
                   title={isUserActive ? "Click to remove reaction" : "Click to react"}
-                  className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition ${
+                  className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs transition ${
                     isUserActive
-                      ? "border-primary/60 bg-primary/20 text-primary font-bold shadow-[0_0_12px_rgba(var(--primary-rgb,59,130,246),0.25)]"
+                      ? "border-primary/60 bg-primary/20 text-primary font-bold shadow-[0_0_12px_rgba(var(--primary-rgb,59,130,246),0.25)] ring-1 ring-primary/40"
                       : "border-border bg-surface/70 hover:border-primary/50 hover:bg-primary/10 text-foreground/90"
                   }`}
                 >
                   <span>{r.emoji}</span>
-                  <span className={`font-mono text-[10px] ${isUserActive ? "text-primary font-bold" : "text-muted-foreground"}`}>
+                  <span
+                    className={`font-mono text-[10px] ${
+                      isUserActive ? "text-primary font-bold" : "text-muted-foreground"
+                    }`}
+                  >
                     {r.count}
                   </span>
                 </button>

@@ -84,7 +84,8 @@ const HOSTELS_LIST: HostelInfo[] = [
     name: "Vindhya Hostel",
     type: "girls",
     location: "West Campus",
-    hasMenu: false,
+    hasMenu: true,
+    specialNotice: "Sweets every day: Gulab Jamun, Rasmalai, Ice Creams, Dairy Milk & Chocopie",
   },
 ];
 
@@ -325,6 +326,256 @@ const KURUKSHETRA_WEEKLY_MENU: Record<string, DayMenu> = {
   },
 };
 
+// ─── VINDHYA HOSTEL 7-DAY MENU (OFFICIAL) ───
+
+const VINDHYA_WEEKLY_MENU: Record<string, DayMenu> = {
+  Monday: {
+    dayName: "Monday",
+    breakfast: {
+      name: "Breakfast",
+      time: "7:30 AM – 9:30 AM",
+      items: ["Aloo Parantha", "Butter & Pickle", "Hot Tea & Milk"],
+      specialItem: "Aloo Parantha",
+      diet: "veg",
+      tags: ["Breakfast"],
+    },
+    lunch: {
+      name: "Lunch",
+      time: "12:30 PM – 2:30 PM",
+      items: ["Rajma Masala", "Steamed Rice", "Plain Dahi", "Tawa Roti", "Salad"],
+      specialItem: "Rajma Chawal & Plain Dahi",
+      diet: "veg",
+      tags: ["Popular"],
+    },
+    snacks: {
+      name: "Evening Snacks",
+      time: "5:00 PM – 6:30 PM",
+      items: ["Crispy Samosa", "Hot Tea"],
+      specialItem: "Samosa & Tea",
+      diet: "veg",
+      tags: ["Evening Snacks"],
+    },
+    dinner: {
+      name: "Dinner",
+      time: "7:30 PM – 9:45 PM",
+      items: ["Chilli Paneer / Malai Kofta", "Dal", "Steamed Rice", "Fresh Roti", "Gulab Jamun (Sweet)"],
+      specialItem: "Chilli Paneer / Malai Kofta & Gulab Jamun",
+      diet: "veg",
+      tags: ["Sweet Included"],
+    },
+  },
+  Tuesday: {
+    dayName: "Tuesday",
+    breakfast: {
+      name: "Breakfast",
+      time: "7:30 AM – 9:30 AM",
+      items: ["Palak Methi Parantha", "Butter & Pickle", "Hot Tea & Milk"],
+      specialItem: "Palak Methi Parantha",
+      diet: "veg",
+      tags: ["Breakfast"],
+    },
+    lunch: {
+      name: "Lunch",
+      time: "12:30 PM – 2:30 PM",
+      items: ["White Chana (Chole)", "Steamed Rice", "Tamatar-Pyaz Raita", "Tawa Roti", "Salad"],
+      specialItem: "White Chana & Tamatar-Pyaz Raita",
+      diet: "veg",
+      tags: ["Lunch"],
+    },
+    snacks: {
+      name: "Evening Snacks",
+      time: "5:00 PM – 6:30 PM",
+      items: ["Veg Noodles", "Chilled Ice Tea"],
+      specialItem: "Noodles & Ice Tea",
+      diet: "veg",
+      tags: ["Evening Snacks"],
+    },
+    dinner: {
+      name: "Dinner",
+      time: "7:30 PM – 9:45 PM",
+      items: ["Mix Veg", "Arhar Dal Tadka", "Steamed Rice", "Fresh Roti", "Cone Ice Cream (Sweet)"],
+      specialItem: "Mix Veg, Arhar Dal & Cone Ice Cream",
+      diet: "veg",
+      tags: ["Sweet Included"],
+    },
+  },
+  Wednesday: {
+    dayName: "Wednesday",
+    breakfast: {
+      name: "Breakfast",
+      time: "7:30 AM – 9:30 AM",
+      items: ["Daal Parantha / Aloo Sandwich", "Butter & Sauce", "Hot Tea & Milk"],
+      specialItem: "Daal Parantha / Aloo Sandwich",
+      diet: "veg",
+      tags: ["Breakfast"],
+    },
+    lunch: {
+      name: "Lunch",
+      time: "12:30 PM – 2:30 PM",
+      items: ["Matar Paneer Gravy", "Tawa Roti", "Steamed Rice", "Fresh Raita", "Salad"],
+      specialItem: "Matar Paneer & Raita",
+      diet: "veg",
+      tags: ["Lunch"],
+    },
+    snacks: {
+      name: "Evening Snacks",
+      time: "5:00 PM – 6:30 PM",
+      items: ["Bread Pakoda / Chana Chaat", "Refreshing Jaljeera"],
+      specialItem: "Bread Pakoda / Chana Chaat & Jaljeera",
+      diet: "veg",
+      tags: ["Evening Snacks"],
+    },
+    dinner: {
+      name: "Dinner",
+      time: "7:30 PM – 9:45 PM",
+      items: ["Veg Pulao", "Tawa Roti", "Dal Makhni", "Plain Dahi", "Dairy Milk / Bar One Chocolate (Sweet)"],
+      specialItem: "Pulao, Dal Makhni & Chocolate",
+      diet: "veg",
+      tags: ["Sweet Included"],
+    },
+  },
+  Thursday: {
+    dayName: "Thursday",
+    breakfast: {
+      name: "Breakfast",
+      time: "7:30 AM – 9:30 AM",
+      items: ["Paneer Parantha", "Butter & Pickle", "Hot Tea & Milk"],
+      specialItem: "Stuffed Paneer Parantha",
+      diet: "veg",
+      tags: ["Breakfast"],
+    },
+    lunch: {
+      name: "Lunch",
+      time: "12:30 PM – 2:30 PM",
+      items: ["Punjabi Kadhi", "Steamed Rice", "Aloo Sabzi", "Tawa Roti", "Salad"],
+      specialItem: "Kadhi Chawal & Aloo Sabzi",
+      diet: "veg",
+      tags: ["Comfort Food"],
+    },
+    snacks: {
+      name: "Evening Snacks",
+      time: "5:00 PM – 6:30 PM",
+      items: ["Crispy Spring Roll", "Chilled Ice Tea"],
+      specialItem: "Spring Roll & Ice Tea",
+      diet: "veg",
+      tags: ["Evening Snacks"],
+    },
+    dinner: {
+      name: "Dinner",
+      time: "7:30 PM – 9:45 PM",
+      items: ["Bhindi Masala", "Chana Daal", "Steamed Rice", "Fresh Roti", "Royal Rasmalai (Sweet)"],
+      specialItem: "Bhindi, Chana Daal & Rasmalai",
+      diet: "veg",
+      tags: ["Sweet Included"],
+    },
+  },
+  Friday: {
+    dayName: "Friday",
+    breakfast: {
+      name: "Breakfast",
+      time: "7:30 AM – 9:30 AM",
+      items: ["Aloo Pyaz Parantha", "Butter & Pickle", "Hot Tea & Milk"],
+      specialItem: "Aloo Pyaz Parantha",
+      diet: "veg",
+      tags: ["Breakfast"],
+    },
+    lunch: {
+      name: "Lunch",
+      time: "12:30 PM – 2:30 PM",
+      items: ["Black Chana (Kala Chana)", "Steamed Rice", "Hot Poori", "Plain Dahi", "Salad"],
+      specialItem: "Black Chana with Poori & Dahi",
+      diet: "veg",
+      tags: ["Lunch"],
+    },
+    snacks: {
+      name: "Evening Snacks",
+      time: "5:00 PM – 6:30 PM",
+      items: ["Spicy Corn Chaat", "Fresh Nimbu Paani"],
+      specialItem: "Corn Chaat & Nimbu Paani",
+      diet: "veg",
+      tags: ["Evening Snacks"],
+    },
+    dinner: {
+      name: "Dinner",
+      time: "7:30 PM – 9:45 PM",
+      items: ["Paneer Bhurji", "Moong Dal", "Steamed Rice", "Tawa Roti", "Brick Ice Cream (Vanilla / Chocolate)"],
+      specialItem: "Paneer Bhurji & Brick Ice Cream",
+      diet: "veg",
+      tags: ["Sweet Included"],
+    },
+  },
+  Saturday: {
+    dayName: "Saturday",
+    breakfast: {
+      name: "Breakfast",
+      time: "7:30 AM – 9:30 AM",
+      items: ["Gobhi Parantha", "Butter & Pickle", "Hot Tea & Milk"],
+      specialItem: "Gobhi Parantha",
+      diet: "veg",
+      tags: ["Breakfast"],
+    },
+    lunch: {
+      name: "Lunch",
+      time: "12:30 PM – 2:30 PM",
+      items: ["Dal Makhni", "Steamed Rice", "Fresh Sweet Lassi", "Tawa Roti", "Salad"],
+      specialItem: "Dal Makhni & Sweet Lassi",
+      diet: "veg",
+      tags: ["Lunch"],
+    },
+    snacks: {
+      name: "Evening Snacks",
+      time: "5:00 PM – 6:30 PM",
+      items: ["Snacks Off (Mess Break)"],
+      specialItem: "Snacks Off",
+      diet: "veg",
+      tags: ["Mess Off"],
+    },
+    dinner: {
+      name: "Dinner",
+      time: "7:30 PM – 9:45 PM",
+      items: ["Veg Manchurian Gravy", "Veg Fried Rice", "Fresh Roti", "Chocopie (Sweet)"],
+      specialItem: "Manchurian, Fried Rice & Chocopie",
+      diet: "veg",
+      tags: ["Weekend Special", "Sweet Included"],
+    },
+  },
+  Sunday: {
+    dayName: "Sunday",
+    breakfast: {
+      name: "Breakfast",
+      time: "7:30 AM – 10:00 AM",
+      items: ["Indori Poha with Peanuts & Sev", "Hot Tea & Milk"],
+      specialItem: "Special Poha",
+      diet: "veg",
+      tags: ["Sunday Breakfast"],
+    },
+    lunch: {
+      name: "Lunch",
+      time: "12:30 PM – 2:30 PM",
+      items: ["Chhole Bhature / Pav Bhaji", "Plain Dahi", "Pickle & Onion Salad"],
+      specialItem: "Chhole Bhature / Pav Bhaji Feast",
+      diet: "veg",
+      tags: ["Sunday Feast"],
+    },
+    snacks: {
+      name: "Evening Snacks",
+      time: "5:00 PM – 6:30 PM",
+      items: ["Snacks Off (Mess Break)"],
+      specialItem: "Snacks Off",
+      diet: "veg",
+      tags: ["Mess Off"],
+    },
+    dinner: {
+      name: "Dinner",
+      time: "7:30 PM – 9:45 PM",
+      items: ["Petha Sabzi", "Dal Tadka", "Steamed Rice", "Tawa Roti", "Mango Ice Cream (Amul)"],
+      specialItem: "Petha, Dal & Amul Mango Ice Cream",
+      diet: "veg",
+      tags: ["Sweet Included"],
+    },
+  },
+};
+
 const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 // ─── MAIN COMPONENT ───
@@ -343,8 +594,11 @@ export default function MessAndCanteenPage() {
   }, [selectedHostelId]);
 
   const currentDayMenu = useMemo(() => {
+    if (selectedHostelId === "vindhya") {
+      return VINDHYA_WEEKLY_MENU[selectedDay] || VINDHYA_WEEKLY_MENU["Monday"];
+    }
     return KURUKSHETRA_WEEKLY_MENU[selectedDay] || KURUKSHETRA_WEEKLY_MENU["Monday"];
-  }, [selectedDay]);
+  }, [selectedHostelId, selectedDay]);
 
   // Live status for meal slots
   const getMealStatus = (timeRange: string) => {

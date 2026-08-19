@@ -27,7 +27,26 @@ import { supabase } from "@/lib/supabase";
 import { firebaseAuth } from "@/lib/firebase";
 import { toast } from "sonner";
 
+type ChatSearch = {
+  dm?: string;
+  channel?: string;
+  sellerName?: string;
+  sellerId?: string;
+  listingTitle?: string;
+  listingPrice?: string;
+  draft?: string;
+};
+
 export const Route = createFileRoute("/app/chat")({
+  validateSearch: (search: Record<string, unknown>): ChatSearch => ({
+    dm: search.dm as string | undefined,
+    channel: search.channel as string | undefined,
+    sellerName: search.sellerName as string | undefined,
+    sellerId: search.sellerId as string | undefined,
+    listingTitle: search.listingTitle as string | undefined,
+    listingPrice: search.listingPrice as string | undefined,
+    draft: search.draft as string | undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Campus Chat — Campus Connect" },
@@ -103,8 +122,9 @@ const CHANNELS = {
 };
 
 function ChatApp() {
+  const search = Route.useSearch();
   const [activeServer, setActiveServer] = useState("cs");
-  const [activeChannel, setActiveChannel] = useState("general");
+  const [activeChannel, setActiveChannel] = useState(search.channel || "general");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [draft, setDraft] = useState("");
@@ -118,6 +138,23 @@ function ChatApp() {
     email: string;
     displayName: string | null;
   } | null>(null);
+
+  // Initialize active channel and draft from search params (e.g. from Marketplace Contact Seller)
+  useEffect(() => {
+    if (search.channel) {
+      setActiveChannel(search.channel);
+    }
+    if (search.draft) {
+      setDraft(search.draft);
+    } else if (search.listingTitle) {
+      const sellerFirstName = search.sellerName ? search.sellerName.split(" ")[0] : "there";
+      setDraft(
+        `Hi ${sellerFirstName}! I'm interested in your listing: "${search.listingTitle}"${
+          search.listingPrice ? ` (₹${search.listingPrice})` : ""
+        }. Is it still available?`
+      );
+    }
+  }, [search.channel, search.draft, search.listingTitle, search.listingPrice, search.sellerName]);
 
   // Local storage backed user reaction mapping: messageId -> emoji
   const [myReactions, setMyReactions] = useState<Record<string, string>>(() => {
@@ -519,6 +556,18 @@ function ChatApp() {
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto px-2 py-4">
+          {search.sellerName && (
+            <ChannelGroup label="Direct Inquiries">
+              <ChannelBtn
+                icon={<ShoppingBag className="h-4 w-4 text-primary" />}
+                label={`${search.sellerName.split(" ")[0]} (Seller)`}
+                pill="marketplace"
+                active={activeChannel === (search.channel || "marketplace")}
+                onClick={() => handleChannelChange(search.channel || "marketplace")}
+              />
+            </ChannelGroup>
+          )}
+
           <ChannelGroup label="Text Channels">
             {CHANNELS.text.map((c) => (
               <ChannelBtn
@@ -542,7 +591,13 @@ function ChatApp() {
             ))}
           </ChannelGroup>
           <ChannelGroup label="Campus">
-            <ChannelBtn icon={<ShoppingBag className="h-4 w-4" />} label="marketplace" pill="new" />
+            <ChannelBtn
+              icon={<ShoppingBag className="h-4 w-4" />}
+              label="marketplace"
+              pill="new"
+              active={activeChannel === "marketplace"}
+              onClick={() => handleChannelChange("marketplace")}
+            />
             <ChannelBtn icon={<BookOpen className="h-4 w-4" />} label="notes-share" />
             <ChannelBtn icon={<Sparkles className="h-4 w-4" />} label="events" />
           </ChannelGroup>
@@ -608,6 +663,32 @@ function ChatApp() {
             </div>
           </div>
         </header>
+
+        {/* Marketplace Listing Context Banner */}
+        {search.listingTitle && (
+          <div className="mx-4 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-primary/40 bg-primary/10 px-4 py-2.5 text-xs animate-fade-in shadow-sm">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="grid h-7 w-7 place-items-center rounded-lg bg-primary/20 text-sm">
+                📦
+              </div>
+              <div className="min-w-0 truncate">
+                <span className="font-semibold text-foreground">Marketplace Inquiry: </span>
+                <span className="text-primary font-bold">{search.listingTitle}</span>
+                {search.listingPrice && (
+                  <span className="ml-1.5 font-mono font-bold text-foreground">· ₹{search.listingPrice}</span>
+                )}
+                {search.sellerName && (
+                  <span className="ml-1.5 text-muted-foreground text-[11px] font-medium">
+                    (Seller: {search.sellerName})
+                  </span>
+                )}
+              </div>
+            </div>
+            <span className="rounded-full bg-primary/25 px-2.5 py-0.5 font-mono text-[10px] text-primary uppercase font-bold tracking-wider">
+              Active Inquiry
+            </span>
+          </div>
+        )}
 
         <div ref={scrollRef} className="flex-1 space-y-1 overflow-y-auto px-4 py-4 md:px-6">
           <div className="mx-auto mb-6 max-w-2xl rounded-2xl glass p-5 text-center">

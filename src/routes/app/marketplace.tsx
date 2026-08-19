@@ -15,10 +15,15 @@ import {
   CheckCircle2,
   Loader2,
   MessageSquare,
+  Copy,
+  Mail,
+  Send,
+  Check,
 } from "lucide-react";
 import { firebaseAuth } from "@/lib/firebase";
 import { supabase } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 const formatListingTime = (dateStr: string) => {
   if (!dateStr) return "recently";
@@ -153,6 +158,9 @@ function Marketplace() {
   const [showPost, setShowPost] = useState(false);
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
+  const [contactingListing, setContactingListing] = useState<Listing | null>(null);
+  const [contactMessage, setContactMessage] = useState<string>("");
+  const [copiedEmail, setCopiedEmail] = useState(false);
   const [currentUser, setCurrentUser] = useState<{
     uid: string;
     email: string | null;
@@ -519,7 +527,14 @@ function Marketplace() {
 
                   {!isOwner && (
                     <button
-                      onClick={() => navigate({ to: "/app/chat" })}
+                      onClick={() => {
+                        setContactingListing(listing);
+                        const sellerFirstName = listing.seller_name.split(" ")[0] || "there";
+                        setContactMessage(
+                          `Hi ${sellerFirstName}! I'm interested in your listing "${listing.title}" (₹${listing.price}). Is it still available?`
+                        );
+                        setCopiedEmail(false);
+                      }}
                       className="mt-3 w-full rounded-lg bg-primary/15 py-2 text-xs font-semibold text-primary transition-all duration-150 hover:bg-primary hover:text-primary-foreground btn-press inline-flex items-center justify-center gap-1.5"
                     >
                       <MessageSquare className="h-3 w-3" /> Contact Seller
@@ -529,6 +544,180 @@ function Marketplace() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Contact Seller Modal */}
+      {contactingListing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-lg rounded-3xl glass-strong neon-border p-6 animate-fade-up max-h-[90vh] overflow-y-auto space-y-5">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2">
+                <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 text-primary">
+                  <MessageSquare className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold">Contact Seller</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Connect directly regarding this listing
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setContactingListing(null)}
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-surface hover:text-foreground transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Listing Summary Preview */}
+            <div className="flex items-center gap-3.5 rounded-2xl border border-border/80 bg-surface/70 p-3.5">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-surface-elevated text-2xl shadow-inner border border-border/50">
+                {contactingListing.emoji}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="truncate text-sm font-semibold">{contactingListing.title}</h4>
+                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="font-bold text-primary font-mono">₹{contactingListing.price}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-[11px] text-muted-foreground">{contactingListing.condition}</span>
+                  {contactingListing.location && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="flex items-center gap-1 text-[11px] text-muted-foreground truncate">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        {contactingListing.location}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Seller Profile Card */}
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br ${contactingListing.seller_color} text-xs font-bold text-white shadow-sm`}
+                  >
+                    {contactingListing.seller_initials}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {contactingListing.seller_name}
+                      </p>
+                      <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-500 shrink-0">
+                        Verified Student
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground font-mono truncate">
+                      {contactingListing.seller_email || "Campus Student"}
+                    </p>
+                  </div>
+                </div>
+
+                {contactingListing.seller_email && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(contactingListing.seller_email);
+                      setCopiedEmail(true);
+                      toast.success(`Copied ${contactingListing.seller_email} to clipboard!`);
+                      setTimeout(() => setCopiedEmail(false), 2500);
+                    }}
+                    className="flex items-center gap-1 shrink-0 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground transition shadow-sm"
+                    title="Copy Email"
+                  >
+                    {copiedEmail ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 text-emerald-500" />
+                        <span className="text-emerald-500 font-medium text-[11px]">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5" />
+                        <span className="text-[11px]">Copy</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Message Area & Quick Templates */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Inquiry Message
+              </label>
+
+              {/* Quick Suggestion Chips */}
+              <div className="flex flex-wrap gap-1.5 pb-1">
+                {[
+                  "Hi! Is this still available?",
+                  `Can you do ₹${Math.round(contactingListing.price * 0.9)} for this?`,
+                  "Where on campus can we meet to pick this up?",
+                  "Can I check the item in person first?",
+                ].map((template) => (
+                  <button
+                    key={template}
+                    type="button"
+                    onClick={() => setContactMessage(template)}
+                    className="rounded-lg border border-border bg-surface/60 px-2.5 py-1 text-[11px] text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-foreground transition text-left"
+                  >
+                    💬 {template}
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                value={contactMessage}
+                onChange={(e) => setContactMessage(e.target.value)}
+                rows={3}
+                placeholder="Type your message to the seller..."
+                className="w-full rounded-2xl border border-border bg-input/60 p-3 text-sm outline-none focus:border-primary resize-none"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+              <button
+                onClick={() => {
+                  navigate({
+                    to: "/app/chat",
+                    search: {
+                      channel: "marketplace",
+                      sellerName: contactingListing.seller_name,
+                      sellerId: contactingListing.seller_auth_id,
+                      listingTitle: contactingListing.title,
+                      listingPrice: String(contactingListing.price),
+                      draft: contactMessage,
+                    },
+                  });
+                  toast.success(`Opening chat with ${contactingListing.seller_name}...`);
+                  setContactingListing(null);
+                }}
+                className="w-full rounded-xl bg-primary py-2.5 px-4 text-xs font-semibold text-primary-foreground transition hover:opacity-90 glow-primary inline-flex items-center justify-center gap-2"
+              >
+                <MessageSquare className="h-4 w-4" />
+                <span>Chat in Campus App</span>
+              </button>
+
+              {contactingListing.seller_email && (
+                <a
+                  href={`mailto:${contactingListing.seller_email}?subject=${encodeURIComponent(
+                    `[Campus Connect Marketplace] Inquiry for "${contactingListing.title}"`
+                  )}&body=${encodeURIComponent(contactMessage)}`}
+                  onClick={() => setContactingListing(null)}
+                  className="w-full rounded-xl border border-border bg-surface py-2.5 px-4 text-xs font-semibold text-foreground transition hover:border-primary/50 hover:bg-surface-elevated inline-flex items-center justify-center gap-2 text-center"
+                >
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span>Send Email</span>
+                </a>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -601,15 +790,18 @@ function Marketplace() {
                       className="mb-1.5 block text-xs font-medium text-muted-foreground"
                       htmlFor="post-category"
                     >
-                      Category *
+                      Category
                     </label>
                     <select
                       id="post-category"
                       name="category"
+                      defaultValue="Books"
                       className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
                     >
                       {CATEGORIES.filter((c) => c !== "All").map((c) => (
-                        <option key={c}>{c}</option>
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -619,15 +811,18 @@ function Marketplace() {
                     className="mb-1.5 block text-xs font-medium text-muted-foreground"
                     htmlFor="post-condition"
                   >
-                    Condition *
+                    Condition
                   </label>
                   <select
                     id="post-condition"
                     name="condition"
+                    defaultValue="Good"
                     className="w-full rounded-xl border border-border bg-input/60 py-2.5 px-3 text-sm outline-none focus:border-primary"
                   >
                     {CONDITIONS.map((c) => (
-                      <option key={c}>{c}</option>
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
                     ))}
                   </select>
                 </div>

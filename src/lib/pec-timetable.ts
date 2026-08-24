@@ -150,7 +150,7 @@ const DS1_TIMETABLE: WeeklyTimetable = {
         },
         {
           start: "15:00", end: "16:00",
-          slot: { subject: "Probability & Data Science", code: "DSN3002", room: "L405", faculty: "Kanu Goel", type: "lecture" },
+          slot: { subject: "Python for Data Science", code: "DSN3002", room: "L405", faculty: "Kanu Goel", type: "lecture" },
         },
         {
           start: "16:00", end: "17:00",
@@ -174,7 +174,7 @@ const DS1_TIMETABLE: WeeklyTimetable = {
         { start: "13:00", end: "14:00", slot: lunch() },
         {
           start: "14:00", end: "15:00",
-          slot: { subject: "Probability & Data Science", code: "DSN3002", room: "L21", faculty: "Kanu Goel", type: "lecture" },
+          slot: { subject: "Python for Data Science", code: "DSN3002", room: "L21", faculty: "Kanu Goel", type: "lecture" },
         },
         {
           start: "15:00", end: "16:00",
@@ -222,7 +222,7 @@ const DS1_TIMETABLE: WeeklyTimetable = {
         },
         {
           start: "12:00", end: "13:00",
-          slot: { subject: "Probability & Data Science", code: "DSN3002", room: "L22", faculty: "Kanu Goel", type: "lecture" },
+          slot: { subject: "Python for Data Science", code: "DSN3002", room: "L22", faculty: "Kanu Goel", type: "lecture" },
         },
         { start: "13:00", end: "14:00", slot: lunch() },
         {
@@ -301,7 +301,7 @@ const DS2_TIMETABLE: WeeklyTimetable = {
         },
         {
           start: "15:00", end: "16:00",
-          slot: { subject: "Probability & Data Science", code: "DSN3002", room: "L405", faculty: "Kanu Goel", type: "lecture" },
+          slot: { subject: "Python for Data Science", code: "DSN3002", room: "L405", faculty: "Kanu Goel", type: "lecture" },
         },
         {
           start: "16:00", end: "17:00",
@@ -325,7 +325,7 @@ const DS2_TIMETABLE: WeeklyTimetable = {
         { start: "13:00", end: "14:00", slot: lunch() },
         {
           start: "14:00", end: "15:00",
-          slot: { subject: "Probability & Data Science", code: "DSN3002", room: "L21", faculty: "Kanu Goel", type: "lecture" },
+          slot: { subject: "Python for Data Science", code: "DSN3002", room: "L21", faculty: "Kanu Goel", type: "lecture" },
         },
         {
           start: "15:00", end: "16:00",
@@ -373,7 +373,7 @@ const DS2_TIMETABLE: WeeklyTimetable = {
         },
         {
           start: "12:00", end: "13:00",
-          slot: { subject: "Probability & Data Science", code: "DSN3002", room: "L22", faculty: "Kanu Goel", type: "lecture" },
+          slot: { subject: "Python for Data Science", code: "DSN3002", room: "L22", faculty: "Kanu Goel", type: "lecture" },
         },
         { start: "13:00", end: "14:00", slot: lunch() },
         {
@@ -452,7 +452,7 @@ const DS3_TIMETABLE: WeeklyTimetable = {
         },
         {
           start: "15:00", end: "16:00",
-          slot: { subject: "Probability & Data Science", code: "DSN3002", room: "L405", faculty: "Kanu Goel", type: "lecture" },
+          slot: { subject: "Python for Data Science", code: "DSN3002", room: "L405", faculty: "Kanu Goel", type: "lecture" },
         },
         {
           start: "16:00", end: "17:00",
@@ -476,7 +476,7 @@ const DS3_TIMETABLE: WeeklyTimetable = {
         { start: "13:00", end: "14:00", slot: lunch() },
         {
           start: "14:00", end: "15:00",
-          slot: { subject: "Probability & Data Science", code: "DSN3002", room: "L21", faculty: "Kanu Goel", type: "lecture" },
+          slot: { subject: "Python for Data Science", code: "DSN3002", room: "L21", faculty: "Kanu Goel", type: "lecture" },
         },
         {
           start: "15:00", end: "16:00",
@@ -524,7 +524,7 @@ const DS3_TIMETABLE: WeeklyTimetable = {
         },
         {
           start: "12:00", end: "13:00",
-          slot: { subject: "Probability & Data Science", code: "DSN3002", room: "L22", faculty: "Kanu Goel", type: "lecture" },
+          slot: { subject: "Python for Data Science", code: "DSN3002", room: "L22", faculty: "Kanu Goel", type: "lecture" },
         },
         { start: "13:00", end: "14:00", slot: lunch() },
         {

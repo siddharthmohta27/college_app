@@ -3,16 +3,17 @@ const router = express.Router();
 const { pool } = require("../config/db");
 const { requireAuth } = require("../middleware/auth");
 const { getOrCreateDatingProfile } = require("../config/db");
+const { writeLimiter, readLimiter } = require("../middleware/rateLimit");
 
 // ─── GET /api/dating/profiles ─────────────────────────────────────────────
-// Fetch profiles NOT yet swiped by the current user
-router.get("/profiles", requireAuth, async (req, res) => {
+// Fetch profiles NOT yet swiped by the current user (only safe public fields)
+router.get("/profiles", requireAuth, readLimiter, async (req, res) => {
   const firebaseUid = req.user.id;
 
   try {
     // Ensure current user has a dating profile
     await getOrCreateDatingProfile(firebaseUid, {
-      name: req.user.email?.split("@")[0] || "Student",
+      name: req.user.name || req.user.email?.split("@")[0] || "Student",
     });
 
     // Get current user's dating profile ID (numeric)
@@ -29,6 +30,7 @@ router.get("/profiles", requireAuth, async (req, res) => {
       `SELECT id, name, age, year, major, bio, interests, emoji, verified
        FROM dating_profiles
        WHERE id != $1
+         AND is_incognito = false
          AND id NOT IN (
            SELECT swiped_id FROM swipes WHERE swiper_id = $1
          )
@@ -44,12 +46,13 @@ router.get("/profiles", requireAuth, async (req, res) => {
 
 // ─── POST /api/dating/swipe ────────────────────────────────────────────────
 // Record a swipe and check for mutual match
-router.post("/swipe", requireAuth, async (req, res) => {
+router.post("/swipe", requireAuth, writeLimiter, async (req, res) => {
   const { swipedId, action } = req.body;
   const firebaseUid = req.user.id;
 
-  if (!swipedId || !["like", "pass"].includes(action)) {
-    return res.status(400).json({ error: "swipedId and action ('like'|'pass') are required" });
+  const targetId = parseInt(swipedId, 10);
+  if (isNaN(targetId) || !["like", "pass"].includes(action)) {
+    return res.status(400).json({ error: "Valid numeric swipedId and action ('like'|'pass') are required" });
   }
 
   try {
@@ -63,12 +66,16 @@ router.post("/swipe", requireAuth, async (req, res) => {
     }
     const swiperId = currentProfile.id;
 
+    if (swiperId === targetId) {
+      return res.status(400).json({ error: "Cannot swipe on your own profile" });
+    }
+
     // Record the swipe (ignore if already exists)
     await pool.query(
       `INSERT INTO swipes (swiper_id, swiped_id, action)
        VALUES ($1, $2, $3)
-       ON CONFLICT (swiper_id, swiped_id) DO NOTHING`,
-      [swiperId, swipedId, action],
+       ON CONFLICT (swiper_id, swiped_id) DO UPDATE SET action = EXCLUDED.action`,
+      [swiperId, targetId, action],
     );
 
     let isMatch = false;
@@ -78,12 +85,12 @@ router.post("/swipe", requireAuth, async (req, res) => {
       const mutual = await pool.query(
         `SELECT id FROM swipes
          WHERE swiper_id = $1 AND swiped_id = $2 AND action = 'like'`,
-        [swipedId, swiperId],
+        [targetId, swiperId],
       );
 
       if (mutual.rows.length > 0) {
-        // It's a mutual match — insert into matches table (smaller id first to avoid duplicates)
-        const [u1, u2] = [Math.min(swiperId, swipedId), Math.max(swiperId, swipedId)];
+        // Mutual match — insert into matches table (smaller id first to avoid duplicates)
+        const [u1, u2] = [Math.min(swiperId, targetId), Math.max(swiperId, targetId)];
         await pool.query(
           `INSERT INTO matches (user1_id, user2_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
           [u1, u2],
@@ -100,8 +107,8 @@ router.post("/swipe", requireAuth, async (req, res) => {
 });
 
 // ─── GET /api/dating/matches ───────────────────────────────────────────────
-// Fetch all mutual matches for the current authenticated user
-router.get("/matches", requireAuth, async (req, res) => {
+// Fetch all mutual matches for the current authenticated user (public fields only)
+router.get("/matches", requireAuth, readLimiter, async (req, res) => {
   const firebaseUid = req.user.id;
 
   try {
@@ -138,7 +145,7 @@ router.get("/me", requireAuth, async (req, res) => {
 
   try {
     const profile = await getOrCreateDatingProfile(firebaseUid, {
-      name: req.user.email?.split("@")[0] || "Student",
+      name: req.user.name || req.user.email?.split("@")[0] || "Student",
     });
     res.json({ profile });
   } catch (err) {

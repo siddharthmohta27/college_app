@@ -126,7 +126,15 @@ router.put("/profile/me", requireAuth, writeLimiter, async (req, res) => {
     if (!profile) {
       return res.status(404).json({ error: "Profile not found" });
     }
-    const updated = await updateDatingProfile(profile.id, req.body);
+    // Prevent client from mutating system/identity fields
+    const safeUpdates = { ...req.body };
+    delete safeUpdates.id;
+    delete safeUpdates.auth_user_id;
+    delete safeUpdates.is_admin;
+    delete safeUpdates.is_verified;
+    delete safeUpdates.verified;
+
+    const updated = await updateDatingProfile(profile.id, safeUpdates);
     res.json({ profile: updated });
   } catch (err) {
     console.error("Error updating profile:", err.message);
@@ -1070,7 +1078,15 @@ router.get("/discover", requireAuth, async (req, res) => {
 
     const profiles = await pool.query(
       `
-      SELECT dp.*, pp.url as main_photo_url
+      SELECT 
+        dp.id, dp.name, dp.first_name, dp.last_name, dp.age, dp.year, dp.major, dp.branch,
+        dp.bio, dp.interests, dp.emoji, dp.verified, dp.is_verified, dp.photo_verified,
+        dp.profile_photo_url, dp.gender, dp.pronouns, dp.relationship_preference, dp.hostel,
+        dp.languages, dp.clubs, dp.societies, dp.skills, dp.favorite_cafe, dp.favorite_sport,
+        dp.instagram_url, dp.linkedin_url, dp.github_url, dp.study_subjects, dp.study_cgpa_goal,
+        dp.study_preferred_time, dp.study_preferred_location, dp.startup_looking_for,
+        dp.startup_role, dp.startup_skills, dp.is_incognito, dp.show_only, dp.created_at, dp.updated_at,
+        pp.url as main_photo_url
       FROM dating_profiles dp
       LEFT JOIN profile_photos pp ON pp.profile_id = dp.id AND pp.is_main = true
       WHERE dp.is_incognito = false

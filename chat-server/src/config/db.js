@@ -311,15 +311,28 @@ async function getDatingProfileByAuthId(authUserId) {
 }
 
 // ──────────────────────────────────────────────────────────────
-// V3 Helper: Get dating profile by numeric ID
+// Safe Public Projection for Campus Match Profiles (No auth_user_id or private email leak)
+// ──────────────────────────────────────────────────────────────
+const PUBLIC_PROFILE_COLS = `
+  dp.id, dp.name, dp.first_name, dp.last_name, dp.age, dp.year, dp.major, dp.branch,
+  dp.bio, dp.interests, dp.emoji, dp.verified, dp.is_verified, dp.photo_verified,
+  dp.profile_photo_url, dp.gender, dp.pronouns, dp.relationship_preference, dp.hostel,
+  dp.languages, dp.clubs, dp.societies, dp.skills, dp.favorite_cafe, dp.favorite_sport,
+  dp.instagram_url, dp.linkedin_url, dp.github_url, dp.study_subjects, dp.study_cgpa_goal,
+  dp.study_preferred_time, dp.study_preferred_location, dp.startup_looking_for,
+  dp.startup_role, dp.startup_skills, dp.is_incognito, dp.show_only, dp.created_at, dp.updated_at
+`;
+
+// ──────────────────────────────────────────────────────────────
+// V3 Helper: Get dating profile by numeric ID (Public safe projection)
 // ──────────────────────────────────────────────────────────────
 async function getDatingProfileById(profileId) {
-  const res = await pool.query(`SELECT * FROM dating_profiles WHERE id = $1`, [profileId]);
+  const res = await pool.query(`SELECT ${PUBLIC_PROFILE_COLS} FROM dating_profiles dp WHERE dp.id = $1`, [profileId]);
   return res.rows[0];
 }
 
 // ──────────────────────────────────────────────────────────────
-// V3 Helper: Update dating profile (partial update)
+// V3 Helper: Update dating profile (partial update with authorization check)
 // ──────────────────────────────────────────────────────────────
 async function updateDatingProfile(profileId, updates) {
   const allowedFields = [
@@ -330,10 +343,8 @@ async function updateDatingProfile(profileId, updates) {
     "bio",
     "interests",
     "emoji",
-    "verified",
     "first_name",
     "last_name",
-    "college_email",
     "profile_photo_url",
     "gender",
     "pronouns",
@@ -358,7 +369,6 @@ async function updateDatingProfile(profileId, updates) {
     "startup_skills",
     "is_incognito",
     "show_only",
-    "is_verified",
     "photo_verified",
   ];
 
@@ -382,10 +392,10 @@ async function updateDatingProfile(profileId, updates) {
   values.push(profileId);
 
   const query = `
-    UPDATE dating_profiles
+    UPDATE dating_profiles dp
     SET ${setClause.join(", ")}
-    WHERE id = $${paramIndex}
-    RETURNING *
+    WHERE dp.id = $${paramIndex}
+    RETURNING ${PUBLIC_PROFILE_COLS}
   `;
 
   const res = await pool.query(query, values);
@@ -1193,7 +1203,7 @@ async function searchProfiles(
   currentProfileId = null,
 ) {
   let sql = `
-    SELECT dp.*, 
+    SELECT ${PUBLIC_PROFILE_COLS}, 
            pp.url as main_photo_url
     FROM dating_profiles dp
     LEFT JOIN profile_photos pp ON pp.profile_id = dp.id AND pp.is_main = true
@@ -1299,7 +1309,7 @@ async function getDiscoveryProfiles(
   offset = 0,
 ) {
   let baseQuery = `
-    SELECT dp.*, 
+    SELECT ${PUBLIC_PROFILE_COLS}, 
            pp.url as main_photo_url,
            CASE 
              WHEN $1 IN (SELECT swiped_id FROM swipes WHERE swiper_id = $1) THEN true
@@ -1406,7 +1416,7 @@ async function getDiscoveryProfiles(
 async function getRecommendedProfiles(currentProfileId, limit = 10) {
   // Get profiles with high compatibility scores
   const res = await pool.query(
-    `SELECT dp.*, pp.url as main_photo_url, cs.score, cs.reasons
+    `SELECT ${PUBLIC_PROFILE_COLS}, pp.url as main_photo_url, cs.score, cs.reasons
      FROM compatibility_scores cs
      JOIN dating_profiles dp ON dp.id = CASE 
        WHEN cs.profile1_id = $1 THEN cs.profile2_id 
@@ -1434,7 +1444,7 @@ async function getRecommendedProfiles(currentProfileId, limit = 10) {
 // ──────────────────────────────────────────────────────────────
 async function getStudyBuddyMatches(currentProfileId, filters = {}, limit = 20) {
   const res = await pool.query(
-    `SELECT dp.*, pp.url as main_photo_url
+    `SELECT ${PUBLIC_PROFILE_COLS}, pp.url as main_photo_url
      FROM dating_profiles dp
      LEFT JOIN profile_photos pp ON pp.profile_id = dp.id AND pp.is_main = true
      WHERE dp.is_incognito = false
@@ -1461,7 +1471,7 @@ async function getStudyBuddyMatches(currentProfileId, filters = {}, limit = 20) 
 // ──────────────────────────────────────────────────────────────
 async function getStartupMatches(currentProfileId, filters = {}, limit = 20) {
   const res = await pool.query(
-    `SELECT dp.*, pp.url as main_photo_url
+    `SELECT ${PUBLIC_PROFILE_COLS}, pp.url as main_photo_url
      FROM dating_profiles dp
      LEFT JOIN profile_photos pp ON pp.profile_id = dp.id AND pp.is_main = true
      WHERE dp.is_incognito = false

@@ -23,12 +23,46 @@ const {
 
 const app = express();
 
-// CORS configuration - use environment variable for production domains
-const corsOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
-  : ["http://localhost:8080", "http://localhost:8081", "http://localhost:3000"];
+// CORS configuration - strict origin validation without wildcard credentials
+const allowedOrigins = [
+  "http://localhost:8080",
+  "http://localhost:8081",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "http://127.0.0.1:8080",
+  "http://127.0.0.1:5173",
+];
 
-app.use(cors({ origin: corsOrigins, credentials: true }));
+if (process.env.CORS_ORIGIN) {
+  process.env.CORS_ORIGIN.split(",").forEach((o) => {
+    const trimmed = o.trim();
+    if (trimmed && !allowedOrigins.includes(trimmed)) {
+      allowedOrigins.push(trimmed);
+    }
+  });
+}
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      /^https:\/\/.*\.netlify\.app$/.test(origin) ||
+      /^https:\/\/.*\.vercel\.app$/.test(origin) ||
+      /^https:\/\/.*\.lovable\.app$/.test(origin) ||
+      /^https:\/\/.*\.lovableproject\.com$/.test(origin)
+    ) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: "10kb" }));
 
 // ─── Rate Limiting ──────────────────────────────────────────────────
@@ -62,7 +96,7 @@ const writeLimiter = rateLimit({
 app.use("/api/", apiLimiter);
 
 // ─── REST Routes ──────────────────────────────────────────────────
-app.use("/api/auth", authRouter);
+app.use("/api/auth", authLimiter, authRouter);
 app.use("/api/account", accountRouter);
 app.use("/api/orientation", orientationRouter);
 app.use("/api/dating", datingRouter);
@@ -74,7 +108,7 @@ app.use("/api/attendance", attendanceRouter);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: corsOrigins,
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
   },

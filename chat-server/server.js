@@ -9,6 +9,8 @@ const datingV3Router = require("./src/routes/dating-v3");
 const chatRouter = require("./src/routes/chat");
 const marketplaceRouter = require("./src/routes/marketplace");
 const attendanceRouter = require("./src/routes/attendance");
+const timetableRouter = require("./src/routes/timetable");
+const assignmentsRouter = require("./src/routes/assignments");
 const { authRouter } = require("./src/routes/auth");
 const accountRouter = require("./src/routes/account");
 const orientationRouter = require("./src/routes/orientation");
@@ -104,6 +106,8 @@ app.use("/api/dating", datingV3Router);
 app.use("/api/chat", chatRouter);
 app.use("/api/marketplace", marketplaceRouter);
 app.use("/api/attendance", attendanceRouter);
+app.use("/api/timetable", timetableRouter);
+app.use("/api/assignments", assignmentsRouter);
 
 const server = http.createServer(app);
 const io = new Server(server, {

@@ -88,6 +88,13 @@ const QUICK_LINKS = [
     count: "Auto-detected by section",
   },
   {
+    to: "/app/assignments",
+    label: "Assignments",
+    icon: FileText,
+    iconColor: "text-primary",
+    count: "Due dates & problem sets",
+  },
+  {
     to: "/app/marketplace",
     label: "Marketplace",
     icon: ShoppingBag,

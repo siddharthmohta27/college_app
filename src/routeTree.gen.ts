@@ -25,6 +25,7 @@ import { Route as AppClubsRouteImport } from './routes/app/clubs'
 import { Route as AppChatRouteImport } from './routes/app/chat'
 import { Route as AppCanteenRouteImport } from './routes/app/canteen'
 import { Route as AppAttendanceRouteImport } from './routes/app/attendance'
+import { Route as AppAssignmentsRouteImport } from './routes/app/assignments'
 import { Route as AppDatingStudyBuddiesRouteImport } from './routes/app/dating/study-buddies'
 import { Route as AppDatingStartupRouteImport } from './routes/app/dating/startup'
 import { Route as AppDatingSearchRouteImport } from './routes/app/dating/search'
@@ -118,6 +119,11 @@ const AppAttendanceRoute = AppAttendanceRouteImport.update({
   path: '/attendance',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAssignmentsRoute = AppAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDatingStudyBuddiesRoute = AppDatingStudyBuddiesRouteImport.update({
   id: '/study-buddies',
   path: '/study-buddies',
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/chat': typeof ChatRoute
   '/login': typeof LoginRoute
+  '/app/assignments': typeof AppAssignmentsRoute
   '/app/attendance': typeof AppAttendanceRoute
   '/app/canteen': typeof AppCanteenRoute
   '/app/chat': typeof AppChatRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/chat': typeof ChatRoute
   '/login': typeof LoginRoute
+  '/app/assignments': typeof AppAssignmentsRoute
   '/app/attendance': typeof AppAttendanceRoute
   '/app/canteen': typeof AppCanteenRoute
   '/app/chat': typeof AppChatRoute
@@ -244,6 +252,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/chat': typeof ChatRoute
   '/login': typeof LoginRoute
+  '/app/assignments': typeof AppAssignmentsRoute
   '/app/attendance': typeof AppAttendanceRoute
   '/app/canteen': typeof AppCanteenRoute
   '/app/chat': typeof AppChatRoute
@@ -276,6 +285,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/chat'
     | '/login'
+    | '/app/assignments'
     | '/app/attendance'
     | '/app/canteen'
     | '/app/chat'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/'
     | '/chat'
     | '/login'
+    | '/app/assignments'
     | '/app/attendance'
     | '/app/canteen'
     | '/app/chat'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/chat'
     | '/login'
+    | '/app/assignments'
     | '/app/attendance'
     | '/app/canteen'
     | '/app/chat'
@@ -483,6 +495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAttendanceRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/assignments': {
+      id: '/app/assignments'
+      path: '/assignments'
+      fullPath: '/app/assignments'
+      preLoaderRoute: typeof AppAssignmentsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/dating/study-buddies': {
       id: '/app/dating/study-buddies'
       path: '/study-buddies'
@@ -603,6 +622,7 @@ const AppDatingRouteWithChildren = AppDatingRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppAssignmentsRoute: typeof AppAssignmentsRoute
   AppAttendanceRoute: typeof AppAttendanceRoute
   AppCanteenRoute: typeof AppCanteenRoute
   AppChatRoute: typeof AppChatRoute
@@ -618,6 +638,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAssignmentsRoute: AppAssignmentsRoute,
   AppAttendanceRoute: AppAttendanceRoute,
   AppCanteenRoute: AppCanteenRoute,
   AppChatRoute: AppChatRoute,

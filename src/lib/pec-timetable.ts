@@ -90,11 +90,23 @@ const SECTION_RANGES: { section: string; min: number; max: number }[] = [
 ];
 
 export function getSectionFromRollNo(rollNo: string): string | null {
-  const num = parseInt(rollNo.replace(/\D/g, ""), 10);
+  const clean = rollNo.replace(/\D/g, "");
+  const num = parseInt(clean, 10);
   if (isNaN(num)) return null;
+
+  // 1. Direct range match (e.g. 25106012 or existing ranges)
   for (const range of SECTION_RANGES) {
     if (num >= range.min && num <= range.max) return range.section;
   }
+
+  // 2. Year normalization: support 2610 (juniors), 2410, 2310 by mapping to 2510 series for timetable sections
+  const normalized = parseInt(clean.replace(/^2[0-9]/, "25"), 10);
+  if (!isNaN(normalized)) {
+    for (const range of SECTION_RANGES) {
+      if (normalized >= range.min && normalized <= range.max) return range.section;
+    }
+  }
+
   return null;
 }
 

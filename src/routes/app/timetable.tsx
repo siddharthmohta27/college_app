@@ -34,6 +34,10 @@ import {
   type ClassType,
 } from "@/lib/pec-timetable";
 import {
+  getSem1SectionFromRollNo,
+  getSem1Timetable,
+} from "@/lib/pec-timetable-sem1";
+import {
   fetchTimetableOverrides,
   createTimetableOverride,
   deleteTimetableOverride,
@@ -403,8 +407,16 @@ function TimetablePage() {
   }, []);
 
   const profile = parsePecEmail(email, displayName);
-  const section = getSectionFromRollNo(profile.rollNo);
-  const timetable: WeeklyTimetable | null = section ? getTimetableForSection(section) : null;
+  // For 2026 batch (roll starts with 26), use 1st-semester timetable;
+  // fall back to 3rd-semester lookup for 2025 batch and others.
+  const is2026Batch = /^26/.test(profile.rollNo?.replace(/\D/g, "") ?? "");
+  const sem1Section = is2026Batch ? getSem1SectionFromRollNo(profile.rollNo) : null;
+  const section = sem1Section ?? getSectionFromRollNo(profile.rollNo);
+  const timetable: WeeklyTimetable | null = sem1Section
+    ? getSem1Timetable(sem1Section)
+    : section
+    ? getTimetableForSection(section)
+    : null;
 
   const todaySchedule = timetable ? getTodaySchedule(timetable) : null;
   const selectedSchedule = timetable?.schedule.find((d) => d.day === selectedDay) ?? null;

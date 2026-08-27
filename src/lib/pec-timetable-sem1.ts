@@ -996,13 +996,10 @@ const SEM1_SECTION_RANGES: { section: string; min: number; max: number }[] = [
   { section: "CSE-SEM1-G2", min: 26103067, max: 26103099 },
   // 2025 batch
   { section: "CSE-SEM1-G1", min: 25103001, max: 25103066 },
-  { section: "CSE-SEM1-G2", min: 25103067, max: 25103099 },
+  { section: "CSE-SEM1-G2", min: 25103067, max: 25103144 },
 
   // ── Production (branch 31) ───────────────────────────────────────────────
   // 5th+6th digit = '3','1' → e.g. 26103101 = Prod roll 01
-  { section: "PROD-SEM1", min: 26103101, max: 26103144 },  // 2026 (44 students)
-  { section: "PROD-SEM1", min: 25103101, max: 25103144 },  // 2025
-
   // ── Civil (branch 20) ────────────────────────────────────────────────────
   { section: "CIVIL-SEM1-G1", min: 26102001, max: 26102066 },  // 2026 G1
   { section: "CIVIL-SEM1-G2", min: 26102067, max: 26102132 },  // 2026 G2
